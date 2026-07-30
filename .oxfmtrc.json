@@ -2,5 +2,8 @@
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "singleQuote": true,
   "sortImports": true,
-  "ignorePatterns": ["packages/database/src/generated"]
+  "sortTailwindcss": {
+    "stylesheet": "apps/web/src/styles.css"
+  },
+  "ignorePatterns": ["apps/web/src/routeTree.gen.ts", "packages/database/src/generated"]
 }
