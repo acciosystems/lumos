@@ -11,6 +11,7 @@
   "dependencies": {
     "@better-auth/passkey": "^1.6.25",
     "@lumos/database": "workspace:*",
+    "@lumos/email": "workspace:*",
     "@lumos/env": "workspace:*",
     "better-auth": "^1.6.25",
     "better-auth-localization": "^3.0.0",

@@ -1,11 +1,14 @@
 import { passkey } from '@better-auth/passkey';
 import { prisma } from '@lumos/database';
+import { sendEmail } from '@lumos/email';
 import { env } from '@lumos/env/auth';
 import { betterAuth } from 'better-auth';
 import { localization } from 'better-auth-localization';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { haveIBeenPwned, lastLoginMethod, username } from 'better-auth/plugins';
 import { ulid } from 'ulid';
+
+// WARN: don't await the email sending to prevent timing attacks
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -16,10 +19,22 @@ export const auth = betterAuth({
     enabled: true,
     disableSignUp: !env.SIGNUP_ENABLED,
     requireEmailVerification: true,
-    // TODO: implement sending reset password email
+    sendResetPassword: async ({ user, url }) => {
+      sendEmail({
+        to: user.email,
+        subject: 'Redefinição de senha',
+        body: `Clique no link para redefinir sua senha: ${url}`,
+      });
+    },
   },
   emailVerification: {
-    // TODO: implement sending verification email
+    sendVerificationEmail: async ({ user, url }) => {
+      sendEmail({
+        to: user.email,
+        subject: 'Verificação de email',
+        body: `Clique no link para verificar seu email: ${url}`,
+      });
+    },
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
   },
@@ -27,7 +42,7 @@ export const auth = betterAuth({
     changeEmail: {
       enabled: true,
     },
-    // TODO: allow user deletion
+    // TODO: allow user deletion (gonna take a long while to implement)
     additionalFields: {
       onboarded: {
         type: 'boolean',
