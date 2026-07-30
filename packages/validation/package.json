@@ -1,0 +1,13 @@
+{
+  "name": "@lumos/validation",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "valibot": "catalog:"
+  }
+}

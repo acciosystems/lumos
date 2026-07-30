@@ -72,11 +72,18 @@
         "@lumos/database": "workspace:*",
         "@lumos/env": "workspace:*",
         "@lumos/logging": "workspace:*",
+        "@lumos/validation": "workspace:*",
         "@orpc/client": "^1.14.13",
         "@orpc/server": "^1.14.13",
         "@orpc/tanstack-query": "^1.14.13",
         "evlog": "catalog:",
         "ulid": "catalog:",
+        "valibot": "catalog:",
+      },
+    },
+    "packages/validation": {
+      "name": "@lumos/validation",
+      "dependencies": {
         "valibot": "catalog:",
       },
     },
@@ -166,6 +173,8 @@
     "@lumos/logging": ["@lumos/logging@workspace:packages/logging"],
 
     "@lumos/rpc": ["@lumos/rpc@workspace:packages/rpc"],
+
+    "@lumos/validation": ["@lumos/validation@workspace:packages/validation"],
 
     "@noble/ciphers": ["@noble/ciphers@2.2.0", "", {}, "sha512-Z6pjIZ/8IJcCGzb2S/0Px5J81yij85xASuk1teLNeg75bfT07MV3a/O2Mtn1I2se43k3lkVEcFaR10N4cgQcZA=="],
 
