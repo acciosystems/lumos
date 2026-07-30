@@ -1,0 +1,19 @@
+{
+  "name": "@lumos/auth",
+  "type": "module",
+  "exports": {
+    ".": "./src/auth.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@better-auth/passkey": "^1.6.25",
+    "@lumos/database": "workspace:*",
+    "@lumos/env": "workspace:*",
+    "better-auth": "^1.6.25",
+    "better-auth-localization": "^3.0.0",
+    "ulid": "catalog:"
+  }
+}
