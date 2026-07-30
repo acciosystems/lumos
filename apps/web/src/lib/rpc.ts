@@ -2,6 +2,7 @@ import { router } from '@lumos/rpc';
 import {
   createORPCClient,
   createRouterClient,
+  createTanstackQueryUtils,
   RPCLink,
   type RouterClient,
 } from '@lumos/rpc/client';
@@ -18,11 +19,13 @@ export const useRPC = createIsomorphicFn()
 
     return client;
   })
-  .server(() => {
+  .server(() =>
     createRouterClient(router, {
       // @ts-expect-error needed because of evlog context
       context: () => ({
         headers: getRequestHeaders(),
       }),
-    });
-  });
+    }),
+  );
+
+export const rpc = createTanstackQueryUtils(useRPC());

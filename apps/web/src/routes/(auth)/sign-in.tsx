@@ -50,26 +50,9 @@ function SignInPage() {
 
   const socialMutation = useMutation({
     mutationFn: async (provider: string) =>
-      await authClient.signIn.social({ provider, callbackURL: '/onboarding' }),
+      await authClient.signIn.social({ provider, callbackURL: '/' }),
     onError: (error) => toast.error('Error ao entrar', { description: error.message }),
   });
-
-  // const passkeyMutation = useMutation({
-  //   mutationFn: async () => {
-  //     try {
-  //       const response = await authClient.signIn.passkey({
-  //         autoFill: true,
-  //         returnWebAuthnResponse: true,
-  //       });
-  //       console.log('Passkey sign-in response:', response);
-  //     } catch (error) {
-  //       console.error('Error during passkey sign-in:', error);
-  //       throw error; // Rethrow the error to trigger onError
-  //     }
-  //   },
-  //   onSuccess: () => navigate({ to: '/' }),
-  //   onError: (error) => toast.error('Error ao entrar', { description: error.message }),
-  // });
 
   const formMutation = useMutation({
     mutationFn: async (data: v.InferOutput<typeof formSchema>) => {
@@ -89,7 +72,7 @@ function SignInPage() {
         });
     },
     onSuccess: () => {
-      toast.success('Entrou com sucessoj');
+      toast.success('Entrou com sucesso');
       navigate({ to: '/' });
     },
     onError: (error) => toast.error('Error ao entrar', { description: error.message }),
@@ -124,9 +107,6 @@ function SignInPage() {
     (async () => {
       const isSupported = await PublicKeyCredential.isConditionalMediationAvailable();
       setSupportsPasskey(isSupported);
-      if (!isSupported) return;
-
-      requestPasskey();
     })();
   }, [supportsPasskey, requestPasskey]);
 
@@ -144,9 +124,10 @@ function SignInPage() {
               <Logo className="text-xl" />
             </Link>
             <FieldDescription>
-              Não tem uma conta? <Link to="/">Cadastre-se</Link>
+              Não tem uma conta? <Link to="/sign-up">Cadastre-se</Link>
             </FieldDescription>
           </div>
+
           <ClientOnly>
             {lastUsedMethod && (
               <Alert>
@@ -156,6 +137,7 @@ function SignInPage() {
               </Alert>
             )}
           </ClientOnly>
+
           <Field>
             <Button variant="outline" onClick={() => socialMutation.mutate('google')}>
               <IconBrandGoogle className="size-5" /> Entrar com Google
@@ -192,7 +174,7 @@ function SignInPage() {
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>
                     Senha{' '}
-                    <Link to="/" tabIndex={-1} className="ml-auto default-link">
+                    <Link to="/forgot-password" tabIndex={-1} className="ml-auto default-link">
                       Esqueceu a senha?
                     </Link>
                   </FieldLabel>
@@ -222,6 +204,7 @@ function SignInPage() {
               </Field>
             )}
           </form.Field>
+
           <form.Subscribe
             selector={(state) => ({
               isDefaultValue: state.isDefaultValue,

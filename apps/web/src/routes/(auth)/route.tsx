@@ -1,6 +1,9 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 
+import { ensureNotAuthFn } from '@/lib/auth/functions';
+
 export const Route = createFileRoute('/(auth)')({
+  beforeLoad: async () => ensureNotAuthFn(),
   component: AuthLayout,
 });
 
