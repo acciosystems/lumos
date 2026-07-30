@@ -1,0 +1,14 @@
+{
+  "name": "@lumos/env",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@t3-oss/env-core": "^0.13.11",
+    "valibot": "catalog:"
+  }
+}

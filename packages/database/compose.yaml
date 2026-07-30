@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  database:
+    image: postgres:18
+    container_name: lumos_database
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: hunter2
+      POSTGRES_DB: lumos
+    ports:
+      - '5432:5432'
+    volumes:
+      - lumos_data:/var/lib/postgresql
+
+volumes:
+  lumos_data:

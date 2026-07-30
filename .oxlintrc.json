@@ -10,5 +10,8 @@
   "env": {
     "builtin": true
   },
-  "rules": {}
+  "rules": {
+    "typescript/explicit-function-return-type": "off"
+  },
+  "ignorePatterns": ["packages/database/src/generated"]
 }

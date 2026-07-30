@@ -1,0 +1,23 @@
+{
+  "name": "@lumos/database",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "infra:up": "podman-compose up -d",
+    "infra:down": "podman-compose down"
+  },
+  "dependencies": {
+    "@lumos/env": "workspace:*",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "prisma": "^7.9.1"
+  }
+}
