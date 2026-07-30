@@ -1,0 +1,23 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "envMode": "loose",
+  "tasks": {
+    "type-check": {
+      "dependsOn": ["^type-check"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".tanstack/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "infra:up": {
+      "cache": false
+    },
+    "infra:down": {
+      "cache": false
+    }
+  }
+}
