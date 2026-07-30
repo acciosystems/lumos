@@ -1,0 +1,14 @@
+{
+  "name": "@lumos/logging",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lumos/env": "workspace:*",
+    "evlog": "catalog:"
+  }
+}

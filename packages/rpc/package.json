@@ -1,0 +1,25 @@
+{
+  "name": "@lumos/rpc",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1098.0",
+    "@aws-sdk/s3-request-presigner": "^3.1098.0",
+    "@lumos/auth": "workspace:*",
+    "@lumos/database": "workspace:*",
+    "@lumos/env": "workspace:*",
+    "@lumos/logging": "workspace:*",
+    "@orpc/client": "^1.14.13",
+    "@orpc/server": "^1.14.13",
+    "@orpc/tanstack-query": "^1.14.13",
+    "evlog": "catalog:",
+    "ulid": "catalog:",
+    "valibot": "catalog:"
+  }
+}

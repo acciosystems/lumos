@@ -13,7 +13,8 @@
   "rules": {
     "typescript/explicit-function-return-type": "off",
     "typescript/explicit-module-boundary-types": "off",
-    "oxc/no-async-await": "off"
+    "oxc/no-async-await": "off",
+    "oxc/no-optional-chaining": "off"
   },
   "ignorePatterns": ["packages/database/src/generated"]
 }
