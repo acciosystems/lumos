@@ -15,12 +15,17 @@
     "typescript/explicit-module-boundary-types": "off",
     "oxc/no-async-await": "off",
     "oxc/no-optional-chaining": "off",
+    "oxc/no-rest-spread-properties": "off",
     "react/react-in-jsx-scope": "off",
     "react/jsx-filename-extension": ["warn", { "extensions": [".tsx"] }],
     "react/only-export-components": "off",
     "react/jsx-no-literals": "off",
+    "react/jsx-no-constructed-context-values": "off",
+    "react/forbid-component-props": "off",
+    "react/no-multi-comp": "off",
     "no-undefined": "off",
-    "no-use-before-define": "off"
+    "no-use-before-define": "off",
+    "no-void": "off"
   },
   "ignorePatterns": ["apps/web/src/routeTree.gen.ts", "packages/database/src/generated"]
 }

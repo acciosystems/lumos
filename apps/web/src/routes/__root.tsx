@@ -1,7 +1,8 @@
-import { createRootRouteWithContext, HeadContent, Outlet } from '@tanstack/react-router';
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import { createMiddleware } from '@tanstack/react-start';
 import { evlogErrorHandler } from 'evlog/nitro/v3';
 
+import { Providers } from '@/components/providers';
 import type { RouterContext } from '@/router';
 
 import styles from '@/styles/main.css?url';
@@ -23,12 +24,15 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootComponent() {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
       <body className="antialised">
-        <Outlet />
+        <Providers>
+          <Outlet />
+        </Providers>
+        <Scripts />
       </body>
     </html>
   );

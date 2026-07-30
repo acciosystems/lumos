@@ -1,6 +1,9 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createRouter } from '@tanstack/react-router';
 
+import { ErrorBoundary } from '@/components/boundaries/error';
+import { NotFoundBoundary } from '@/components/boundaries/not-found';
+
 import { routeTree } from './routeTree.gen';
 
 export interface RouterContext {
@@ -23,6 +26,8 @@ export function getRouter() {
     context: { queryClient } satisfies RouterContext,
     scrollRestoration: true,
     defaultPreload: 'intent',
+    defaultErrorComponent: ErrorBoundary,
+    defaultNotFoundComponent: NotFoundBoundary,
   });
 
   return router;

@@ -6,7 +6,7 @@ export const nameSchema = v.pipe(
   v.regex(/^[a-zA-ZÀ-ÿ\s]+$/, 'Nome deve conter apenas letras e espaços'),
 );
 
-export const username = v.pipe(
+export const usernameSchema = v.pipe(
   v.string('Nome de usuário deve ser uma string'),
   v.nonEmpty('Nome de usuário é obrigatório'),
   v.regex(/^[a-zA-Z0-9_]+$/, 'Nome de usuário deve conter apenas letras, números e underscores'),
