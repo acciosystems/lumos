@@ -30,12 +30,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSkeleton,
-} from '@/components/ui/sidebar';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { hotkeys } from '@/hotkeys';
@@ -91,7 +86,7 @@ export function SidebarNavUser() {
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
-              <DropdownMenuItem render={<Link to="/" />}>
+              <DropdownMenuItem render={<Link to="/settings/{-$tab}" />}>
                 <IconSettings /> Configurações
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setOpenCheatSheet(true)}>
@@ -119,7 +114,7 @@ function UserView({ user }: { user: User }) {
     <div className="flex items-center gap-x-2 text-foreground">
       <Avatar className="size-8 rounded-sm">
         <AvatarImage src={user.image ?? undefined} alt={user.name} className="rounded-sm" />
-        <AvatarFallback>{user.username?.charAt(0).toUpperCase() ?? 'U'}</AvatarFallback>
+        <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
       </Avatar>
       <div className="grid">
         <span className="truncate text-sm font-medium">{user.name}</span>

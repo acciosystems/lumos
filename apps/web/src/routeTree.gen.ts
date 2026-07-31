@@ -18,6 +18,7 @@ import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-pas
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as specialOnboardingRouteImport } from './routes/(special)/onboarding'
+import { Route as appSettingsChar123TabChar125RouteImport } from './routes/(app)/settings/{-$tab}'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
 
@@ -63,6 +64,12 @@ const specialOnboardingRoute = specialOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => specialRouteRoute,
 } as any)
+const appSettingsChar123TabChar125Route =
+  appSettingsChar123TabChar125RouteImport.update({
+    id: '/settings/{-$tab}',
+    path: '/settings/{-$tab}',
+    getParentRoute: () => appRouteRoute,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -81,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof authSignUpRoute
   '/onboarding': typeof specialOnboardingRoute
   '/': typeof appIndexRoute
+  '/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
@@ -91,6 +99,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof authSignUpRoute
   '/onboarding': typeof specialOnboardingRoute
   '/': typeof appIndexRoute
+  '/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
@@ -105,6 +114,7 @@ export interface FileRoutesById {
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(special)/onboarding': typeof specialOnboardingRoute
   '/(app)/': typeof appIndexRoute
+  '/(app)/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/onboarding'
     | '/'
+    | '/settings/{-$tab}'
     | '/api/auth/$'
     | '/api/rpc/$'
   fileRoutesByTo: FileRoutesByTo
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/onboarding'
     | '/'
+    | '/settings/{-$tab}'
     | '/api/auth/$'
     | '/api/rpc/$'
   id:
@@ -140,6 +152,7 @@ export interface FileRouteTypes {
     | '/(auth)/sign-up'
     | '/(special)/onboarding'
     | '/(app)/'
+    | '/(app)/settings/{-$tab}'
     | '/api/auth/$'
     | '/api/rpc/$'
   fileRoutesById: FileRoutesById
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof specialOnboardingRouteImport
       parentRoute: typeof specialRouteRoute
     }
+    '/(app)/settings/{-$tab}': {
+      id: '/(app)/settings/{-$tab}'
+      path: '/settings/{-$tab}'
+      fullPath: '/settings/{-$tab}'
+      preLoaderRoute: typeof appSettingsChar123TabChar125RouteImport
+      parentRoute: typeof appRouteRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -236,10 +256,12 @@ declare module '@tanstack/react-router' {
 
 interface appRouteRouteChildren {
   appIndexRoute: typeof appIndexRoute
+  appSettingsChar123TabChar125Route: typeof appSettingsChar123TabChar125Route
 }
 
 const appRouteRouteChildren: appRouteRouteChildren = {
   appIndexRoute: appIndexRoute,
+  appSettingsChar123TabChar125Route: appSettingsChar123TabChar125Route,
 }
 
 const appRouteRouteWithChildren = appRouteRoute._addFileChildren(
