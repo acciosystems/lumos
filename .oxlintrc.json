@@ -23,6 +23,7 @@
     "react/jsx-no-constructed-context-values": "off",
     "react/forbid-component-props": "off",
     "react/no-multi-comp": "off",
+    "unicorn/consistent-function-scoping": "off",
     "no-undefined": "off",
     "no-use-before-define": "off",
     "no-void": "off"
