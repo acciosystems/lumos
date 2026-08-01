@@ -1,0 +1,29 @@
+enum OrganizerType {
+  INDIVIDUAL
+  ORGANIZATION
+}
+
+model OrganizerProfile {
+  id     String @id @default(ulid())
+  userId String
+
+  type        OrganizerType
+  displayName String
+  bio         String?
+  websiteUrl  String?
+
+  // Transparency (P0)
+  cnpj         String? @unique
+  cpnjVerified Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  campaigns Campaign[]
+
+  @@index([cnpj])
+  @@index([type])
+  @@map("organizer_profiles")
+}

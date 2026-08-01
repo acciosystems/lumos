@@ -1,0 +1,137 @@
+enum CampaignType {
+  PHYSICAL
+  VIRTUAL
+}
+
+enum CampaignStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Campaign {
+  id                 String @id @default(uuid())
+  organizerProfileId String
+
+  title       String
+  description String
+  status      CampaignStatus @default(PENDING)
+  type        CampaignType
+
+  // Filters (P0)
+  category String
+  region   String
+
+  startDate DateTime
+  endDate   DateTime
+
+  imageUrl String?
+
+  // PHYSICAL only
+  location     String?
+  targetItems  Int?
+  currentItems Int?    @default(0)
+
+  // VIRTUAL only
+  // No amounts are being tracked, since the platform doesn't process payments (that's P3)
+  pixKey          String?
+  bankAccountInfo String?
+
+  organizerProfile OrganizerProfile @relation(fields: [organizerProfileId], references: [id], onDelete: Cascade)
+
+  collectionPoints CampaignCollectionPoint[]
+  participants     CampaignParticipant[]
+  updates          CampaignUpdate[]
+  accountability   CampaignAccountability?
+  donations        Donation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([type])
+  @@index([category])
+  @@index([region])
+  @@index([organizerProfileId])
+  @@index([startDate, endDate])
+  @@map("campaigns")
+}
+
+model CampaignCollectionPoint {
+  id         String @id @default(uuid())
+  campaignId String
+
+  name         String
+  address      String
+  city         String
+  state        String
+  zipCode      String
+  lat          Float?
+  lon          Float?
+  instructions String?
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campaignId])
+  @@map("campaign_collection_points")
+}
+
+model CampaignParticipant {
+  id         String @id @default(uuid())
+  campaignId String
+  userId     String
+
+  confirmedAt DateTime?
+  cancelledAt DateTime?
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([campaignId, userId])
+  @@index([campaignId])
+  @@index([userId])
+  @@map("campaign_participants")
+}
+
+model CampaignUpdate {
+  id         String @id @default(uuid())
+  campaignId String
+  authorId   String
+
+  message     String
+  publishedAt DateTime @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("campaign_updates")
+}
+
+// Transparency (P0)
+model CampaignAccountability {
+  id         String @id @default(uuid())
+  campaignId String @unique
+
+  totalItems    Int
+  notes         String?
+  evidencesUrls String[]
+
+  submittedAt     DateTime @default(now())
+  submittedOnTime Boolean
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campaignId])
+  @@map("campaign_accountabilities")
+}

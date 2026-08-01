@@ -1,0 +1,32 @@
+enum DonationStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+// Physical campaigns (P0)
+// Virtual campaigns don't generate Donation records, planned for P3
+model Donation {
+  id         String @id @default(ulid())
+  campaignId String
+  donorId    String
+
+  itemCount       Int?
+  itemDescription String?
+
+  status      DonationStatus @default(PENDING)
+  confirmedAt DateTime?
+  cancelledAt DateTime?
+  notes       String?
+
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  donor    User     @relation(fields: [donorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campaignId])
+  @@index([donorId])
+  @@index([status])
+  @@map("donations")
+}
