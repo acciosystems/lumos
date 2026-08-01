@@ -14,6 +14,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { useStrictAuth } from '@/lib/auth/hooks';
 
 import { UserAvatarChange } from './avatar-change';
+import { UserEmailChange } from './email-change';
 
 const formSchema = v.object({
   name: nameSchema,
@@ -68,6 +69,10 @@ export function UserProfileSettings() {
           <Field orientation="horizontal">
             <FieldLabel>Foto de perfil</FieldLabel>
             <UserAvatarChange />
+          </Field>
+          <Field orientation="responsive">
+            <FieldLabel>Email</FieldLabel>
+            <UserEmailChange />
           </Field>
 
           <form
