@@ -45,7 +45,7 @@ function SettingsPage() {
   return (
     <AppInset breadcrumbs={breadcrumbs}>
       <AuthGuard when="loading">
-        <Loading description="Verificando autenticação..." />
+        <Loading description="Verificando autenticação" />
       </AuthGuard>
       <AuthGuard when="authenticated">
         <Tabs

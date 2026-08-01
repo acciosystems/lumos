@@ -21,6 +21,11 @@ export const passwordSchema = v.pipe(
   v.regex(/[@$!%*?&._]/, 'Senha deve conter pelo menos um caractere especial (@$!%*?&._)'),
 );
 
+export const confirmPasswordSchema = v.pipe(
+  v.string('Confirmação de senha deve ser uma string'),
+  v.nonEmpty('Confirmação de senha é obrigatória'),
+);
+
 export const emailSchema = v.pipe(v.string('Email deve ser uma string'), v.email('Email inválido'));
 
 export const imageSchema = v.pipe(

@@ -75,7 +75,7 @@ export function UserConnectedAccounts() {
       </CardHeader>
 
       <CardContent>
-        {isPending && <Loading description="Carregando contas..." />}
+        {isPending && <Loading description="Carregando contas" />}
 
         {isError && (
           <Alert variant="destructive">

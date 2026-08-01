@@ -1,5 +1,5 @@
 import { authClient } from '@lumos/auth/auth-client';
-import { passwordSchema } from '@lumos/validation/user';
+import { confirmPasswordSchema, passwordSchema } from '@lumos/validation/user';
 import { IconPencilFilled } from '@tabler/icons-react';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
@@ -26,10 +26,7 @@ const formSchema = v.pipe(
   v.object({
     currentPassword: passwordSchema,
     newPassword: passwordSchema,
-    confirmPassword: v.pipe(
-      v.string('Confirmar senha deve ser uma string'),
-      v.nonEmpty('Confirmar senha não pode estar vazia'),
-    ),
+    confirmPassword: confirmPasswordSchema,
   }),
   v.forward(
     v.check((data) => data.newPassword === data.confirmPassword, 'Senhas não coincidem'),

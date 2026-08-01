@@ -1,6 +1,11 @@
 import { authClient } from '@lumos/auth/auth-client';
 import { env } from '@lumos/env/web';
-import { emailSchema, nameSchema, passwordSchema } from '@lumos/validation/user';
+import {
+  confirmPasswordSchema,
+  emailSchema,
+  nameSchema,
+  passwordSchema,
+} from '@lumos/validation/user';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
@@ -24,10 +29,7 @@ const formSchema = v.pipe(
     name: nameSchema,
     email: emailSchema,
     password: passwordSchema,
-    confirmPassword: v.pipe(
-      v.string('Confirmar senha deve ser uma string'),
-      v.nonEmpty('Confirmar senha não pode estar vazia'),
-    ),
+    confirmPassword: confirmPasswordSchema,
   }),
   v.forward(
     v.check((data) => data.password === data.confirmPassword, 'Senhas não coincidem'),

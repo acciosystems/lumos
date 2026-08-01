@@ -52,7 +52,7 @@ export function UserPasskeys() {
       </CardHeader>
 
       <CardContent>
-        {isPending && <Loading description="Carregando chaves de acesso..." />}
+        {isPending && <Loading description="Carregando chaves de acesso" />}
 
         {isError && (
           <Alert variant="destructive">

@@ -29,7 +29,7 @@ export function UserSecuritySettings() {
   return (
     <Card size="sm" className="max-w-lg">
       <CardContent>
-        {isPending && <Loading description="Carregando dados..." />}
+        {isPending && <Loading description="Carregando dados" />}
 
         {isError && (
           <Alert variant="destructive">
