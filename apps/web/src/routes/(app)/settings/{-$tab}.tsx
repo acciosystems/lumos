@@ -9,6 +9,7 @@ import { UserConnectedAccounts } from '@/components/user/connected-accounts';
 import { UserPasskeys } from '@/components/user/passkeys';
 import { UserProfileSettings } from '@/components/user/profile-settings';
 import { UserSecuritySettings } from '@/components/user/security-settings';
+import { UserSessions } from '@/components/user/sessions';
 import { useQuickBreadcrumb, type BreadcrumbLoaderData } from '@/hooks/use-quick-breadcrumb';
 import { AuthGuard } from '@/lib/auth/guard';
 
@@ -71,6 +72,7 @@ function SettingsPage() {
               <div className="space-y-4">
                 <UserSecuritySettings />
                 <UserPasskeys />
+                <UserSessions />
               </div>
             </TabsContent>
           </div>
