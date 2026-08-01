@@ -142,7 +142,7 @@ export function UserAvatarChange() {
         </form>
 
         <DialogFooter>
-          <div className="w-full justify-between flex">
+          <div className="flex w-full justify-between">
             {user.image ? (
               <Button
                 variant="destructive"

@@ -25,8 +25,8 @@ const formSchema = v.pipe(
     email: emailSchema,
     password: passwordSchema,
     confirmPassword: v.pipe(
-      v.string('Senha deve ser uma string'),
-      v.nonEmpty('Senha não pode estar vazia'),
+      v.string('Confirmar senha deve ser uma string'),
+      v.nonEmpty('Confirmar senha não pode estar vazia'),
     ),
   }),
   v.forward(

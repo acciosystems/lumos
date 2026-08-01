@@ -24,7 +24,7 @@ const searchSchema = v.object({
   token: v.pipe(v.string(), v.nonEmpty()),
 });
 
-export const Route = createFileRoute('/(auth)/reset-password')({
+export const Route = createFileRoute('/(special)/reset-password')({
   validateSearch: searchSchema,
   component: ResetPasswordPage,
 });

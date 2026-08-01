@@ -4,17 +4,24 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 
-import { Loading } from '../misc/loading';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Loading } from '@/components/misc/loading';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia, ItemTitle } from '../ui/item';
+} from '@/components/ui/dropdown-menu';
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from '@/components/ui/item';
 
 const providers = [{ id: 'google', name: 'Google', icon: IconBrandGoogle }];
 
@@ -31,7 +38,7 @@ export function UserConnectedAccounts() {
     queryFn: async () => {
       const response = await authClient.listAccounts();
       // oxlint-disable-next-line typescript/no-non-null-assertion
-      return response.data!.filter((acc) => acc.providerId !== 'credentials');
+      return response.data!.filter((acc) => acc.providerId !== 'credential');
     },
   });
 
@@ -84,7 +91,7 @@ export function UserConnectedAccounts() {
               {formattedProviders.map((provider) => (
                 <Item key={provider.id} variant="outline">
                   <ItemMedia variant="icon">
-                    <provider.icon />
+                    <provider.icon className="size-5" />
                   </ItemMedia>
                   <ItemContent>
                     <ItemTitle>{provider.name}</ItemTitle>

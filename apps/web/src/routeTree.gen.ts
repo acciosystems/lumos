@@ -14,10 +14,10 @@ import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as specialRouteRouteImport } from './routes/(special)/route'
 import { Route as appIndexRouteImport } from './routes/(app)/index'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
-import { Route as authResetPasswordRouteImport } from './routes/(auth)/reset-password'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as specialOnboardingRouteImport } from './routes/(special)/onboarding'
+import { Route as specialResetPasswordRouteImport } from './routes/(special)/reset-password'
 import { Route as appSettingsChar123TabChar125RouteImport } from './routes/(app)/settings/{-$tab}'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
@@ -44,11 +44,6 @@ const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => authRouteRoute,
 } as any)
-const authResetPasswordRoute = authResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => authRouteRoute,
-} as any)
 const authSignInRoute = authSignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
@@ -62,6 +57,11 @@ const authSignUpRoute = authSignUpRouteImport.update({
 const specialOnboardingRoute = specialOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => specialRouteRoute,
+} as any)
+const specialResetPasswordRoute = specialResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => specialRouteRoute,
 } as any)
 const appSettingsChar123TabChar125Route =
@@ -83,10 +83,10 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/forgot-password': typeof authForgotPasswordRoute
-  '/reset-password': typeof authResetPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/onboarding': typeof specialOnboardingRoute
+  '/reset-password': typeof specialResetPasswordRoute
   '/': typeof appIndexRoute
   '/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -94,10 +94,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
-  '/reset-password': typeof authResetPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/onboarding': typeof specialOnboardingRoute
+  '/reset-password': typeof specialResetPasswordRoute
   '/': typeof appIndexRoute
   '/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -109,10 +109,10 @@ export interface FileRoutesById {
   '/(auth)': typeof authRouteRouteWithChildren
   '/(special)': typeof specialRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
-  '/(auth)/reset-password': typeof authResetPasswordRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(special)/onboarding': typeof specialOnboardingRoute
+  '/(special)/reset-password': typeof specialResetPasswordRoute
   '/(app)/': typeof appIndexRoute
   '/(app)/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -122,10 +122,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/forgot-password'
-    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
     | '/onboarding'
+    | '/reset-password'
     | '/'
     | '/settings/{-$tab}'
     | '/api/auth/$'
@@ -133,10 +133,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/forgot-password'
-    | '/reset-password'
     | '/sign-in'
     | '/sign-up'
     | '/onboarding'
+    | '/reset-password'
     | '/'
     | '/settings/{-$tab}'
     | '/api/auth/$'
@@ -147,10 +147,10 @@ export interface FileRouteTypes {
     | '/(auth)'
     | '/(special)'
     | '/(auth)/forgot-password'
-    | '/(auth)/reset-password'
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
     | '/(special)/onboarding'
+    | '/(special)/reset-password'
     | '/(app)/'
     | '/(app)/settings/{-$tab}'
     | '/api/auth/$'
@@ -202,13 +202,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authForgotPasswordRouteImport
       parentRoute: typeof authRouteRoute
     }
-    '/(auth)/reset-password': {
-      id: '/(auth)/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof authResetPasswordRouteImport
-      parentRoute: typeof authRouteRoute
-    }
     '/(auth)/sign-in': {
       id: '/(auth)/sign-in'
       path: '/sign-in'
@@ -228,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof specialOnboardingRouteImport
+      parentRoute: typeof specialRouteRoute
+    }
+    '/(special)/reset-password': {
+      id: '/(special)/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof specialResetPasswordRouteImport
       parentRoute: typeof specialRouteRoute
     }
     '/(app)/settings/{-$tab}': {
@@ -270,14 +270,12 @@ const appRouteRouteWithChildren = appRouteRoute._addFileChildren(
 
 interface authRouteRouteChildren {
   authForgotPasswordRoute: typeof authForgotPasswordRoute
-  authResetPasswordRoute: typeof authResetPasswordRoute
   authSignInRoute: typeof authSignInRoute
   authSignUpRoute: typeof authSignUpRoute
 }
 
 const authRouteRouteChildren: authRouteRouteChildren = {
   authForgotPasswordRoute: authForgotPasswordRoute,
-  authResetPasswordRoute: authResetPasswordRoute,
   authSignInRoute: authSignInRoute,
   authSignUpRoute: authSignUpRoute,
 }
@@ -288,10 +286,12 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 
 interface specialRouteRouteChildren {
   specialOnboardingRoute: typeof specialOnboardingRoute
+  specialResetPasswordRoute: typeof specialResetPasswordRoute
 }
 
 const specialRouteRouteChildren: specialRouteRouteChildren = {
   specialOnboardingRoute: specialOnboardingRoute,
+  specialResetPasswordRoute: specialResetPasswordRoute,
 }
 
 const specialRouteRouteWithChildren = specialRouteRoute._addFileChildren(

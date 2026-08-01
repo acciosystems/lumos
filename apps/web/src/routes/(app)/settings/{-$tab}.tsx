@@ -7,6 +7,7 @@ import { AppInset } from '@/components/sidebar/inset';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserConnectedAccounts } from '@/components/user/connected-accounts';
 import { UserProfileSettings } from '@/components/user/profile-settings';
+import { UserSecuritySettings } from '@/components/user/security-settings';
 import { useQuickBreadcrumb, type BreadcrumbLoaderData } from '@/hooks/use-quick-breadcrumb';
 import { AuthGuard } from '@/lib/auth/guard';
 
@@ -67,7 +68,7 @@ function SettingsPage() {
             </TabsContent>
             <TabsContent value="security">
               <div className="space-y-4">
-                <h1>Segurança</h1>
+                <UserSecuritySettings />
               </div>
             </TabsContent>
           </div>
