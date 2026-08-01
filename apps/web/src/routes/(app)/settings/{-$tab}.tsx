@@ -5,6 +5,7 @@ import * as v from 'valibot';
 import { Loading } from '@/components/misc/loading';
 import { AppInset } from '@/components/sidebar/inset';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UserConnectedAccounts } from '@/components/user/connected-accounts';
 import { UserProfileSettings } from '@/components/user/profile-settings';
 import { useQuickBreadcrumb, type BreadcrumbLoaderData } from '@/hooks/use-quick-breadcrumb';
 import { AuthGuard } from '@/lib/auth/guard';
@@ -61,6 +62,7 @@ function SettingsPage() {
             <TabsContent value="account">
               <div className="space-y-4">
                 <UserProfileSettings />
+                <UserConnectedAccounts />
               </div>
             </TabsContent>
             <TabsContent value="security">
