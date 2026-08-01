@@ -6,6 +6,7 @@ import { Loading } from '@/components/misc/loading';
 import { AppInset } from '@/components/sidebar/inset';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UserConnectedAccounts } from '@/components/user/connected-accounts';
+import { UserPasskeys } from '@/components/user/passkeys';
 import { UserProfileSettings } from '@/components/user/profile-settings';
 import { UserSecuritySettings } from '@/components/user/security-settings';
 import { useQuickBreadcrumb, type BreadcrumbLoaderData } from '@/hooks/use-quick-breadcrumb';
@@ -69,6 +70,7 @@ function SettingsPage() {
             <TabsContent value="security">
               <div className="space-y-4">
                 <UserSecuritySettings />
+                <UserPasskeys />
               </div>
             </TabsContent>
           </div>
