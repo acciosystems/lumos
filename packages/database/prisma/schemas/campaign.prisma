@@ -11,7 +11,7 @@ enum CampaignStatus {
 }
 
 model Campaign {
-  id                 String @id @default(uuid())
+  id                 String @id @default(ulid())
   organizerProfileId String
 
   title       String
@@ -59,7 +59,7 @@ model Campaign {
 }
 
 model CampaignCollectionPoint {
-  id         String @id @default(uuid())
+  id         String @id @default(ulid())
   campaignId String
 
   name         String
@@ -81,7 +81,7 @@ model CampaignCollectionPoint {
 }
 
 model CampaignParticipant {
-  id         String @id @default(uuid())
+  id         String @id @default(ulid())
   campaignId String
   userId     String
 
@@ -101,7 +101,7 @@ model CampaignParticipant {
 }
 
 model CampaignUpdate {
-  id         String @id @default(uuid())
+  id         String @id @default(ulid())
   campaignId String
   authorId   String
 
@@ -117,7 +117,7 @@ model CampaignUpdate {
 
 // Transparency (P0)
 model CampaignAccountability {
-  id         String @id @default(uuid())
+  id         String @id @default(ulid())
   campaignId String @unique
 
   totalItems    Int

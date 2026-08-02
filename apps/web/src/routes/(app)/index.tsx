@@ -1,15 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
-
-import { AppInset } from '@/components/sidebar/inset';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/(app)/')({
-  component: HomePage,
+  beforeLoad: () => {
+    throw redirect({ to: '/campaigns' });
+  },
 });
-
-function HomePage() {
-  return (
-    <AppInset breadcrumbs={[{ label: 'Home' }]}>
-      <p>Hello, World!</p>
-    </AppInset>
-  );
-}

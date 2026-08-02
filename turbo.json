@@ -18,6 +18,9 @@
     },
     "infra:down": {
       "cache": false
+    },
+    "db:seed": {
+      "cache": false
     }
   }
 }
