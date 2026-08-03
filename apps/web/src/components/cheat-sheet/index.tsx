@@ -1,5 +1,4 @@
-import { formatForDisplay, useHotkey } from '@tanstack/react-hotkeys';
-import { create } from 'zustand';
+import { formatForDisplay } from '@tanstack/react-hotkeys';
 
 import {
   Item,
@@ -17,22 +16,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useCheatSheet } from '@/components/cheat-sheet/store';
 import { hotkeys } from '@/hotkeys';
-
-interface CheatSheetState {
-  isOpen: boolean;
-  setOpen: (open: boolean) => void;
-}
-
-export const useCheatSheet = create<CheatSheetState>((set) => ({
-  isOpen: false,
-  setOpen: (open) => set({ isOpen: open }),
-}));
 
 export function CheatSheet() {
   const { isOpen, setOpen } = useCheatSheet();
-
-  useHotkey(hotkeys.toggleCheatSheet.keys, () => setOpen(!isOpen));
 
   return (
     <Sheet open={isOpen} onOpenChange={setOpen}>

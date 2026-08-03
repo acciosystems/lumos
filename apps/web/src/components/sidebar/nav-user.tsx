@@ -12,7 +12,7 @@ import {
 import { formatForDisplay } from '@tanstack/react-hotkeys';
 import { Link, redirect } from '@tanstack/react-router';
 
-import { useCheatSheet } from '@/components/cheat-sheet';
+import { useCheatSheet } from '@/components/cheat-sheet/store';
 import { useTheme } from '@/components/providers/theme-provider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {

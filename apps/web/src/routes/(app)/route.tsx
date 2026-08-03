@@ -1,9 +1,16 @@
+import { useHotkey } from '@tanstack/react-hotkeys';
 import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
 
-import { CheatSheet } from '@/components/cheat-sheet';
+import { useCheatSheet } from '@/components/cheat-sheet/store';
 import { AppSidebar, getSidebarStateFn } from '@/components/sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { ensureAuthFn } from '@/lib/auth/functions';
+import { hotkeys } from '@/hotkeys';
+
+const CheatSheet = lazy(() =>
+  import('@/components/cheat-sheet').then(({ CheatSheet: Component }) => ({ default: Component })),
+);
 
 export const Route = createFileRoute('/(app)')({
   beforeLoad: async () => await ensureAuthFn(),
@@ -16,12 +23,19 @@ export const Route = createFileRoute('/(app)')({
 
 function AppLayout() {
   const { sidebarState } = Route.useLoaderData();
+  const { isOpen, setOpen } = useCheatSheet();
+
+  useHotkey(hotkeys.toggleCheatSheet.keys, () => setOpen(!isOpen));
 
   return (
     <SidebarProvider defaultOpen={sidebarState}>
       <AppSidebar />
       <Outlet />
-      <CheatSheet />
+      {isOpen && (
+        <Suspense fallback={null}>
+          <CheatSheet />
+        </Suspense>
+      )}
     </SidebarProvider>
   );
 }
