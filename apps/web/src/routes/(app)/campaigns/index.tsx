@@ -2,7 +2,7 @@ import { IconAlertCircle, IconFilter, IconPlus, IconSearch } from '@tabler/icons
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ptBR } from 'date-fns/locale';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import * as v from 'valibot';
 
 import { Loading } from '@/components/misc/loading';
@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useDebouncedRouteInput } from '@/hooks/use-debounced-route-input';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
 
@@ -37,6 +38,7 @@ const searchSchema = v.object({
 });
 
 type CampaignFilterType = 'ALL' | 'PHYSICAL' | 'VIRTUAL';
+type TextFilterName = 'category' | 'region';
 
 const campaignTypeLabels: Record<CampaignFilterType, string> = {
   ALL: 'Todos',
@@ -55,13 +57,23 @@ function CampaignsPage() {
   const navigate = Route.useNavigate();
   const selectedType: CampaignFilterType = type ?? 'ALL';
   const updateFilter = useCallback(
-    (name: 'category' | 'region', value: string) =>
+    (name: TextFilterName, value: string) =>
       navigate({
+        replace: true,
         search: (previous) => ({ ...previous, [name]: value || undefined }),
       }),
     [navigate],
   );
-  const filterInputs = useDebouncedInputs({ category, region }, updateFilter);
+  const [categoryInput, setCategoryInput] = useDebouncedRouteInput({
+    name: 'category',
+    value: category,
+    onCommit: updateFilter,
+  });
+  const [regionInput, setRegionInput] = useDebouncedRouteInput({
+    name: 'region',
+    value: region,
+    onCommit: updateFilter,
+  });
 
   const filters = {
     category,
@@ -96,8 +108,8 @@ function CampaignsPage() {
             </FieldLabel>
             <Input
               id="category"
-              value={filterInputs.category.value}
-              onChange={(event) => filterInputs.category.onChange(event.target.value)}
+              value={categoryInput}
+              onChange={(event) => setCategoryInput(event.target.value)}
               placeholder="Ex: alimentos, roupas"
             />
           </Field>
@@ -107,8 +119,8 @@ function CampaignsPage() {
             </FieldLabel>
             <Input
               id="region"
-              value={filterInputs.region.value}
-              onChange={(event) => filterInputs.region.onChange(event.target.value)}
+              value={regionInput}
+              onChange={(event) => setRegionInput(event.target.value)}
               placeholder="Ex: São Paulo"
             />
           </Field>
@@ -162,52 +174,6 @@ function CampaignsPage() {
       </div>
     </AppInset>
   );
-}
-
-type DebouncedInput = { value: string; onChange: (value: string) => void };
-
-function useDebouncedInputs(
-  values: { category: string | undefined; region: string | undefined },
-  onChange: (name: 'category' | 'region', value: string) => void,
-): { category: DebouncedInput; region: DebouncedInput } {
-  const [inputs, setInputs] = useState({
-    category: values.category ?? '',
-    region: values.region ?? '',
-  });
-
-  useEffect(() => {
-    const nextInputs = {
-      category: values.category ?? '',
-      region: values.region ?? '',
-    };
-
-    if (inputs.category !== nextInputs.category || inputs.region !== nextInputs.region) {
-      setInputs(nextInputs);
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      if (inputs.category !== (values.category ?? '')) {
-        onChange('category', inputs.category);
-      }
-      if (inputs.region !== (values.region ?? '')) {
-        onChange('region', inputs.region);
-      }
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [inputs, onChange, values.category, values.region]);
-
-  return {
-    category: {
-      value: inputs.category,
-      onChange: (value) => setInputs((current) => ({ ...current, category: value })),
-    },
-    region: {
-      value: inputs.region,
-      onChange: (value) => setInputs((current) => ({ ...current, region: value })),
-    },
-  };
 }
 
 function CampaignCard({
