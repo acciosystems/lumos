@@ -1,5 +1,6 @@
 import { formatForDisplay } from '@tanstack/react-hotkeys';
 
+import { useCheatSheet } from '@/components/cheat-sheet/store';
 import {
   Item,
   ItemActions,
@@ -16,7 +17,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { useCheatSheet } from '@/components/cheat-sheet/store';
 import { hotkeys } from '@/hotkeys';
 
 export function CheatSheet() {

@@ -5,8 +5,8 @@ import { lazy, Suspense } from 'react';
 import { useCheatSheet } from '@/components/cheat-sheet/store';
 import { AppSidebar, getSidebarStateFn } from '@/components/sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { ensureAuthFn } from '@/lib/auth/functions';
 import { hotkeys } from '@/hotkeys';
+import { ensureAuthFn } from '@/lib/auth/functions';
 
 const CheatSheet = lazy(() =>
   import('@/components/cheat-sheet').then(({ CheatSheet: Component }) => ({ default: Component })),
