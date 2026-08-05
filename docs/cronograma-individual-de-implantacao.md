@@ -11,7 +11,7 @@
 
 ## 2. Objetivo
 
-Este cronograma organiza as atividades necessárias para implantar o Nossa Causa em ambiente de produção. Como o projeto possui um único responsável técnico, todas as etapas de planejamento, preparação, execução, validação, liberação e acompanhamento serão realizadas por essa mesma pessoa.
+Este cronograma organiza as atividades necessárias para implantar o Nossa Causa em ambiente de produção. Como o projeto necessita de um único responsável técnico, todas as etapas de planejamento, preparação, execução, validação, liberação e acompanhamento serão realizadas por essa mesma pessoa.
 
 A implantação deverá disponibilizar, de forma segura e estável, os recursos atualmente implementados: autenticação e recuperação de acesso, configuração inicial do usuário, consulta e filtragem de campanhas, visualização dos detalhes de uma campanha e criação de campanhas físicas ou virtuais por usuários que já possuam perfil organizador.
 
