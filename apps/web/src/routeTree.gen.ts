@@ -16,7 +16,6 @@ import { Route as appIndexRouteImport } from './routes/(app)/index'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
-import { Route as specialOnboardingRouteImport } from './routes/(special)/onboarding'
 import { Route as specialResetPasswordRouteImport } from './routes/(special)/reset-password'
 import { Route as appCampaignsIndexRouteImport } from './routes/(app)/campaigns/index'
 import { Route as appCampaignsIdRouteImport } from './routes/(app)/campaigns/$id'
@@ -57,11 +56,6 @@ const authSignUpRoute = authSignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
   getParentRoute: () => authRouteRoute,
-} as any)
-const specialOnboardingRoute = specialOnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => specialRouteRoute,
 } as any)
 const specialResetPasswordRoute = specialResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -109,7 +103,6 @@ export interface FileRoutesByFullPath {
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/onboarding': typeof specialOnboardingRoute
   '/reset-password': typeof specialResetPasswordRoute
   '/': typeof appIndexRoute
   '/campaigns/$id': typeof appCampaignsIdRoute
@@ -124,7 +117,6 @@ export interface FileRoutesByTo {
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
-  '/onboarding': typeof specialOnboardingRoute
   '/reset-password': typeof specialResetPasswordRoute
   '/': typeof appIndexRoute
   '/campaigns/$id': typeof appCampaignsIdRoute
@@ -143,7 +135,6 @@ export interface FileRoutesById {
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
-  '/(special)/onboarding': typeof specialOnboardingRoute
   '/(special)/reset-password': typeof specialResetPasswordRoute
   '/(app)/': typeof appIndexRoute
   '/(app)/campaigns/$id': typeof appCampaignsIdRoute
@@ -160,7 +151,6 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/sign-in'
     | '/sign-up'
-    | '/onboarding'
     | '/reset-password'
     | '/'
     | '/campaigns/$id'
@@ -175,7 +165,6 @@ export interface FileRouteTypes {
     | '/forgot-password'
     | '/sign-in'
     | '/sign-up'
-    | '/onboarding'
     | '/reset-password'
     | '/'
     | '/campaigns/$id'
@@ -193,7 +182,6 @@ export interface FileRouteTypes {
     | '/(auth)/forgot-password'
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
-    | '/(special)/onboarding'
     | '/(special)/reset-password'
     | '/(app)/'
     | '/(app)/campaigns/$id'
@@ -263,13 +251,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/sign-up'
       preLoaderRoute: typeof authSignUpRouteImport
       parentRoute: typeof authRouteRoute
-    }
-    '/(special)/onboarding': {
-      id: '/(special)/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof specialOnboardingRouteImport
-      parentRoute: typeof specialRouteRoute
     }
     '/(special)/reset-password': {
       id: '/(special)/reset-password'
@@ -369,12 +350,10 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 )
 
 interface specialRouteRouteChildren {
-  specialOnboardingRoute: typeof specialOnboardingRoute
   specialResetPasswordRoute: typeof specialResetPasswordRoute
 }
 
 const specialRouteRouteChildren: specialRouteRouteChildren = {
-  specialOnboardingRoute: specialOnboardingRoute,
   specialResetPasswordRoute: specialResetPasswordRoute,
 }
 

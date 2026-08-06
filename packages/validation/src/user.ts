@@ -8,7 +8,8 @@ export const nameSchema = v.pipe(
 
 export const usernameSchema = v.pipe(
   v.string('Nome de usuário deve ser uma string'),
-  v.nonEmpty('Nome de usuário é obrigatório'),
+  v.minLength(3, 'Nome de usuário deve ter no mínimo 3 caracteres'),
+  v.maxLength(30, 'Nome de usuário deve ter no máximo 30 caracteres'),
   v.regex(/^[a-zA-Z0-9_]+$/, 'Nome de usuário deve conter apenas letras, números e underscores'),
 );
 

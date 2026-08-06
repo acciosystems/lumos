@@ -9,15 +9,6 @@ import { authorized } from '../procedures';
 import { s3Client } from '../services/s3';
 
 export const userRouter = {
-  onboard: authorized.handler(async ({ context: { user } }) => {
-    if (!user.username) return;
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { onboarded: true },
-    });
-  }),
-
   avatar: {
     getUploadUrl: authorized.handler(async ({ context: { user, log } }) => {
       const filename = `avatars/${user.id}.webp`;

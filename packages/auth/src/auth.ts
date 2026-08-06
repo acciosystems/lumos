@@ -8,12 +8,21 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { haveIBeenPwned, lastLoginMethod, username } from 'better-auth/plugins';
 import { ulid } from 'ulid';
 
+import { addGeneratedUsernameBeforeCreate, usernamePluginOptions } from './username';
+
 // WARN: don't await the email sending to prevent timing attacks
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        before: addGeneratedUsernameBeforeCreate,
+      },
+    },
+  },
   experimental: { joins: true },
   emailAndPassword: {
     enabled: true,
@@ -43,14 +52,6 @@ export const auth = betterAuth({
       enabled: true,
     },
     // TODO: allow user deletion (gonna take a long while to implement)
-    additionalFields: {
-      onboarded: {
-        type: 'boolean',
-        required: false,
-        defaultValue: false,
-        input: false,
-      },
-    },
   },
   account: {
     accountLinking: {
@@ -69,7 +70,7 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    username(),
+    username(usernamePluginOptions),
     passkey({
       registration: {
         requireSession: true,

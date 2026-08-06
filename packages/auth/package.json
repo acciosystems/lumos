@@ -6,6 +6,7 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
+    "test": "bun test",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -13,8 +14,10 @@
     "@lumos/database": "workspace:*",
     "@lumos/email": "workspace:*",
     "@lumos/env": "workspace:*",
+    "@lumos/validation": "workspace:*",
     "better-auth": "^1.6.25",
     "better-auth-localization": "^3.0.0",
-    "ulid": "catalog:"
+    "ulid": "catalog:",
+    "valibot": "catalog:"
   }
 }

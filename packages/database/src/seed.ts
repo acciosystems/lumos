@@ -32,6 +32,14 @@ const ids = {
   },
 } as const;
 
+const usernames = {
+  instituto: `ins_${ids.users.instituto.toLowerCase()}`,
+  coletivo: `col_${ids.users.coletivo.toLowerCase()}`,
+  ana: `ana_${ids.users.ana.toLowerCase()}`,
+  bruno: `bru_${ids.users.bruno.toLowerCase()}`,
+  carla: `car_${ids.users.carla.toLowerCase()}`,
+} as const;
+
 function daysFromNow(days: number) {
   return new Date(Date.now() + days * DAY_IN_MS);
 }
@@ -44,14 +52,16 @@ async function seed() {
         name: 'Instituto Esperanca',
         email: 'instituto.esperanca@example.com',
         emailVerified: true,
-        onboarded: true,
+        username: usernames.instituto,
+        displayUsername: usernames.instituto,
       },
       create: {
         id: ids.users.instituto,
         name: 'Instituto Esperanca',
         email: 'instituto.esperanca@example.com',
         emailVerified: true,
-        onboarded: true,
+        username: usernames.instituto,
+        displayUsername: usernames.instituto,
       },
     }),
     prisma.user.upsert({
@@ -60,14 +70,16 @@ async function seed() {
         name: 'Coletivo Solidario',
         email: 'coletivo.solidario@example.com',
         emailVerified: true,
-        onboarded: true,
+        username: usernames.coletivo,
+        displayUsername: usernames.coletivo,
       },
       create: {
         id: ids.users.coletivo,
         name: 'Coletivo Solidario',
         email: 'coletivo.solidario@example.com',
         emailVerified: true,
-        onboarded: true,
+        username: usernames.coletivo,
+        displayUsername: usernames.coletivo,
       },
     }),
     prisma.user.upsert({
@@ -76,14 +88,16 @@ async function seed() {
         name: 'Ana Souza',
         email: 'ana.souza@example.com',
         emailVerified: true,
-        onboarded: true,
+        username: usernames.ana,
+        displayUsername: usernames.ana,
       },
       create: {
         id: ids.users.ana,
         name: 'Ana Souza',
         email: 'ana.souza@example.com',
         emailVerified: true,
-        onboarded: true,
+        username: usernames.ana,
+        displayUsername: usernames.ana,
       },
     }),
     prisma.user.upsert({
@@ -92,14 +106,16 @@ async function seed() {
         name: 'Bruno Lima',
         email: 'bruno.lima@example.com',
         emailVerified: true,
-        onboarded: true,
+        username: usernames.bruno,
+        displayUsername: usernames.bruno,
       },
       create: {
         id: ids.users.bruno,
         name: 'Bruno Lima',
         email: 'bruno.lima@example.com',
         emailVerified: true,
-        onboarded: true,
+        username: usernames.bruno,
+        displayUsername: usernames.bruno,
       },
     }),
     prisma.user.upsert({
@@ -108,14 +124,16 @@ async function seed() {
         name: 'Carla Mendes',
         email: 'carla.mendes@example.com',
         emailVerified: true,
-        onboarded: true,
+        username: usernames.carla,
+        displayUsername: usernames.carla,
       },
       create: {
         id: ids.users.carla,
         name: 'Carla Mendes',
         email: 'carla.mendes@example.com',
         emailVerified: true,
-        onboarded: true,
+        username: usernames.carla,
+        displayUsername: usernames.carla,
       },
     }),
   ]);
