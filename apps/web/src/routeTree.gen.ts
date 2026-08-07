@@ -13,6 +13,7 @@ import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as specialRouteRouteImport } from './routes/(special)/route'
 import { Route as appIndexRouteImport } from './routes/(app)/index'
+import { Route as appOrganizerProfileRouteImport } from './routes/(app)/organizer-profile'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
@@ -40,6 +41,11 @@ const specialRouteRoute = specialRouteRouteImport.update({
 const appIndexRoute = appIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => appRouteRoute,
+} as any)
+const appOrganizerProfileRoute = appOrganizerProfileRouteImport.update({
+  id: '/organizer-profile',
+  path: '/organizer-profile',
   getParentRoute: () => appRouteRoute,
 } as any)
 const authForgotPasswordRoute = authForgotPasswordRouteImport.update({
@@ -100,6 +106,7 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/organizer-profile': typeof appOrganizerProfileRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/campaigns/': typeof appCampaignsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/organizer-profile': typeof appOrganizerProfileRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/(app)': typeof appRouteRouteWithChildren
   '/(auth)': typeof authRouteRouteWithChildren
   '/(special)': typeof specialRouteRouteWithChildren
+  '/(app)/organizer-profile': typeof appOrganizerProfileRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
@@ -148,6 +157,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/organizer-profile'
     | '/forgot-password'
     | '/sign-in'
     | '/sign-up'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/campaigns/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/organizer-profile'
     | '/forgot-password'
     | '/sign-in'
     | '/sign-up'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/(app)'
     | '/(auth)'
     | '/(special)'
+    | '/(app)/organizer-profile'
     | '/(auth)/forgot-password'
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
@@ -229,6 +241,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof appIndexRouteImport
+      parentRoute: typeof appRouteRoute
+    }
+    '/(app)/organizer-profile': {
+      id: '/(app)/organizer-profile'
+      path: '/organizer-profile'
+      fullPath: '/organizer-profile'
+      preLoaderRoute: typeof appOrganizerProfileRouteImport
       parentRoute: typeof appRouteRoute
     }
     '/(auth)/forgot-password': {
@@ -312,6 +331,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface appRouteRouteChildren {
+  appOrganizerProfileRoute: typeof appOrganizerProfileRoute
   appIndexRoute: typeof appIndexRoute
   appCampaignsIdRoute: typeof appCampaignsIdRoute
   appCampaignsMyRoute: typeof appCampaignsMyRoute
@@ -321,6 +341,7 @@ interface appRouteRouteChildren {
 }
 
 const appRouteRouteChildren: appRouteRouteChildren = {
+  appOrganizerProfileRoute: appOrganizerProfileRoute,
   appIndexRoute: appIndexRoute,
   appCampaignsIdRoute: appCampaignsIdRoute,
   appCampaignsMyRoute: appCampaignsMyRoute,

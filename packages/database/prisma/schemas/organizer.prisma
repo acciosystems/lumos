@@ -5,7 +5,7 @@ enum OrganizerType {
 
 model OrganizerProfile {
   id     String @id @default(ulid())
-  userId String
+  userId String @unique
 
   type        OrganizerType
   displayName String

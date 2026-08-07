@@ -147,7 +147,7 @@ async function seed() {
         displayName: 'Instituto Esperanca',
         bio: 'Organizacao dedicada a seguranca alimentar e apoio comunitario.',
         websiteUrl: 'https://example.com/instituto-esperanca',
-        cnpj: '12.345.678/0001-90',
+        cnpj: '12345678000195',
         cpnjVerified: true,
       },
       create: {
@@ -157,7 +157,7 @@ async function seed() {
         displayName: 'Instituto Esperanca',
         bio: 'Organizacao dedicada a seguranca alimentar e apoio comunitario.',
         websiteUrl: 'https://example.com/instituto-esperanca',
-        cnpj: '12.345.678/0001-90',
+        cnpj: '12345678000195',
         cpnjVerified: true,
       },
     }),

@@ -17,7 +17,6 @@ const campaignInclude = {
       type: true,
       displayName: true,
       cnpj: true,
-      cpnjVerified: true,
     },
   },
   collectionPoints: {
@@ -127,18 +126,16 @@ export const campaignRouter = {
   }),
 
   myCampaigns: authorized.handler(async ({ context: { user } }) => {
-    const organizerProfiles = await prisma.organizerProfile.findMany({
+    const organizerProfile = await prisma.organizerProfile.findUnique({
       where: { userId: user.id },
       select: { id: true },
     });
 
-    if (!organizerProfiles.length) return [];
+    if (!organizerProfile) return [];
 
     return prisma.campaign.findMany({
       where: {
-        organizerProfileId: {
-          in: organizerProfiles.map((profile) => profile.id),
-        },
+        organizerProfileId: organizerProfile.id,
       },
       include: {
         organizerProfile: {
@@ -157,7 +154,7 @@ export const campaignRouter = {
   }),
 
   canCreate: authorized.handler(async ({ context: { user } }) => {
-    const organizerProfile = await prisma.organizerProfile.findFirst({
+    const organizerProfile = await prisma.organizerProfile.findUnique({
       where: { userId: user.id },
       select: { id: true },
     });
@@ -168,9 +165,8 @@ export const campaignRouter = {
   create: authorized
     .input(campaignCreateInputSchema)
     .handler(async ({ input, context: { user } }) => {
-      const organizerProfile = await prisma.organizerProfile.findFirst({
+      const organizerProfile = await prisma.organizerProfile.findUnique({
         where: { userId: user.id },
-        orderBy: { createdAt: 'asc' },
       });
 
       if (!organizerProfile) {

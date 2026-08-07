@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
+import { formatCnpj } from '@lumos/validation/organizer';
 
 const paramsSchema = v.object({
   id: v.pipe(v.string(), v.ulid()),
@@ -130,7 +131,7 @@ function CampaignDetailPage() {
                     }
                   />
                   {data.organizerProfile.cnpj && (
-                    <DetailRow label="CNPJ" value={data.organizerProfile.cnpj} />
+                    <DetailRow label="CNPJ" value={formatCnpj(data.organizerProfile.cnpj)} />
                   )}
                 </CardContent>
               </Card>

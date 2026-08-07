@@ -3,6 +3,7 @@ import {
   IconHomeFilled,
   IconLayoutListFilled,
   IconPlus,
+  IconUserHeart,
 } from '@tabler/icons-react';
 import { Link, useLocation } from '@tanstack/react-router';
 
@@ -21,6 +22,7 @@ const campaignItems = [
   { title: 'Campanhas', href: '/campaigns', icon: IconHeartHandshake },
   { title: 'Minhas campanhas', href: '/campaigns/my', icon: IconLayoutListFilled },
   { title: 'Criar campanha', href: '/campaigns/new', icon: IconPlus },
+  { title: 'Perfil organizador', href: '/organizer-profile', icon: IconUserHeart },
 ];
 
 export function SidebarNavMain() {

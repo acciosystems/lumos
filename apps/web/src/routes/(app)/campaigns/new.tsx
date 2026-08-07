@@ -2,7 +2,7 @@ import { campaignCreateInputSchema } from '@lumos/validation/campaign';
 import { IconAlertCircle, IconDeviceFloppy } from '@tabler/icons-react';
 import { useForm } from '@tanstack/react-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useId, useState } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
@@ -99,16 +99,12 @@ function NewCampaignPage() {
 
   const [errors, setErrors] = useState<string[]>([]);
 
-  const organizerProfileQuery = useQuery({
-    queryKey: ['campaign-organizer-profile'],
-    queryFn: async () => await rpc.campaign.canCreate.call(),
-  });
+  const organizerProfileQuery = useQuery(rpc.campaign.canCreate.queryOptions());
 
-  const mutation = useMutation({
-    mutationFn: async (input: CampaignCreateInput) => await rpc.campaign.create.call(input),
+  const mutation = useMutation(rpc.campaign.create.mutationOptions({
     onSuccess: async (campaign) => {
-      await queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-      await queryClient.invalidateQueries({ queryKey: ['my-campaigns'] });
+      await queryClient.invalidateQueries({ queryKey: rpc.campaign.list.key() });
+      await queryClient.invalidateQueries({ queryKey: rpc.campaign.myCampaigns.key() });
       toast.success('Campanha criada com sucesso');
       navigate({ to: '/campaigns/$id', params: { id: campaign.id } });
     },
@@ -116,7 +112,7 @@ function NewCampaignPage() {
       const message = error.message || String(error);
       toast.error('Falha ao criar campanha', { description: message });
     },
-  });
+  }));
 
   const form = useForm({
     defaultValues,
@@ -320,6 +316,9 @@ function NewCampaignPage() {
             Configure um perfil organizador antes de criar campanhas. O formulário ficará disponível
             depois que o perfil for criado.
           </AlertDescription>
+          <Button className="mt-3" size="sm" render={<Link to="/organizer-profile" />}>
+            Configurar perfil organizador
+          </Button>
         </Alert>
       )}
 
@@ -377,7 +376,9 @@ function NewCampaignPage() {
                             onValueChange={(value) => field.setValue(value as CampaignType)}
                           >
                             <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Selecione o tipo" />
+                              <SelectValue>
+                                {field.state.value === 'PHYSICAL' ? 'Física' : 'Virtual'}
+                              </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="PHYSICAL">Física</SelectItem>
