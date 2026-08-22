@@ -1,9 +1,9 @@
-import { campaignCreateInputSchema } from '@lumos/validation/campaign';
+import { campaignCreateInputSchema, type CampaignCreateInput } from '@lumos/validation/campaign';
 import { IconAlertCircle, IconDeviceFloppy } from '@tabler/icons-react';
-import { useForm } from '@tanstack/react-form';
+import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { useId, useState } from 'react';
+import { useId } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 
@@ -12,7 +12,15 @@ import { AppInset } from '@/components/sidebar/inset';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -30,47 +38,46 @@ export const Route = createFileRoute('/(app)/campaigns/new')({
   component: NewCampaignPage,
 });
 
-type CampaignType = 'PHYSICAL' | 'VIRTUAL';
-type CampaignCreateInput = v.InferOutput<typeof campaignCreateInputSchema>;
+type CampaignType = CampaignCreateInput['type'];
+type CollectionPointFormValue = {
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  instructions?: string;
+};
 
-const requiredString = (message: string) => v.pipe(v.string(), v.trim(), v.nonEmpty(message));
+type CampaignCommonFormValue = {
+  title: string;
+  description: string;
+  category: string;
+  region: string;
+  startDate: string;
+  endDate: string;
+  imageUrl?: string;
+};
 
-const formSchema = v.pipe(
-  v.object({
-    title: requiredString('Título é obrigatório'),
-    description: requiredString('Descrição é obrigatória'),
-    type: v.picklist(['PHYSICAL', 'VIRTUAL']),
-    category: requiredString('Tema é obrigatório'),
-    region: requiredString('Região é obrigatória'),
-    startDate: requiredString('Data inicial é obrigatória'),
-    endDate: requiredString('Data final é obrigatória'),
-    imageUrl: v.string(),
-    location: v.string(),
-    targetItems: v.number(),
-    pixKey: v.string(),
-    bankAccountInfo: v.string(),
-    collectionPoints: v.array(
-      v.object({
-        name: v.string(),
-        address: v.string(),
-        city: v.string(),
-        state: v.string(),
-        zipCode: v.string(),
-        instructions: v.string(),
-      }),
-    ),
-  }),
-  v.check(
-    (data) => new Date(data.endDate) > new Date(data.startDate),
-    'Data final deve ser posterior ao início',
-  ),
-  v.check(
-    (data) => data.type !== 'PHYSICAL' || (Number.isInteger(data.targetItems) && data.targetItems >= 1),
-    'Meta de itens deve ser um número inteiro maior que zero.',
-  ),
-);
+type CampaignFormValue = CampaignCommonFormValue &
+  (
+    | {
+        type: 'PHYSICAL';
+        location: string;
+        targetItems: number;
+        collectionPoints: CollectionPointFormValue[];
+        pixKey?: string;
+        bankAccountInfo?: string;
+      }
+    | {
+        type: 'VIRTUAL';
+        pixKey?: string;
+        bankAccountInfo?: string;
+        location?: string;
+        targetItems?: number;
+        collectionPoints?: CollectionPointFormValue[];
+      }
+  );
 
-type CampaignFormValue = v.InferOutput<typeof formSchema>;
 const defaultValues: CampaignFormValue = {
   title: '',
   description: '',
@@ -101,492 +108,494 @@ function NewCampaignPage() {
   const queryClient = useQueryClient();
   const formId = useId();
 
-  const [errors, setErrors] = useState<string[]>([]);
-
   const organizerProfileQuery = useQuery(rpc.campaign.canCreate.queryOptions());
 
-  const mutation = useMutation(rpc.campaign.create.mutationOptions({
-    onSuccess: async (campaign) => {
-      await queryClient.invalidateQueries({ queryKey: rpc.campaign.list.key() });
-      await queryClient.invalidateQueries({ queryKey: rpc.campaign.myCampaigns.key() });
-      toast.success('Campanha criada com sucesso');
-      navigate({ to: '/campaigns/$id', params: { id: campaign.id } });
-    },
-    onError: (error) => {
-      const message = error.message || String(error);
-      toast.error('Falha ao criar campanha', { description: message });
-    },
-  }));
+  const mutation = useMutation(
+    rpc.campaign.create.mutationOptions({
+      onSuccess: async (campaign) => {
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: rpc.campaign.list.key() }),
+          queryClient.invalidateQueries({ queryKey: rpc.campaign.myCampaigns.key() }),
+        ]);
+        toast.success('Campanha criada com sucesso.');
+        await navigate({ to: '/campaigns/$id', params: { id: campaign.id } });
+      },
+      onError: (error) =>
+        toast.error('Não foi possível criar a campanha.', { description: error.message }),
+    }),
+  );
 
   const form = useForm({
     defaultValues,
-    validators: {
-      onSubmit: formSchema,
-    },
+    validators: { onDynamic: campaignCreateInputSchema },
+    validationLogic: revalidateLogic({ mode: 'submit', modeAfterSubmission: 'change' }),
     onSubmit: ({ value }) => {
-      setErrors([]);
-
-      const result = validateCreateInput(value);
-      if (!result.success) {
-        setErrors(result.errors);
-        return;
-      }
-
-      mutation.mutate(result.input);
+      const result = v.safeParse(campaignCreateInputSchema, value);
+      if (result.success) mutation.mutate(result.output);
     },
   });
 
   const physicalFields = (
-    <FieldGroup>
-      <div className="grid gap-4 md:grid-cols-2">
-        <form.Field name="location">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>Local principal</FieldLabel>
-              <Input
-                id={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.setValue(event.target.value)}
+    <FieldSet>
+      <FieldLegend>Coleta dos itens</FieldLegend>
+      <FieldDescription>
+        Informe a meta da campanha e onde as doações físicas serão recebidas.
+      </FieldDescription>
+      <FieldGroup>
+        <div className="grid gap-4 md:grid-cols-2">
+          <form.Field name="location">
+            {(field) => (
+              <TextField
+                field={field}
+                label="Local principal"
                 placeholder="Ex: Centro comunitário"
+                description="Nome do local que identifica a coleta."
+                required
               />
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field name="targetItems">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>Meta de itens</FieldLabel>
-              <Input
-                id={field.name}
-                type="number"
-                min={1}
-                step={1}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.setValue(Number(event.target.value))}
-              />
-            </Field>
-          )}
-        </form.Field>
-      </div>
-
-      <div className="rounded-lg border p-4">
-        <h2 className="mb-4 font-heading text-base font-medium">Ponto de coleta</h2>
-        <div className="grid gap-4">
-          <form.Field name="collectionPoints[0].name">
-            {(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
-                <Input
-                  id={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.setValue(event.target.value)}
-                />
-              </Field>
             )}
           </form.Field>
 
-          <form.Field name="collectionPoints[0].address">
-            {(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Endereço</FieldLabel>
-                <Input
-                  id={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.setValue(event.target.value)}
-                />
-              </Field>
-            )}
-          </form.Field>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <form.Field name="collectionPoints[0].city">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>Cidade</FieldLabel>
+          <form.Field name="targetItems">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field data-invalid={isInvalid}>
+                  <RequiredLabel htmlFor={field.name}>Meta de itens</RequiredLabel>
                   <Input
                     id={field.name}
+                    type="number"
+                    min={1}
+                    step={1}
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(event) => field.setValue(event.target.value)}
+                    onChange={(event) => field.setValue(Number(event.target.value))}
+                    aria-invalid={isInvalid}
+                    aria-required="true"
                   />
+                  <FieldDescription>
+                    Quantidade total de itens que a campanha pretende receber.
+                  </FieldDescription>
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
-              )}
-            </form.Field>
-
-            <form.Field name="collectionPoints[0].state">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>Estado</FieldLabel>
-                  <Input
-                    id={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.setValue(event.target.value)}
-                  />
-                </Field>
-              )}
-            </form.Field>
-
-            <form.Field name="collectionPoints[0].zipCode">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>CEP</FieldLabel>
-                  <Input
-                    id={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.setValue(event.target.value)}
-                  />
-                </Field>
-              )}
-            </form.Field>
-          </div>
-
-          <form.Field name="collectionPoints[0].instructions">
-            {(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Instruções</FieldLabel>
-                <Textarea
-                  id={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.setValue(event.target.value)}
-                />
-              </Field>
-            )}
+              );
+            }}
           </form.Field>
         </div>
-      </div>
-    </FieldGroup>
+
+        <FieldSet className="rounded-lg border p-4">
+          <FieldLegend>
+            Ponto de coleta <RequiredMark />
+          </FieldLegend>
+          <FieldDescription>
+            Endereço público onde os doadores poderão entregar os itens.
+          </FieldDescription>
+          <FieldGroup>
+            <form.Field name="collectionPoints[0].name">
+              {(field) => (
+                <TextField
+                  field={field}
+                  label="Nome do ponto"
+                  placeholder="Ex: Centro comunitário"
+                  required
+                />
+              )}
+            </form.Field>
+
+            <form.Field name="collectionPoints[0].address">
+              {(field) => (
+                <TextField
+                  field={field}
+                  label="Endereço"
+                  placeholder="Rua, número e complemento"
+                  required
+                />
+              )}
+            </form.Field>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <form.Field name="collectionPoints[0].city">
+                {(field) => <TextField field={field} label="Cidade" required />}
+              </form.Field>
+
+              <form.Field name="collectionPoints[0].state">
+                {(field) => (
+                  <TextField field={field} label="Estado" placeholder="Ex: SP" required />
+                )}
+              </form.Field>
+
+              <form.Field name="collectionPoints[0].zipCode">
+                {(field) => (
+                  <TextField field={field} label="CEP" placeholder="00000-000" required />
+                )}
+              </form.Field>
+            </div>
+
+            <form.Field name="collectionPoints[0].instructions">
+              {(field) => (
+                <TextAreaField
+                  field={field}
+                  label="Instruções de entrega"
+                  placeholder="Ex: Entregas de segunda a sexta, das 9h às 17h"
+                  description="Opcional. Informe horários, responsáveis ou orientações de acesso."
+                />
+              )}
+            </form.Field>
+          </FieldGroup>
+        </FieldSet>
+      </FieldGroup>
+    </FieldSet>
   );
 
   const virtualFields = (
-    <FieldGroup>
-      <form.Field name="pixKey">
-        {(field) => (
-          <Field>
-            <FieldLabel htmlFor={field.name}>Chave PIX</FieldLabel>
-            <Input
-              id={field.name}
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(event) => field.setValue(event.target.value)}
-              placeholder="email, CPF/CNPJ, telefone ou chave aleatória"
+    <FieldSet>
+      <FieldLegend>Recebimento das doações</FieldLegend>
+      <FieldDescription>
+        Informe pelo menos uma forma de transferência. O valor será enviado diretamente para os
+        dados fornecidos.
+      </FieldDescription>
+      <FieldGroup>
+        <form.Field name="pixKey">
+          {(field) => (
+            <TextField
+              field={field}
+              label="Chave PIX"
+              placeholder="E-mail, CPF/CNPJ, telefone ou chave aleatória"
+              description="Preencha este campo ou informe os dados bancários abaixo."
             />
-          </Field>
-        )}
-      </form.Field>
+          )}
+        </form.Field>
 
-      <form.Field name="bankAccountInfo">
-        {(field) => (
-          <Field>
-            <FieldLabel htmlFor={field.name}>Dados bancários</FieldLabel>
-            <Textarea
-              id={field.name}
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(event) => field.setValue(event.target.value)}
+        <form.Field name="bankAccountInfo">
+          {(field) => (
+            <TextAreaField
+              field={field}
+              label="Dados bancários"
+              placeholder="Banco, agência, conta, tipo de conta e titular"
+              description="Preencha este campo ou informe uma chave PIX acima."
             />
-            <FieldDescription>Informe chave PIX, dados bancários, ou ambos.</FieldDescription>
-            <FieldError />
-          </Field>
-        )}
-      </form.Field>
-    </FieldGroup>
+          )}
+        </form.Field>
+      </FieldGroup>
+    </FieldSet>
   );
 
   return (
     <AppInset breadcrumbs={[{ label: 'Campanhas', href: '/campaigns' }, { label: 'Criar' }]}>
-      {organizerProfileQuery.isPending && <Loading description="Verificando perfil organizador" />}
+      <div className="w-full max-w-3xl space-y-5">
+        {organizerProfileQuery.isPending && (
+          <Loading description="Verificando perfil organizador" />
+        )}
 
-      {organizerProfileQuery.isError && (
-        <Alert variant="destructive">
-          <IconAlertCircle />
-          <AlertTitle>Não foi possível verificar o perfil</AlertTitle>
-          <AlertDescription>{organizerProfileQuery.error.message}</AlertDescription>
-        </Alert>
-      )}
+        {organizerProfileQuery.isError && (
+          <Alert variant="destructive">
+            <IconAlertCircle />
+            <AlertTitle>Não foi possível verificar o perfil</AlertTitle>
+            <AlertDescription>{organizerProfileQuery.error.message}</AlertDescription>
+          </Alert>
+        )}
 
-      {organizerProfileQuery.data && !organizerProfileQuery.data.hasOrganizerProfile && (
-        <Alert>
-          <IconAlertCircle />
-          <AlertTitle>Perfil organizador obrigatório</AlertTitle>
-          <AlertDescription>
-            Configure um perfil organizador antes de criar campanhas. O formulário ficará disponível
-            depois que o perfil for criado.
-          </AlertDescription>
-          <Button className="mt-3" size="sm" render={<Link to="/organizer-profile" />}>
-            Configurar perfil organizador
-          </Button>
-        </Alert>
-      )}
+        {organizerProfileQuery.data && !organizerProfileQuery.data.hasOrganizerProfile && (
+          <Alert>
+            <IconAlertCircle />
+            <AlertTitle>Perfil organizador obrigatório</AlertTitle>
+            <AlertDescription>
+              Configure um perfil organizador antes de criar campanhas. O formulário ficará
+              disponível depois que o perfil for criado.
+            </AlertDescription>
+            <Button className="mt-3" size="sm" render={<Link to="/organizer-profile" />}>
+              Configurar perfil organizador
+            </Button>
+          </Alert>
+        )}
 
-      {organizerProfileQuery.data?.hasOrganizerProfile && (
-        <div className="w-full">
+        {organizerProfileQuery.data?.hasOrganizerProfile && (
           <Card>
             <CardHeader>
               <CardTitle>Criar campanha</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Apresente sua causa e informe como as pessoas poderão contribuir.
+              </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
+              {mutation.isError && (
+                <Alert variant="destructive">
+                  <IconAlertCircle />
+                  <AlertTitle>Não foi possível criar a campanha</AlertTitle>
+                  <AlertDescription>{mutation.error.message}</AlertDescription>
+                </Alert>
+              )}
+
               <form
                 id={formId}
-                className="space-y-7"
+                className="space-y-8"
+                aria-busy={mutation.isPending}
+                noValidate
                 onSubmit={(event) => {
                   event.preventDefault();
                   form.handleSubmit();
                 }}
               >
-                {errors.length > 0 && (
-                  <Alert variant="destructive">
-                    <IconAlertCircle />
-                    <AlertTitle>Revise os campos</AlertTitle>
-                    <AlertDescription>{errors.join(' ')}</AlertDescription>
-                  </Alert>
-                )}
-
-                <FieldGroup>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <form.Field name="title">
-                      {(field) => {
-                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                        return (
-                          <Field data-invalid={isInvalid}>
-                            <FieldLabel htmlFor={field.name}>Título</FieldLabel>
-                            <Input
-                              id={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(event) => field.setValue(event.target.value)}
-                              aria-invalid={isInvalid}
-                              placeholder="Ex: Alimentos para famílias"
-                            />
-                            {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                          </Field>
-                        );
-                      }}
-                    </form.Field>
-
-                    <form.Field name="type">
-                      {(field) => (
-                        <Field>
-                          <FieldLabel>Tipo</FieldLabel>
-                          <Select
-                            value={field.state.value}
-                            onValueChange={(value) => field.setValue(value as CampaignType)}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue>
-                                {field.state.value === 'PHYSICAL' ? 'Física' : 'Virtual'}
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="PHYSICAL">Física</SelectItem>
-                              <SelectItem value="VIRTUAL">Virtual</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </Field>
-                      )}
-                    </form.Field>
-                  </div>
-
-                  <form.Field name="description">
-                    {(field) => {
-                      const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                      return (
-                        <Field data-invalid={isInvalid}>
-                          <FieldLabel htmlFor={field.name}>Descrição</FieldLabel>
-                          <Textarea
-                            id={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(event) => field.setValue(event.target.value)}
-                            aria-invalid={isInvalid}
-                            placeholder="Descreva a causa, o objetivo e quem será beneficiado"
+                <fieldset className="contents" disabled={mutation.isPending}>
+                  <FieldSet>
+                    <FieldLegend>Informações principais</FieldLegend>
+                    <FieldDescription>
+                      Explique de forma objetiva a causa, o público beneficiado e a região atendida.
+                    </FieldDescription>
+                    <FieldGroup>
+                      <form.Field name="title">
+                        {(field) => (
+                          <TextField
+                            field={field}
+                            label="Título"
+                            placeholder="Ex: Alimentos para famílias"
+                            required
                           />
-                          {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                        </Field>
-                      );
-                    }}
-                  </form.Field>
+                        )}
+                      </form.Field>
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <form.Field name="category">
-                      {(field) => {
-                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                        return (
-                          <Field data-invalid={isInvalid}>
-                            <FieldLabel htmlFor={field.name}>Tema</FieldLabel>
-                            <Input
-                              id={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(event) => field.setValue(event.target.value)}
-                              aria-invalid={isInvalid}
-                              placeholder="Ex: alimentos"
+                      <form.Field name="description">
+                        {(field) => (
+                          <TextAreaField
+                            field={field}
+                            label="Descrição"
+                            placeholder="Descreva a causa, o objetivo e quem será beneficiado"
+                            description="Inclua as informações necessárias para que os doadores entendam a campanha."
+                            required
+                          />
+                        )}
+                      </form.Field>
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <form.Field name="category">
+                          {(field) => (
+                            <TextField
+                              field={field}
+                              label="Categoria"
+                              placeholder="Ex: Alimentos"
+                              description="Tema usado para encontrar a campanha."
+                              required
                             />
-                            {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                          </Field>
-                        );
-                      }}
-                    </form.Field>
+                          )}
+                        </form.Field>
 
-                    <form.Field name="region">
-                      {(field) => {
-                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                        return (
-                          <Field data-invalid={isInvalid}>
-                            <FieldLabel htmlFor={field.name}>Região</FieldLabel>
-                            <Input
-                              id={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(event) => field.setValue(event.target.value)}
-                              aria-invalid={isInvalid}
+                        <form.Field name="region">
+                          {(field) => (
+                            <TextField
+                              field={field}
+                              label="Região"
                               placeholder="Ex: São Paulo"
+                              description="Cidade, estado ou região atendida."
+                              required
                             />
-                            {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                          </Field>
-                        );
-                      }}
-                    </form.Field>
-                  </div>
+                          )}
+                        </form.Field>
+                      </div>
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <form.Field name="startDate">
-                      {(field) => {
-                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                        return (
-                          <Field data-invalid={isInvalid}>
-                            <FieldLabel htmlFor={field.name}>Início</FieldLabel>
-                            <Input
-                              id={field.name}
+                      <form.Field name="type">
+                        {(field) => {
+                          const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                          return (
+                            <Field data-invalid={isInvalid}>
+                              <RequiredLabel htmlFor={field.name}>Tipo de campanha</RequiredLabel>
+                              <Select
+                                value={field.state.value}
+                                onValueChange={(value) => field.setValue(value as CampaignType)}
+                              >
+                                <SelectTrigger
+                                  id={field.name}
+                                  className="w-full"
+                                  aria-invalid={isInvalid}
+                                  aria-required="true"
+                                >
+                                  <SelectValue>
+                                    {field.state.value === 'PHYSICAL' ? 'Física' : 'Virtual'}
+                                  </SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="PHYSICAL">Física — coleta de itens</SelectItem>
+                                  <SelectItem value="VIRTUAL">
+                                    Virtual — doação financeira
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FieldDescription>
+                                Campanhas físicas recebem itens; campanhas virtuais recebem doações
+                                diretamente na conta informada.
+                              </FieldDescription>
+                              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                            </Field>
+                          );
+                        }}
+                      </form.Field>
+                    </FieldGroup>
+                  </FieldSet>
+
+                  <FieldSet>
+                    <FieldLegend>Período e imagem</FieldLegend>
+                    <FieldDescription>
+                      Defina quando a campanha estará ativa e, se desejar, adicione uma imagem
+                      pública.
+                    </FieldDescription>
+                    <FieldGroup>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <form.Field name="startDate">
+                          {(field) => (
+                            <TextField field={field} label="Data inicial" type="date" required />
+                          )}
+                        </form.Field>
+
+                        <form.Field name="endDate">
+                          {(field) => (
+                            <TextField
+                              field={field}
+                              label="Data final"
                               type="date"
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(event) => field.setValue(event.target.value)}
-                              aria-invalid={isInvalid}
+                              description="Deve ser posterior à data inicial."
+                              required
                             />
-                            {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                          </Field>
-                        );
-                      }}
-                    </form.Field>
+                          )}
+                        </form.Field>
+                      </div>
 
-                    <form.Field name="endDate">
-                      {(field) => {
-                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                        return (
-                          <Field data-invalid={isInvalid}>
-                            <FieldLabel htmlFor={field.name}>Fim</FieldLabel>
-                            <Input
-                              id={field.name}
-                              type="date"
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(event) => field.setValue(event.target.value)}
-                              aria-invalid={isInvalid}
-                            />
-                            {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                          </Field>
-                        );
-                      }}
-                    </form.Field>
-                  </div>
+                      <form.Field name="imageUrl">
+                        {(field) => (
+                          <TextField
+                            field={field}
+                            label="Imagem da campanha"
+                            type="url"
+                            placeholder="https://exemplo.com/imagem.jpg"
+                            description="Opcional. Use uma URL pública com http:// ou https://."
+                          />
+                        )}
+                      </form.Field>
+                    </FieldGroup>
+                  </FieldSet>
 
-                  <form.Field name="imageUrl">
-                    {(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>Imagem</FieldLabel>
-                        <Input
-                          id={field.name}
-                          type="url"
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(event) => field.setValue(event.target.value)}
-                          placeholder="https://..."
-                        />
-                        <FieldDescription>Opcional.</FieldDescription>
-                      </Field>
-                    )}
-                  </form.Field>
-                </FieldGroup>
-
-                <form.Subscribe selector={(state) => state.values.type}>
-                  {(type) => (type === 'PHYSICAL' ? physicalFields : virtualFields)}
-                </form.Subscribe>
+                  <form.Subscribe selector={(state) => state.values.type}>
+                    {(type) => (type === 'PHYSICAL' ? physicalFields : virtualFields)}
+                  </form.Subscribe>
+                </fieldset>
               </form>
             </CardContent>
             <CardFooter className="justify-end">
-              <form.Subscribe
-                selector={(state) => ({
-                  isDefaultValue: state.isDefaultValue,
-                  isValid: state.isValid,
-                })}
-              >
-                {({ isDefaultValue, isValid }) => (
-                  <Button
-                    type="submit"
-                    form={formId}
-                    disabled={isDefaultValue || !isValid || mutation.isPending}
-                  >
+              <form.Subscribe selector={(state) => state.canSubmit}>
+                {(canSubmit) => (
+                  <Button type="submit" form={formId} disabled={!canSubmit || mutation.isPending}>
                     {mutation.isPending ? <Spinner /> : <IconDeviceFloppy />}
-                    Criar campanha
+                    {mutation.isPending ? 'Criando campanha...' : 'Criar campanha'}
                   </Button>
                 )}
               </form.Subscribe>
             </CardFooter>
           </Card>
-        </div>
-      )}
+        )}
+      </div>
     </AppInset>
   );
 }
 
-function validateCreateInput(value: CampaignFormValue) {
-  const input = toCampaignCreateInput(value);
-  const result = v.safeParse(campaignCreateInputSchema, input);
-  if (!result.success) return { success: false as const, errors: getIssueMessages(result.issues) };
-
-  if (input.type === 'PHYSICAL' && (!input.location || !input.targetItems)) {
-    return {
-      success: false as const,
-      errors: ['Campanhas físicas precisam de local e meta de itens.'],
-    };
-  }
-
-  if (input.type === 'VIRTUAL' && !input.pixKey && !input.bankAccountInfo) {
-    return {
-      success: false as const,
-      errors: ['Campanhas virtuais precisam de chave PIX ou dados bancários.'],
-    };
-  }
-
-  return { success: true as const, input: result.output };
-}
-
-function toCampaignCreateInput(value: CampaignFormValue): CampaignCreateInput {
-  return {
-    title: value.title,
-    description: value.description,
-    type: value.type,
-    category: value.category,
-    region: value.region,
-    startDate: value.startDate,
-    endDate: value.endDate,
-    imageUrl: value.imageUrl,
-    location: value.type === 'PHYSICAL' ? value.location : '',
-    targetItems: value.type === 'PHYSICAL' ? value.targetItems : undefined,
-    pixKey: value.type === 'VIRTUAL' ? value.pixKey : '',
-    bankAccountInfo: value.type === 'VIRTUAL' ? value.bankAccountInfo : '',
-    collectionPoints: value.type === 'PHYSICAL' ? value.collectionPoints : undefined,
+type StringField = {
+  name: string;
+  state: {
+    value: string | undefined;
+    meta: { isTouched: boolean; isValid: boolean; errors: unknown[] };
   };
+  handleBlur: () => void;
+  setValue: (value: string) => void;
+};
+
+function TextField({
+  field,
+  label,
+  placeholder,
+  description,
+  required,
+  type,
+}: {
+  field: StringField;
+  label: string;
+  placeholder?: string;
+  description?: string;
+  required?: boolean;
+  type?: React.ComponentProps<typeof Input>['type'];
+}) {
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  return (
+    <Field data-invalid={isInvalid}>
+      {required ? (
+        <RequiredLabel htmlFor={field.name}>{label}</RequiredLabel>
+      ) : (
+        <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+      )}
+      <Input
+        id={field.name}
+        type={type}
+        value={field.state.value ?? ''}
+        onBlur={field.handleBlur}
+        onChange={(event) => field.setValue(event.target.value)}
+        placeholder={placeholder}
+        aria-invalid={isInvalid}
+        aria-required={required || undefined}
+      />
+      {description && <FieldDescription>{description}</FieldDescription>}
+      {isInvalid && <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />}
+    </Field>
+  );
 }
 
-function getIssueMessages(issues: v.InferIssue<typeof campaignCreateInputSchema>[]) {
-  return [...new Set(issues.map((issue) => issue.message))];
+function TextAreaField({
+  field,
+  label,
+  placeholder,
+  description,
+  required,
+}: {
+  field: StringField;
+  label: string;
+  placeholder?: string;
+  description?: string;
+  required?: boolean;
+}) {
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  return (
+    <Field data-invalid={isInvalid}>
+      {required ? (
+        <RequiredLabel htmlFor={field.name}>{label}</RequiredLabel>
+      ) : (
+        <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+      )}
+      <Textarea
+        id={field.name}
+        value={field.state.value ?? ''}
+        onBlur={field.handleBlur}
+        onChange={(event) => field.setValue(event.target.value)}
+        placeholder={placeholder}
+        aria-invalid={isInvalid}
+        aria-required={required || undefined}
+      />
+      {description && <FieldDescription>{description}</FieldDescription>}
+      {isInvalid && <FieldError errors={field.state.meta.errors as Array<{ message?: string }>} />}
+    </Field>
+  );
+}
+
+function RequiredLabel({ children, ...props }: React.ComponentProps<typeof FieldLabel>) {
+  return (
+    <FieldLabel {...props}>
+      {children} <RequiredMark />
+    </FieldLabel>
+  );
+}
+
+function RequiredMark() {
+  return (
+    <>
+      <span className="text-destructive" aria-hidden="true">
+        *
+      </span>
+      <span className="sr-only"> (obrigatório)</span>
+    </>
+  );
 }
