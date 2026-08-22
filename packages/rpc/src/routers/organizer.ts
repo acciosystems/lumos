@@ -1,8 +1,5 @@
 import { prisma } from '@lumos/database';
-import {
-  normalizeCnpj,
-  organizerProfileUpsertInputSchema,
-} from '@lumos/validation/organizer';
+import { normalizeCnpj, organizerProfileUpsertInputSchema } from '@lumos/validation/organizer';
 import { ORPCError } from '@orpc/client';
 
 import { authorized } from '../procedures';

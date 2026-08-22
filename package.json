@@ -16,9 +16,6 @@
     "lint": "oxlint",
     "format": "oxfmt"
   },
-  "dependencies": {
-    "lumos": "."
-  },
   "devDependencies": {
     "@types/bun": "latest",
     "oxfmt": "^0.61.0",

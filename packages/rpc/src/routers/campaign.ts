@@ -1,4 +1,5 @@
 import { prisma } from '@lumos/database';
+import type { CampaignInclude } from '@lumos/database/generated/prisma/models';
 import {
   campaignByIdInputSchema,
   campaignCreateInputSchema,
@@ -32,7 +33,7 @@ const campaignInclude = {
       participants: true,
     },
   },
-};
+} as const satisfies CampaignInclude;
 
 const campaignDateSchema = v.pipe(
   v.string(),

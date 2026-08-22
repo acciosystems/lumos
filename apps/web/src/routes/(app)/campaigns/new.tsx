@@ -46,7 +46,7 @@ const formSchema = v.pipe(
     endDate: requiredString('Data final é obrigatória'),
     imageUrl: v.string(),
     location: v.string(),
-    targetItems: v.pipe(v.number(), v.integer(), v.minValue(1)),
+    targetItems: v.number(),
     pixKey: v.string(),
     bankAccountInfo: v.string(),
     collectionPoints: v.array(
@@ -63,6 +63,10 @@ const formSchema = v.pipe(
   v.check(
     (data) => new Date(data.endDate) > new Date(data.startDate),
     'Data final deve ser posterior ao início',
+  ),
+  v.check(
+    (data) => data.type !== 'PHYSICAL' || (Number.isInteger(data.targetItems) && data.targetItems >= 1),
+    'Meta de itens deve ser um número inteiro maior que zero.',
   ),
 );
 
