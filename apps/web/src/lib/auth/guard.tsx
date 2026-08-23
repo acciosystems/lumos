@@ -7,10 +7,10 @@ interface AuthenticatedRenderProps {
   user: User;
 }
 
-type WhenCodition = 'authenticated' | 'unauthenticated' | 'loading';
+type WhenCondition = 'authenticated' | 'unauthenticated' | 'loading';
 
 interface AuthGuardProps {
-  when: WhenCodition;
+  when: WhenCondition;
   children: React.ReactNode | ((props: AuthenticatedRenderProps) => React.ReactNode);
 }
 

@@ -5,7 +5,7 @@ import { identifyUser } from 'evlog/better-auth';
 
 import { base } from '../base';
 
-export const authMiddlware = base.middleware(async ({ context, next }) => {
+export const authMiddleware = base.middleware(async ({ context, next }) => {
   const sessionData = await auth.api.getSession({
     headers: context.headers,
   });

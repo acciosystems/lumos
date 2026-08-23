@@ -131,7 +131,9 @@ function OrganizerProfilePage() {
                         >
                           <SelectTrigger id={field.name} className="w-full">
                             <SelectValue>
-                              {field.state.value === 'ORGANIZATION' ? 'Organização' : 'Pessoa física'}
+                              {field.state.value === 'ORGANIZATION'
+                                ? 'Organização'
+                                : 'Pessoa física'}
                             </SelectValue>
                           </SelectTrigger>
                           <SelectContent>

@@ -7,7 +7,7 @@ export const Route = createFileRoute('/api/rpc/$')({
       ANY: async ({ request }) => {
         const { response } = await handler.handle(request, {
           prefix: '/api/rpc',
-          // @ts-expect-error needed beacuse of evlog context
+          // @ts-expect-error needed because of evlog context
           context: { headers: request.headers },
         });
 

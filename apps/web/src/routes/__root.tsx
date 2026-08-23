@@ -32,7 +32,7 @@ function RootComponent() {
       <head>
         <HeadContent />
       </head>
-      <body className="antialised">
+      <body className="antialiased">
         <Providers>
           <Outlet />
         </Providers>

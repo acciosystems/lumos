@@ -1,3 +1,4 @@
+import { formatCnpj } from '@lumos/validation/organizer';
 import { IconAlertCircle, IconCalendar, IconMapPin, IconUsers } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
@@ -12,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
-import { formatCnpj } from '@lumos/validation/organizer';
 
 const paramsSchema = v.object({
   id: v.pipe(v.string(), v.ulid()),
