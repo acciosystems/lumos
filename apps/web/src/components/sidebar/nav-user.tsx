@@ -111,7 +111,7 @@ export function SidebarNavUser() {
 
 function UserView({ user }: { user: User }) {
   return (
-    <div className="flex items-center gap-x-2 text-foreground">
+    <div className="flex items-center gap-2 text-foreground">
       <Avatar className="size-8 rounded-sm">
         <AvatarImage src={user.image ?? undefined} alt={user.name} className="rounded-sm" />
         <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>

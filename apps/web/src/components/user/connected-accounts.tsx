@@ -14,6 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Empty, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
 import {
   Item,
   ItemActions,
@@ -71,7 +72,7 @@ export function UserConnectedAccounts() {
   return (
     <Card size="sm" className="max-w-lg">
       <CardHeader>
-        <CardTitle className="text-base!">Contas Vinculadas</CardTitle>
+        <CardTitle>Contas Vinculadas</CardTitle>
       </CardHeader>
 
       <CardContent>
@@ -110,9 +111,11 @@ export function UserConnectedAccounts() {
               ))}
             </ItemGroup>
           ) : (
-            <Alert>
-              <AlertTitle>Nenhuma conta vinculada</AlertTitle>
-            </Alert>
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>Nenhuma conta vinculada</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
           ))}
       </CardContent>
 

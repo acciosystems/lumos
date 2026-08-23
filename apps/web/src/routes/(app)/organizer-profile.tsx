@@ -82,7 +82,7 @@ function OrganizerProfilePage() {
 
   return (
     <AppInset breadcrumbs={[{ label: 'Perfil organizador' }]}>
-      <div className="w-full max-w-2xl space-y-5">
+      <div className="flex w-full max-w-2xl flex-col gap-5">
         {profileQuery.isPending && <Loading description="Carregando perfil organizador" />}
 
         {profileQuery.isError && (
@@ -103,7 +103,6 @@ function OrganizerProfilePage() {
             <CardContent>
               <form
                 id={formId}
-                className="space-y-6"
                 onSubmit={(event) => {
                   event.preventDefault();
                   form.handleSubmit();

@@ -89,7 +89,7 @@ export function UserPasswordChange() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-base">Alterar senha</DialogTitle>
+            <DialogTitle>Alterar senha</DialogTitle>
             <DialogDescription>Você será desconectado de todas as sessões ativas</DialogDescription>
           </DialogHeader>
 

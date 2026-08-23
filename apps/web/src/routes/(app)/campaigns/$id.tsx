@@ -11,6 +11,8 @@ import { AppInset } from '@/components/sidebar/inset';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Empty, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
+import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '@/components/ui/item';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
 import { campaignTypeMetadata, isPhysicalCampaign } from '@/utils/campaign-type';
@@ -52,7 +54,7 @@ function CampaignDetailPage() {
         {data && (
           <>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <div className="flex flex-wrap gap-2">
                   <Badge>{campaignTypeMetadata[data.type].campaignLabel}</Badge>
                   <Badge variant="secondary">{data.category}</Badge>
@@ -84,7 +86,7 @@ function CampaignDetailPage() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-              <Card className="gap-0">
+              <Card>
                 <CardHeader>
                   <CardTitle>Como doar</CardTitle>
                   <CardDescription>
@@ -93,21 +95,21 @@ function CampaignDetailPage() {
                       : 'Contribua diretamente usando os dados de pagamento do organizador.'}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4 pt-4">
+                <CardContent className="flex flex-col gap-4">
                   {isPhysicalCampaign(data.type) ? (
-                    <>
-                      <div className="grid gap-3">
-                        {data.collectionPoints.map((point) => (
-                          <div key={point.id} className="rounded-md border p-3 text-sm">
-                            <p className="font-medium">{point.name}</p>
-                            <p className="text-muted-foreground">
+                    <ItemGroup>
+                      {data.collectionPoints.map((point) => (
+                        <Item key={point.id} variant="outline">
+                          <ItemContent>
+                            <ItemTitle>{point.name}</ItemTitle>
+                            <ItemDescription>
                               {point.address}, {point.city} - {point.state}, {point.zipCode}
-                            </p>
-                            {point.instructions && <p className="mt-2">{point.instructions}</p>}
-                          </div>
-                        ))}
-                      </div>
-                    </>
+                            </ItemDescription>
+                            {point.instructions && <p>{point.instructions}</p>}
+                          </ItemContent>
+                        </Item>
+                      ))}
+                    </ItemGroup>
                   ) : (
                     <div className="grid gap-3 text-sm">
                       {data.pixKey && <DetailRow label="PIX" value={data.pixKey} />}
@@ -119,11 +121,11 @@ function CampaignDetailPage() {
                 </CardContent>
               </Card>
 
-              <Card className="gap-0">
+              <Card>
                 <CardHeader>
                   <CardTitle>Organizador</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-sm">
+                <CardContent className="flex flex-col gap-3 text-sm">
                   <DetailRow label="Nome" value={data.organizerProfile.displayName} />
                   <DetailRow
                     label="Tipo"
@@ -140,22 +142,32 @@ function CampaignDetailPage() {
               </Card>
             </div>
 
-            <Card className="gap-0">
+            <Card>
               <CardHeader>
                 <CardTitle>Atualizações</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 pt-4">
+              <CardContent className="flex flex-col gap-3">
                 {data.updates.length ? (
-                  data.updates.map((update) => (
-                    <div key={update.id} className="rounded-md border p-3">
-                      <p className="text-sm">{update.message}</p>
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        {format(update.publishedAt, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                      </p>
-                    </div>
-                  ))
+                  <ItemGroup>
+                    {data.updates.map((update) => (
+                      <Item key={update.id} variant="outline" size="sm">
+                        <ItemContent>
+                          <ItemDescription className="line-clamp-none text-foreground">
+                            {update.message}
+                          </ItemDescription>
+                          <ItemDescription className="text-xs">
+                            {format(update.publishedAt, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                          </ItemDescription>
+                        </ItemContent>
+                      </Item>
+                    ))}
+                  </ItemGroup>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Nenhuma atualização publicada.</p>
+                  <Empty>
+                    <EmptyHeader>
+                      <EmptyTitle>Nenhuma atualização publicada</EmptyTitle>
+                    </EmptyHeader>
+                  </Empty>
                 )}
               </CardContent>
             </Card>

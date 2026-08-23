@@ -7,6 +7,7 @@ import { Loading } from '@/components/misc/loading';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Empty, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
 import {
   Item,
   ItemActions,
@@ -48,7 +49,7 @@ export function UserPasskeys() {
   return (
     <Card size="sm" className="max-w-lg">
       <CardHeader>
-        <CardTitle className="text-base!">Chaves de Acesso</CardTitle>
+        <CardTitle>Chaves de Acesso</CardTitle>
       </CardHeader>
 
       <CardContent>
@@ -88,9 +89,11 @@ export function UserPasskeys() {
               ))}
             </ItemGroup>
           ) : (
-            <Alert>
-              <AlertTitle>Nenhuma chave de acesso encontrada</AlertTitle>
-            </Alert>
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>Nenhuma chave de acesso encontrada</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
           ))}
       </CardContent>
 

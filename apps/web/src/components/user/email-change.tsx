@@ -57,7 +57,7 @@ export function UserEmailChange() {
 
   return (
     <>
-      <div className="flex items-center gap-x-2">
+      <div className="flex items-center gap-2">
         <p>{user.email}</p>
         <Tooltip>
           <TooltipTrigger
@@ -81,7 +81,7 @@ export function UserEmailChange() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-lg">Alterar email</DialogTitle>
+            <DialogTitle>Alterar email</DialogTitle>
           </DialogHeader>
 
           <form

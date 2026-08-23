@@ -15,7 +15,14 @@ import { Loading } from '@/components/misc/loading';
 import { AppInset } from '@/components/sidebar/inset';
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   Field,
   FieldDescription,
@@ -289,7 +296,7 @@ function NewCampaignPage() {
 
   return (
     <AppInset breadcrumbs={[{ label: 'Campanhas', href: '/campaigns' }, { label: 'Criar' }]}>
-      <div className="w-full space-y-5">
+      <div className="flex w-full flex-col gap-5">
         {organizerProfileQuery.isPending && (
           <Loading description="Verificando perfil organizador" />
         )}
@@ -322,11 +329,11 @@ function NewCampaignPage() {
           <Card>
             <CardHeader>
               <CardTitle>Criar campanha</CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <CardDescription>
                 Apresente sua causa e informe como as pessoas poderão contribuir.
-              </p>
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="flex flex-col gap-6">
               {mutation.isError && (
                 <Alert variant="destructive">
                   <IconAlertCircle />
@@ -337,7 +344,7 @@ function NewCampaignPage() {
 
               <form
                 id={formId}
-                className="space-y-8"
+                className="flex flex-col gap-8"
                 aria-busy={mutation.isPending}
                 noValidate
                 onSubmit={(event) => {

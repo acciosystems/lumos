@@ -73,7 +73,7 @@ export function UserPasskeyRegister({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-base">Registrar chave de acesso</DialogTitle>
+          <DialogTitle>Registrar chave de acesso</DialogTitle>
         </DialogHeader>
 
         <form

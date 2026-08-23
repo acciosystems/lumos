@@ -31,8 +31,8 @@ export function AppInset({
 }) {
   return (
     <SidebarInset>
-      <header className="flex h-12 shrink-0 items-center gap-y-2 border-b transition-[width,height] ease-linear">
-        <div className="flex w-full items-center gap-x-2 px-4">
+      <header className="flex h-12 shrink-0 items-center border-b transition-[width,height] ease-linear">
+        <div className="flex w-full items-center gap-2 px-4">
           <Tooltip>
             <TooltipTrigger render={<SidebarTrigger className="-ml-1" />} />
             <TooltipContent>

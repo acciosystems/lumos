@@ -51,7 +51,7 @@ function SettingsPage() {
         <Tabs
           value={tab}
           onValueChange={(value) => navigate({ params: { tab: value } })}
-          className="space-y-4"
+          className="gap-4"
         >
           <TabsList variant="line">
             <TabsTrigger value="account">
@@ -63,13 +63,13 @@ function SettingsPage() {
           </TabsList>
           <div className="px-1">
             <TabsContent value="account">
-              <div className="space-y-4">
+              <div className="flex flex-col gap-4">
                 <UserProfileSettings />
                 <UserConnectedAccounts />
               </div>
             </TabsContent>
             <TabsContent value="security">
-              <div className="space-y-4">
+              <div className="flex flex-col gap-4">
                 <UserSecuritySettings />
                 <UserPasskeys />
                 <UserSessions />

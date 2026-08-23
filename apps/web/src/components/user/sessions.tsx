@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '../ui/empty';
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '../ui/item';
 
 export function UserSessions() {
@@ -56,7 +57,7 @@ export function UserSessions() {
   return (
     <Card size="sm" className="max-w-lg">
       <CardHeader>
-        <CardTitle className="text-base!">Sessões Ativas</CardTitle>
+        <CardTitle>Sessões Ativas</CardTitle>
       </CardHeader>
 
       <CardContent>
@@ -100,10 +101,12 @@ export function UserSessions() {
               ))}
             </ItemGroup>
           ) : (
-            <Alert>
-              <AlertTitle>Nenhuma sessão ativa</AlertTitle>
-              <AlertDescription>Algo esta muito errado</AlertDescription>
-            </Alert>
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>Nenhuma sessão ativa</EmptyTitle>
+                <EmptyDescription>Algo está muito errado.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ))}
       </CardContent>
     </Card>

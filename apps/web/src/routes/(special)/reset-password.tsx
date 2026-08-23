@@ -72,7 +72,7 @@ function ResetPasswordPage() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle className="text-lg!">Redefinir Senha</CardTitle>
+        <CardTitle>Redefinir Senha</CardTitle>
         <CardDescription>Digite sua nova senha abaixo</CardDescription>
       </CardHeader>
 

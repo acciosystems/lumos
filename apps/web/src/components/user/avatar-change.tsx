@@ -105,7 +105,7 @@ export function UserAvatarChange() {
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-lg">Alterar foto de perfil</DialogTitle>
+          <DialogTitle>Alterar foto de perfil</DialogTitle>
         </DialogHeader>
 
         <form

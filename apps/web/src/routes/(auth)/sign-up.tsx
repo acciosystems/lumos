@@ -71,10 +71,10 @@ function SignUpPage() {
 
   if (!env.VITE_SIGNUP_ENABLED) {
     return (
-      <Alert className="max-w-sm space-y-1">
-        <AlertTitle className="text-lg">Cadastro desativado</AlertTitle>
+      <Alert className="max-w-sm">
+        <AlertTitle>Cadastro desativado</AlertTitle>
         <AlertDescription>O cadastro de novos usuários está desativado no momento</AlertDescription>
-        <Button size="sm" nativeButton={false} render={<Link to="/sign-in" />} className="mt-1">
+        <Button size="sm" nativeButton={false} render={<Link to="/sign-in" />}>
           Entrar com uma conta existente
         </Button>
       </Alert>
@@ -90,7 +90,7 @@ function SignUpPage() {
         }}
       >
         <FieldGroup>
-          <div className="flex flex-col items-center justify-center gap-y-4">
+          <div className="flex flex-col items-center justify-center gap-4">
             <Link to="/">
               <Logo className="text-xl" />
             </Link>

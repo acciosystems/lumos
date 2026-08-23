@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
 
@@ -80,12 +81,14 @@ function MyCampaignsPage() {
               ))}
             </div>
           ) : (
-            <Alert>
-              <AlertTitle>Nenhuma campanha criada</AlertTitle>
-              <AlertDescription>
-                Crie uma campanha depois de configurar seu perfil organizador.
-              </AlertDescription>
-            </Alert>
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>Nenhuma campanha criada</EmptyTitle>
+                <EmptyDescription>
+                  Crie uma campanha depois de configurar seu perfil organizador.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ))}
       </div>
     </AppInset>

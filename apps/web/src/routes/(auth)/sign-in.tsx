@@ -119,7 +119,7 @@ function SignInPage() {
         }}
       >
         <FieldGroup>
-          <div className="flex flex-col items-center justify-center gap-y-4">
+          <div className="flex flex-col items-center justify-center gap-4">
             <Link to="/">
               <Logo className="text-xl" />
             </Link>

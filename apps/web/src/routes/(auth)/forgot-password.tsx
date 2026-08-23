@@ -57,7 +57,7 @@ function ForgotPasswordPage() {
   return (
     <Card size="sm" className="w-full max-w-md">
       <CardHeader>
-        <CardTitle className="text-lg!">Esqueceu a senha?</CardTitle>
+        <CardTitle>Esqueceu a senha?</CardTitle>
         <CardDescription>
           Digite seu e-mail e enviaremos um link para redefinir sua senha
         </CardDescription>

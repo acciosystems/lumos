@@ -19,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -102,61 +103,65 @@ function CampaignsPage() {
           </Button>
         </div>
 
-        <div className="grid gap-3 rounded-lg border bg-card p-3 md:grid-cols-[1fr_1fr_180px]">
-          <Field>
-            <FieldLabel htmlFor="category">
-              <IconSearch className="size-4" /> Tema
-            </FieldLabel>
-            <Input
-              id="category"
-              value={categoryInput}
-              onChange={(event) => setCategoryInput(event.target.value)}
-              placeholder="Ex: alimentos, roupas"
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="region">
-              <IconFilter className="size-4" /> Região
-            </FieldLabel>
-            <Input
-              id="region"
-              value={regionInput}
-              onChange={(event) => setRegionInput(event.target.value)}
-              placeholder="Ex: São Paulo"
-            />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor="type">Tipo</FieldLabel>
-            <Select
-              value={selectedType}
-              onValueChange={(value) =>
-                navigate({
-                  search: (previous) => ({
-                    ...previous,
-                    type:
-                      value === ALL_CAMPAIGN_TYPES ? undefined : v.parse(campaignTypeSchema, value),
-                  }),
-                })
-              }
-            >
-              <SelectTrigger id="type" className="w-full">
-                <SelectValue>
-                  {selectedType === ALL_CAMPAIGN_TYPES
-                    ? 'Todos'
-                    : campaignTypeMetadata[selectedType].label}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL_CAMPAIGN_TYPES}>Todos</SelectItem>
-                {campaignTypeValues.map((campaignType) => (
-                  <SelectItem key={campaignType} value={campaignType}>
-                    {campaignTypeMetadata[campaignType].label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-        </div>
+        <Card size="sm">
+          <CardContent className="grid gap-3 md:grid-cols-[1fr_1fr_180px]">
+            <Field>
+              <FieldLabel htmlFor="category">
+                <IconSearch className="size-4" /> Tema
+              </FieldLabel>
+              <Input
+                id="category"
+                value={categoryInput}
+                onChange={(event) => setCategoryInput(event.target.value)}
+                placeholder="Ex: alimentos, roupas"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="region">
+                <IconFilter className="size-4" /> Região
+              </FieldLabel>
+              <Input
+                id="region"
+                value={regionInput}
+                onChange={(event) => setRegionInput(event.target.value)}
+                placeholder="Ex: São Paulo"
+              />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="type">Tipo</FieldLabel>
+              <Select
+                value={selectedType}
+                onValueChange={(value) =>
+                  navigate({
+                    search: (previous) => ({
+                      ...previous,
+                      type:
+                        value === ALL_CAMPAIGN_TYPES
+                          ? undefined
+                          : v.parse(campaignTypeSchema, value),
+                    }),
+                  })
+                }
+              >
+                <SelectTrigger id="type" className="w-full">
+                  <SelectValue>
+                    {selectedType === ALL_CAMPAIGN_TYPES
+                      ? 'Todos'
+                      : campaignTypeMetadata[selectedType].label}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_CAMPAIGN_TYPES}>Todos</SelectItem>
+                  {campaignTypeValues.map((campaignType) => (
+                    <SelectItem key={campaignType} value={campaignType}>
+                      {campaignTypeMetadata[campaignType].label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </CardContent>
+        </Card>
 
         {isPending && <Loading description="Carregando campanhas" />}
 
@@ -173,10 +178,12 @@ function CampaignsPage() {
             {data.length ? (
               data.map((campaign) => <CampaignCard key={campaign.id} campaign={campaign} />)
             ) : (
-              <Alert className="md:col-span-2 xl:col-span-3">
-                <AlertTitle>Nenhuma campanha encontrada</AlertTitle>
-                <AlertDescription>Ajuste os filtros para ver outras campanhas.</AlertDescription>
-              </Alert>
+              <Empty className="md:col-span-2 xl:col-span-3">
+                <EmptyHeader>
+                  <EmptyTitle>Nenhuma campanha encontrada</EmptyTitle>
+                  <EmptyDescription>Ajuste os filtros para ver outras campanhas.</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             )}
           </div>
         )}
@@ -191,7 +198,7 @@ function CampaignCard({
   campaign: Awaited<ReturnType<typeof rpc.campaign.list.call>>[number];
 }) {
   return (
-    <Card className="h-full gap-0">
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="line-clamp-2">{campaign.title}</CardTitle>
         <CardDescription>{campaign.organizerProfile.displayName}</CardDescription>
@@ -201,7 +208,7 @@ function CampaignCard({
           </Badge>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-1 flex-col gap-4 pt-4">
+      <CardContent className="flex flex-1 flex-col gap-4">
         <p className="line-clamp-3 text-sm text-muted-foreground">{campaign.description}</p>
         <div className="grid gap-2 text-sm">
           <Metadata label="Tema" value={campaign.category} />
