@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
+import { campaignTypeMetadata, isPhysicalCampaign } from '@/utils/campaign-type';
 
 const paramsSchema = v.object({
   id: v.pipe(v.string(), v.ulid()),
@@ -53,7 +54,7 @@ function CampaignDetailPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
-                  <Badge>{data.type === 'PHYSICAL' ? 'Campanha física' : 'Campanha virtual'}</Badge>
+                  <Badge>{campaignTypeMetadata[data.type].campaignLabel}</Badge>
                   <Badge variant="secondary">{data.category}</Badge>
                   <Badge variant="outline">{data.region}</Badge>
                 </div>
@@ -76,7 +77,9 @@ function CampaignDetailPage() {
               <InfoCard
                 icon={<IconUsers />}
                 label="Participantes"
-                value={data.type === 'PHYSICAL' ? String(data.participantCount) : 'Não aplicável'}
+                value={
+                  isPhysicalCampaign(data.type) ? String(data.participantCount) : 'Não aplicável'
+                }
               />
             </div>
 
@@ -85,13 +88,13 @@ function CampaignDetailPage() {
                 <CardHeader>
                   <CardTitle>Como doar</CardTitle>
                   <CardDescription>
-                    {data.type === 'PHYSICAL'
+                    {isPhysicalCampaign(data.type)
                       ? 'Entregue os itens em um dos pontos de coleta cadastrados.'
                       : 'Contribua diretamente usando os dados de pagamento do organizador.'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 pt-4">
-                  {data.type === 'PHYSICAL' ? (
+                  {isPhysicalCampaign(data.type) ? (
                     <>
                       <div className="grid gap-3">
                         {data.collectionPoints.map((point) => (

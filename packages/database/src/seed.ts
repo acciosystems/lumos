@@ -1,3 +1,4 @@
+import { CampaignType } from './generated/prisma/enums';
 import { prisma } from './index';
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -191,7 +192,7 @@ async function seed() {
         description:
           'Arrecadacao de cestas basicas e alimentos nao pereciveis para familias acompanhadas pelo instituto.',
         status: 'ACTIVE',
-        type: 'PHYSICAL',
+        type: CampaignType.PHYSICAL,
         category: 'Alimentacao',
         region: 'Sao Paulo - SP',
         startDate: daysFromNow(-7),
@@ -207,7 +208,7 @@ async function seed() {
         description:
           'Arrecadacao de cestas basicas e alimentos nao pereciveis para familias acompanhadas pelo instituto.',
         status: 'ACTIVE',
-        type: 'PHYSICAL',
+        type: CampaignType.PHYSICAL,
         category: 'Alimentacao',
         region: 'Sao Paulo - SP',
         startDate: daysFromNow(-7),
@@ -225,7 +226,7 @@ async function seed() {
         description:
           'Recebemos casacos, cobertores e roupas de inverno em bom estado para distribuicao durante as noites frias.',
         status: 'ACTIVE',
-        type: 'PHYSICAL',
+        type: CampaignType.PHYSICAL,
         category: 'Vestuario',
         region: 'Campinas - SP',
         startDate: daysFromNow(-2),
@@ -241,7 +242,7 @@ async function seed() {
         description:
           'Recebemos casacos, cobertores e roupas de inverno em bom estado para distribuicao durante as noites frias.',
         status: 'ACTIVE',
-        type: 'PHYSICAL',
+        type: CampaignType.PHYSICAL,
         category: 'Vestuario',
         region: 'Campinas - SP',
         startDate: daysFromNow(-2),
@@ -259,7 +260,7 @@ async function seed() {
         description:
           'Doacoes financeiras para compra local de agua, produtos de higiene e materiais de limpeza.',
         status: 'ACTIVE',
-        type: 'VIRTUAL',
+        type: CampaignType.VIRTUAL,
         category: 'Emergencia',
         region: 'Rio Grande do Sul',
         startDate: daysFromNow(-10),
@@ -274,7 +275,7 @@ async function seed() {
         description:
           'Doacoes financeiras para compra local de agua, produtos de higiene e materiais de limpeza.',
         status: 'ACTIVE',
-        type: 'VIRTUAL',
+        type: CampaignType.VIRTUAL,
         category: 'Emergencia',
         region: 'Rio Grande do Sul',
         startDate: daysFromNow(-10),
@@ -291,7 +292,7 @@ async function seed() {
         description:
           'Campanha concluida para arrecadar cadernos, mochilas, lapis e estojos para estudantes da rede publica.',
         status: 'COMPLETED',
-        type: 'PHYSICAL',
+        type: CampaignType.PHYSICAL,
         category: 'Educacao',
         region: 'Sao Paulo - SP',
         startDate: daysFromNow(-75),
@@ -307,7 +308,7 @@ async function seed() {
         description:
           'Campanha concluida para arrecadar cadernos, mochilas, lapis e estojos para estudantes da rede publica.',
         status: 'COMPLETED',
-        type: 'PHYSICAL',
+        type: CampaignType.PHYSICAL,
         category: 'Educacao',
         region: 'Sao Paulo - SP',
         startDate: daysFromNow(-75),

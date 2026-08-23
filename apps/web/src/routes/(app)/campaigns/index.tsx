@@ -1,3 +1,4 @@
+import { CampaignType, campaignTypeSchema } from '@lumos/validation/campaign';
 import { IconAlertCircle, IconFilter, IconPlus, IconSearch } from '@tabler/icons-react';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
@@ -30,21 +31,21 @@ import {
 import { useDebouncedRouteInput } from '@/hooks/use-debounced-route-input';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
+import {
+  campaignTypeMetadata,
+  campaignTypeValues,
+  isPhysicalCampaign,
+} from '@/utils/campaign-type';
 
 const searchSchema = v.object({
   category: v.optional(v.string()),
   region: v.optional(v.string()),
-  type: v.optional(v.picklist(['PHYSICAL', 'VIRTUAL'])),
+  type: v.optional(campaignTypeSchema),
 });
 
-type CampaignFilterType = 'ALL' | 'PHYSICAL' | 'VIRTUAL';
+const ALL_CAMPAIGN_TYPES = 'ALL' as const;
+type CampaignFilterType = CampaignType | typeof ALL_CAMPAIGN_TYPES;
 type TextFilterName = 'category' | 'region';
-
-const campaignTypeLabels: Record<CampaignFilterType, string> = {
-  ALL: 'Todos',
-  PHYSICAL: 'Física',
-  VIRTUAL: 'Virtual',
-};
 
 export const Route = createFileRoute('/(app)/campaigns/')({
   loader: () => ({ breadcrumb: [{ label: 'Campanhas' }] }),
@@ -55,7 +56,7 @@ export const Route = createFileRoute('/(app)/campaigns/')({
 function CampaignsPage() {
   const { category, region, type } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const selectedType: CampaignFilterType = type ?? 'ALL';
+  const selectedType: CampaignFilterType = type ?? ALL_CAMPAIGN_TYPES;
   const updateFilter = useCallback(
     (name: TextFilterName, value: string) =>
       navigate({
@@ -132,18 +133,26 @@ function CampaignsPage() {
                 navigate({
                   search: (previous) => ({
                     ...previous,
-                    type: value === 'ALL' ? undefined : (value as 'PHYSICAL' | 'VIRTUAL'),
+                    type:
+                      value === ALL_CAMPAIGN_TYPES ? undefined : v.parse(campaignTypeSchema, value),
                   }),
                 })
               }
             >
               <SelectTrigger id="type" className="w-full">
-                <SelectValue>{campaignTypeLabels[selectedType]}</SelectValue>
+                <SelectValue>
+                  {selectedType === ALL_CAMPAIGN_TYPES
+                    ? 'Todos'
+                    : campaignTypeMetadata[selectedType].label}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">Todos</SelectItem>
-                <SelectItem value="PHYSICAL">Física</SelectItem>
-                <SelectItem value="VIRTUAL">Virtual</SelectItem>
+                <SelectItem value={ALL_CAMPAIGN_TYPES}>Todos</SelectItem>
+                {campaignTypeValues.map((campaignType) => (
+                  <SelectItem key={campaignType} value={campaignType}>
+                    {campaignTypeMetadata[campaignType].label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </Field>
@@ -187,8 +196,8 @@ function CampaignCard({
         <CardTitle className="line-clamp-2">{campaign.title}</CardTitle>
         <CardDescription>{campaign.organizerProfile.displayName}</CardDescription>
         <CardAction>
-          <Badge variant={campaign.type === 'PHYSICAL' ? 'default' : 'secondary'}>
-            {campaign.type === 'PHYSICAL' ? 'Física' : 'Virtual'}
+          <Badge variant={isPhysicalCampaign(campaign.type) ? 'default' : 'secondary'}>
+            {campaignTypeMetadata[campaign.type].label}
           </Badge>
         </CardAction>
       </CardHeader>
@@ -207,7 +216,7 @@ function CampaignCard({
           />
           <Metadata
             label="Participantes"
-            value={campaign.type === 'PHYSICAL' ? String(campaign.participantCount) : 'N/A'}
+            value={isPhysicalCampaign(campaign.type) ? String(campaign.participantCount) : 'N/A'}
           />
         </div>
         <Button

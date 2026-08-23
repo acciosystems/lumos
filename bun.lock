@@ -131,6 +131,7 @@
     "packages/validation": {
       "name": "@lumos/validation",
       "dependencies": {
+        "@lumos/database": "workspace:*",
         "valibot": "catalog:",
       },
     },

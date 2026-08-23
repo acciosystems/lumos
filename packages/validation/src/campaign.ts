@@ -1,4 +1,11 @@
+import { CampaignType } from '@lumos/database/generated/prisma/enums';
 import * as v from 'valibot';
+
+/**
+ * Canonical persisted and API values for campaign behavior.
+ * PHYSICAL campaigns collect items at collection points; VIRTUAL campaigns receive direct funds.
+ */
+export { CampaignType };
 
 const requiredString = (message: string) => v.pipe(v.string(), v.trim(), v.nonEmpty(message));
 const optionalString = v.optional(v.pipe(v.string(), v.trim()));
@@ -18,7 +25,8 @@ const optionalHttpUrl = v.optional(
   ),
 );
 
-export const campaignTypeSchema = v.picklist(['PHYSICAL', 'VIRTUAL']);
+// eslint-disable-next-line no-underscore-dangle -- Valibot intentionally names this API enum_.
+export const campaignTypeSchema = v.enum_(CampaignType);
 
 export const campaignListInputSchema = v.object({
   category: optionalString,
@@ -51,7 +59,7 @@ const campaignCommonInputEntries = {
 
 const physicalCampaignCreateInputSchema = v.object({
   ...campaignCommonInputEntries,
-  type: v.literal('PHYSICAL'),
+  type: v.literal(CampaignType.PHYSICAL),
   location: requiredString('Local principal é obrigatório'),
   targetItems: v.pipe(
     v.number('Meta de itens é obrigatória'),
@@ -66,7 +74,7 @@ const physicalCampaignCreateInputSchema = v.object({
 
 const virtualCampaignCreateInputSchema = v.object({
   ...campaignCommonInputEntries,
-  type: v.literal('VIRTUAL'),
+  type: v.literal(CampaignType.VIRTUAL),
   pixKey: optionalString,
   bankAccountInfo: optionalString,
 });
@@ -83,7 +91,8 @@ export const campaignCreateInputSchema = v.pipe(
   ),
   v.forward(
     v.check(
-      (input) => input.type !== 'VIRTUAL' || Boolean(input.pixKey || input.bankAccountInfo),
+      (input) =>
+        input.type !== CampaignType.VIRTUAL || Boolean(input.pixKey || input.bankAccountInfo),
       'Informe uma chave PIX ou os dados bancários.',
     ),
     ['pixKey'],

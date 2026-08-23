@@ -1,6 +1,7 @@
 import { prisma } from '@lumos/database';
 import type { CampaignInclude } from '@lumos/database/generated/prisma/models';
 import {
+  CampaignType,
   campaignByIdInputSchema,
   campaignCreateInputSchema,
   campaignListInputSchema,
@@ -10,6 +11,7 @@ import { ORPCError } from '@orpc/client';
 import * as v from 'valibot';
 
 import { authorized } from '../procedures';
+import { toCampaignCreateData } from '../services/campaign-create';
 
 const campaignInclude = {
   organizerProfile: {
@@ -59,7 +61,7 @@ function assertCreateInput(input: CampaignCreateInput) {
     });
   }
 
-  if (input.type === 'PHYSICAL') {
+  if (input.type === CampaignType.PHYSICAL) {
     if (!input.location || !input.targetItems || !input.collectionPoints?.length) {
       throw new ORPCError('BAD_REQUEST', {
         message: 'Campanhas físicas precisam de local, meta de itens e ponto de coleta.',
@@ -67,7 +69,7 @@ function assertCreateInput(input: CampaignCreateInput) {
     }
   }
 
-  if (input.type === 'VIRTUAL' && !input.pixKey && !input.bankAccountInfo) {
+  if (input.type === CampaignType.VIRTUAL && !input.pixKey && !input.bankAccountInfo) {
     throw new ORPCError('BAD_REQUEST', {
       message: 'Campanhas virtuais precisam de uma chave PIX ou dados bancários.',
     });
@@ -179,36 +181,7 @@ export const campaignRouter = {
       const { startDate, endDate } = assertCreateInput(input);
 
       return prisma.campaign.create({
-        data: {
-          organizerProfileId: organizerProfile.id,
-          title: input.title,
-          description: input.description,
-          status: 'ACTIVE',
-          type: input.type,
-          category: input.category,
-          region: input.region,
-          startDate,
-          endDate,
-          imageUrl: input.imageUrl || null,
-          location: input.type === 'PHYSICAL' ? input.location : null,
-          targetItems: input.type === 'PHYSICAL' ? input.targetItems : null,
-          currentItems: input.type === 'PHYSICAL' ? 0 : null,
-          pixKey: input.type === 'VIRTUAL' ? input.pixKey || null : null,
-          bankAccountInfo: input.type === 'VIRTUAL' ? input.bankAccountInfo || null : null,
-          collectionPoints:
-            input.type === 'PHYSICAL'
-              ? {
-                  create: input.collectionPoints?.map((point) => ({
-                    name: point.name,
-                    address: point.address,
-                    city: point.city,
-                    state: point.state,
-                    zipCode: point.zipCode,
-                    instructions: point.instructions || null,
-                  })),
-                }
-              : undefined,
-        },
+        data: toCampaignCreateData(input, organizerProfile.id, { startDate, endDate }),
         include: campaignInclude,
       });
     }),

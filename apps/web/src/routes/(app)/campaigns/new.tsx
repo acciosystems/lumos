@@ -1,4 +1,8 @@
-import { campaignCreateInputSchema, type CampaignCreateInput } from '@lumos/validation/campaign';
+import {
+  CampaignType,
+  campaignCreateInputSchema,
+  campaignTypeSchema,
+} from '@lumos/validation/campaign';
 import { IconAlertCircle, IconDeviceFloppy } from '@tabler/icons-react';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -32,13 +36,17 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { rpc } from '@/lib/rpc';
+import {
+  campaignTypeMetadata,
+  campaignTypeValues,
+  isPhysicalCampaign,
+} from '@/utils/campaign-type';
 
 export const Route = createFileRoute('/(app)/campaigns/new')({
   loader: () => ({ breadcrumb: [{ label: 'Campanhas', href: '/campaigns' }, { label: 'Criar' }] }),
   component: NewCampaignPage,
 });
 
-type CampaignType = CampaignCreateInput['type'];
 type CollectionPointFormValue = {
   name: string;
   address: string;
@@ -61,7 +69,7 @@ type CampaignCommonFormValue = {
 type CampaignFormValue = CampaignCommonFormValue &
   (
     | {
-        type: 'PHYSICAL';
+        type: typeof CampaignType.PHYSICAL;
         location: string;
         targetItems: number;
         collectionPoints: CollectionPointFormValue[];
@@ -69,7 +77,7 @@ type CampaignFormValue = CampaignCommonFormValue &
         bankAccountInfo?: string;
       }
     | {
-        type: 'VIRTUAL';
+        type: typeof CampaignType.VIRTUAL;
         pixKey?: string;
         bankAccountInfo?: string;
         location?: string;
@@ -81,7 +89,7 @@ type CampaignFormValue = CampaignCommonFormValue &
 const defaultValues: CampaignFormValue = {
   title: '',
   description: '',
-  type: 'PHYSICAL',
+  type: CampaignType.PHYSICAL,
   category: '',
   region: '',
   startDate: '',
@@ -399,7 +407,9 @@ function NewCampaignPage() {
                               <RequiredLabel htmlFor={field.name}>Tipo de campanha</RequiredLabel>
                               <Select
                                 value={field.state.value}
-                                onValueChange={(value) => field.setValue(value as CampaignType)}
+                                onValueChange={(value) =>
+                                  field.setValue(v.parse(campaignTypeSchema, value))
+                                }
                               >
                                 <SelectTrigger
                                   id={field.name}
@@ -408,14 +418,15 @@ function NewCampaignPage() {
                                   aria-required="true"
                                 >
                                   <SelectValue>
-                                    {field.state.value === 'PHYSICAL' ? 'Física' : 'Virtual'}
+                                    {campaignTypeMetadata[field.state.value].label}
                                   </SelectValue>
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="PHYSICAL">Física — coleta de itens</SelectItem>
-                                  <SelectItem value="VIRTUAL">
-                                    Virtual — doação financeira
-                                  </SelectItem>
+                                  {campaignTypeValues.map((campaignType) => (
+                                    <SelectItem key={campaignType} value={campaignType}>
+                                      {campaignTypeMetadata[campaignType].formLabel}
+                                    </SelectItem>
+                                  ))}
                                 </SelectContent>
                               </Select>
                               <FieldDescription>
@@ -472,7 +483,7 @@ function NewCampaignPage() {
                   </FieldSet>
 
                   <form.Subscribe selector={(state) => state.values.type}>
-                    {(type) => (type === 'PHYSICAL' ? physicalFields : virtualFields)}
+                    {(type) => (isPhysicalCampaign(type) ? physicalFields : virtualFields)}
                   </form.Subscribe>
                 </fieldset>
               </form>
