@@ -41,7 +41,7 @@ export function UserSecuritySettings() {
 
         {isSuccess && (
           <Field orientation="horizontal">
-            <FieldLabel>Password</FieldLabel>
+            <FieldLabel>Senha</FieldLabel>
             {hasPassword ? <UserPasswordChange /> : <UserPasswordSet />}
           </Field>
         )}

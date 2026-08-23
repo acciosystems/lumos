@@ -13,7 +13,7 @@ import * as v from 'valibot';
 
 import { Loading } from '@/components/misc/loading';
 import { AppInset } from '@/components/sidebar/inset';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -289,7 +289,7 @@ function NewCampaignPage() {
 
   return (
     <AppInset breadcrumbs={[{ label: 'Campanhas', href: '/campaigns' }, { label: 'Criar' }]}>
-      <div className="w-full max-w-3xl space-y-5">
+      <div className="w-full space-y-5">
         {organizerProfileQuery.isPending && (
           <Loading description="Verificando perfil organizador" />
         )}
@@ -303,16 +303,18 @@ function NewCampaignPage() {
         )}
 
         {organizerProfileQuery.data && !organizerProfileQuery.data.hasOrganizerProfile && (
-          <Alert>
+          <Alert className="w-fit pb-14 has-data-[slot=alert-action]:pr-4">
             <IconAlertCircle />
             <AlertTitle>Perfil organizador obrigatório</AlertTitle>
             <AlertDescription>
               Configure um perfil organizador antes de criar campanhas. O formulário ficará
               disponível depois que o perfil for criado.
             </AlertDescription>
-            <Button className="mt-3" size="sm" render={<Link to="/organizer-profile" />}>
-              Configurar perfil organizador
-            </Button>
+            <AlertAction className="top-auto bottom-3">
+              <Button size="sm" render={<Link to="/organizer-profile" />}>
+                Configurar perfil organizador
+              </Button>
+            </AlertAction>
           </Alert>
         )}
 
