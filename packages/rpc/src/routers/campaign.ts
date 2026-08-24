@@ -184,13 +184,13 @@ export const campaignRouter = {
     const campaign = await prisma.campaign.findFirst({
       where: {
         id: input.id,
-        OR: [{ status: 'ACTIVE' }, { organizerProfile: { userId: user.id } }],
+        organizerProfile: { userId: user.id },
       },
       include: campaignInclude,
     });
 
     if (!campaign) {
-      throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada ou não está ativa.' });
+      throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
     }
 
     const { _count, ...campaignData } = campaign;
