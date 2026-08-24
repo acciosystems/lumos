@@ -1,13 +1,11 @@
 import { CampaignType, campaignTypeSchema } from '@lumos/validation/campaign';
 import { IconAlertCircle, IconFilter, IconPlus, IconSearch } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ptBR } from 'date-fns/locale';
 import { useCallback } from 'react';
 import * as v from 'valibot';
 
 import { Loading } from '@/components/misc/loading';
-import { AppInset } from '@/components/sidebar/inset';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -30,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useDebouncedRouteInput } from '@/hooks/use-debounced-route-input';
+import { AuthGuard } from '@/lib/auth/guard';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
 import {
@@ -48,9 +47,41 @@ const ALL_CAMPAIGN_TYPES = 'ALL' as const;
 type CampaignFilterType = CampaignType | typeof ALL_CAMPAIGN_TYPES;
 type TextFilterName = 'category' | 'region';
 
-export const Route = createFileRoute('/(app)/campaigns/')({
-  loader: () => ({ breadcrumb: [{ label: 'Campanhas' }] }),
+export const Route = createFileRoute('/(public)/campaigns/')({
   validateSearch: searchSchema,
+  loaderDeps: ({ search }) => search,
+  loader: ({ context, deps }) =>
+    context.queryClient.ensureQueryData(rpc.campaign.list.queryOptions({ input: deps })),
+  head: () => ({
+    meta: [
+      { title: 'Campanhas de doação | Nossa Causa' },
+      {
+        name: 'description',
+        content: 'Encontre campanhas de doação por tipo, tema e região na Nossa Causa.',
+      },
+      { property: 'og:title', content: 'Campanhas de doação | Nossa Causa' },
+      {
+        property: 'og:description',
+        content: 'Encontre campanhas de doação por tipo, tema e região na Nossa Causa.',
+      },
+      { property: 'og:type', content: 'website' },
+      { name: 'twitter:card', content: 'summary' },
+    ],
+  }),
+  pendingComponent: () => (
+    <main className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8">
+      <Loading description="Carregando campanhas" />
+    </main>
+  ),
+  errorComponent: ({ error }) => (
+    <main className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8">
+      <Alert variant="destructive">
+        <IconAlertCircle />
+        <AlertTitle>Falha ao carregar campanhas</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    </main>
+  ),
   component: CampaignsPage,
 });
 
@@ -76,20 +107,10 @@ function CampaignsPage() {
     value: region,
     onCommit: updateFilter,
   });
-
-  const filters = {
-    category,
-    region,
-    type,
-  };
-
-  const { data, isPending, isError, error } = useQuery({
-    queryKey: ['campaigns', filters],
-    queryFn: async () => await rpc.campaign.list.call(filters),
-  });
+  const data = Route.useLoaderData();
 
   return (
-    <AppInset breadcrumbs={[{ label: 'Campanhas' }]}>
+    <main className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8">
       <div className="flex w-full flex-col gap-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -98,9 +119,11 @@ function CampaignsPage() {
               Encontre campanhas de doação por tipo, tema e região.
             </p>
           </div>
-          <Button render={<Link to="/campaigns/new" />}>
-            <IconPlus /> Criar campanha
-          </Button>
+          <AuthGuard when="authenticated">
+            <Button nativeButton={false} render={<Link to="/campaigns/new" />}>
+              <IconPlus /> Criar campanha
+            </Button>
+          </AuthGuard>
         </div>
 
         <Card size="sm">
@@ -163,32 +186,20 @@ function CampaignsPage() {
           </CardContent>
         </Card>
 
-        {isPending && <Loading description="Carregando campanhas" />}
-
-        {isError && (
-          <Alert variant="destructive">
-            <IconAlertCircle />
-            <AlertTitle>Falha ao carregar campanhas</AlertTitle>
-            <AlertDescription>{error.message}</AlertDescription>
-          </Alert>
-        )}
-
-        {data && (
-          <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {data.length ? (
-              data.map((campaign) => <CampaignCard key={campaign.id} campaign={campaign} />)
-            ) : (
-              <Empty className="md:col-span-2 xl:col-span-3">
-                <EmptyHeader>
-                  <EmptyTitle>Nenhuma campanha encontrada</EmptyTitle>
-                  <EmptyDescription>Ajuste os filtros para ver outras campanhas.</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )}
-          </div>
-        )}
+        <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {data.length ? (
+            data.map((campaign) => <CampaignCard key={campaign.id} campaign={campaign} />)
+          ) : (
+            <Empty className="md:col-span-2 xl:col-span-3">
+              <EmptyHeader>
+                <EmptyTitle>Nenhuma campanha encontrada</EmptyTitle>
+                <EmptyDescription>Ajuste os filtros para ver outras campanhas.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
+        </div>
       </div>
-    </AppInset>
+    </main>
   );
 }
 
@@ -227,6 +238,7 @@ function CampaignCard({
           />
         </div>
         <Button
+          nativeButton={false}
           className="mt-auto"
           variant="outline"
           render={<Link to="/campaigns/$id" params={{ id: campaign.id }} />}

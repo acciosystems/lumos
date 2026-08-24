@@ -38,7 +38,7 @@ function MyCampaignsPage() {
               Acompanhe as campanhas criadas por você.
             </p>
           </div>
-          <Button render={<Link to="/campaigns/new" />}>
+          <Button nativeButton={false} render={<Link to="/campaigns/new" />}>
             <IconPlus /> Criar campanha
           </Button>
         </div>
@@ -70,9 +70,10 @@ function MyCampaignsPage() {
                       {formatCampaignDate(campaign.startDate, 'dd MMM yyyy', { locale: ptBR })}
                     </div>
                     <Button
+                      nativeButton={false}
                       variant="outline"
                       size="sm"
-                      render={<Link to="/campaigns/$id" params={{ id: campaign.id }} />}
+                      render={<Link to="/campaigns/my/$id" params={{ id: campaign.id }} />}
                     >
                       Ver campanha
                     </Button>

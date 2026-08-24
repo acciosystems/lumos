@@ -1,5 +1,5 @@
 import { prisma } from '@lumos/database';
-import type { CampaignInclude } from '@lumos/database/generated/prisma/models';
+import type { CampaignInclude, CampaignSelect } from '@lumos/database/generated/prisma/models';
 import {
   CampaignType,
   campaignByIdInputSchema,
@@ -10,7 +10,7 @@ import {
 import { ORPCError } from '@orpc/client';
 import * as v from 'valibot';
 
-import { authorized } from '../procedures';
+import { authorized, publicProcedure } from '../procedures';
 import { toCampaignCreateData } from '../services/campaign-create';
 
 const campaignInclude = {
@@ -36,6 +36,76 @@ const campaignInclude = {
     },
   },
 } as const satisfies CampaignInclude;
+
+const publicCampaignListSelect = {
+  id: true,
+  title: true,
+  description: true,
+  type: true,
+  category: true,
+  region: true,
+  startDate: true,
+  endDate: true,
+  imageUrl: true,
+  organizerProfile: {
+    select: {
+      displayName: true,
+    },
+  },
+  _count: {
+    select: {
+      participants: {
+        where: { cancelledAt: null },
+      },
+    },
+  },
+} as const satisfies CampaignSelect;
+
+const publicCampaignDetailSelect = {
+  ...publicCampaignListSelect,
+  location: true,
+  targetItems: true,
+  currentItems: true,
+  pixKey: true,
+  bankAccountInfo: true,
+  organizerProfile: {
+    select: {
+      type: true,
+      displayName: true,
+      cnpj: true,
+    },
+  },
+  collectionPoints: {
+    select: {
+      id: true,
+      name: true,
+      address: true,
+      city: true,
+      state: true,
+      zipCode: true,
+      lat: true,
+      lon: true,
+      instructions: true,
+    },
+    orderBy: { createdAt: 'asc' as const },
+  },
+  updates: {
+    select: {
+      id: true,
+      message: true,
+      publishedAt: true,
+    },
+    orderBy: { publishedAt: 'desc' as const },
+    take: 5,
+  },
+} as const satisfies CampaignSelect;
+
+function withParticipantCount<Campaign extends { _count: { participants: number } }>(
+  campaign: Campaign,
+) {
+  const { _count, ...campaignData } = campaign;
+  return { ...campaignData, participantCount: _count.participants };
+}
 
 const campaignDateSchema = v.pipe(
   v.string(),
@@ -79,7 +149,7 @@ function assertCreateInput(input: CampaignCreateInput) {
 }
 
 export const campaignRouter = {
-  list: authorized.input(campaignListInputSchema).handler(async ({ input }) => {
+  list: publicProcedure.input(campaignListInputSchema).handler(async ({ input }) => {
     const campaigns = await prisma.campaign.findMany({
       where: {
         status: 'ACTIVE',
@@ -87,24 +157,27 @@ export const campaignRouter = {
         ...(input.region ? { region: { contains: input.region, mode: 'insensitive' } } : {}),
         ...(input.type ? { type: input.type } : {}),
       },
-      include: {
-        organizerProfile: {
-          select: {
-            displayName: true,
-          },
-        },
-        _count: {
-          select: {
-            participants: true,
-          },
-        },
-      },
+      select: publicCampaignListSelect,
       orderBy: [{ startDate: 'asc' }, { createdAt: 'desc' }],
     });
 
-    return campaigns.map(({ _count, ...campaign }) =>
-      Object.assign(campaign, { participantCount: _count.participants }),
-    );
+    return campaigns.map(withParticipantCount);
+  }),
+
+  publicById: publicProcedure.input(campaignByIdInputSchema).handler(async ({ input }) => {
+    const campaign = await prisma.campaign.findFirst({
+      where: {
+        id: input.id,
+        status: 'ACTIVE',
+      },
+      select: publicCampaignDetailSelect,
+    });
+
+    if (!campaign) {
+      throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada ou não está ativa.' });
+    }
+
+    return withParticipantCount(campaign);
   }),
 
   byId: authorized.input(campaignByIdInputSchema).handler(async ({ input, context: { user } }) => {

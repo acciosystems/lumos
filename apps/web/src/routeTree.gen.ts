@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
+import { Route as publicRouteRouteImport } from './routes/(public)/route'
 import { Route as specialRouteRouteImport } from './routes/(special)/route'
 import { Route as appIndexRouteImport } from './routes/(app)/index'
 import { Route as appOrganizerProfileRouteImport } from './routes/(app)/organizer-profile'
@@ -18,13 +19,14 @@ import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-p
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as specialResetPasswordRouteImport } from './routes/(special)/reset-password'
-import { Route as appCampaignsIndexRouteImport } from './routes/(app)/campaigns/index'
-import { Route as appCampaignsIdRouteImport } from './routes/(app)/campaigns/$id'
 import { Route as appCampaignsMyRouteImport } from './routes/(app)/campaigns/my'
 import { Route as appCampaignsNewRouteImport } from './routes/(app)/campaigns/new'
 import { Route as appSettingsChar123TabChar125RouteImport } from './routes/(app)/settings/{-$tab}'
+import { Route as publicCampaignsIndexRouteImport } from './routes/(public)/campaigns/index'
+import { Route as publicCampaignsIdRouteImport } from './routes/(public)/campaigns/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
+import { Route as appCampaignsMyIdRouteImport } from './routes/(app)/campaigns/my_.$id'
 
 const appRouteRoute = appRouteRouteImport.update({
   id: '/(app)',
@@ -32,6 +34,10 @@ const appRouteRoute = appRouteRouteImport.update({
 } as any)
 const authRouteRoute = authRouteRouteImport.update({
   id: '/(auth)',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const publicRouteRoute = publicRouteRouteImport.update({
+  id: '/(public)',
   getParentRoute: () => rootRouteImport,
 } as any)
 const specialRouteRoute = specialRouteRouteImport.update({
@@ -68,16 +74,6 @@ const specialResetPasswordRoute = specialResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => specialRouteRoute,
 } as any)
-const appCampaignsIndexRoute = appCampaignsIndexRouteImport.update({
-  id: '/campaigns/',
-  path: '/campaigns/',
-  getParentRoute: () => appRouteRoute,
-} as any)
-const appCampaignsIdRoute = appCampaignsIdRouteImport.update({
-  id: '/campaigns/$id',
-  path: '/campaigns/$id',
-  getParentRoute: () => appRouteRoute,
-} as any)
 const appCampaignsMyRoute = appCampaignsMyRouteImport.update({
   id: '/campaigns/my',
   path: '/campaigns/my',
@@ -94,6 +90,16 @@ const appSettingsChar123TabChar125Route =
     path: '/settings/{-$tab}',
     getParentRoute: () => appRouteRoute,
   } as any)
+const publicCampaignsIndexRoute = publicCampaignsIndexRouteImport.update({
+  id: '/campaigns/',
+  path: '/campaigns/',
+  getParentRoute: () => publicRouteRoute,
+} as any)
+const publicCampaignsIdRoute = publicCampaignsIdRouteImport.update({
+  id: '/campaigns/$id',
+  path: '/campaigns/$id',
+  getParentRoute: () => publicRouteRoute,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -104,6 +110,11 @@ const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   path: '/api/rpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const appCampaignsMyIdRoute = appCampaignsMyIdRouteImport.update({
+  id: '/campaigns/my_/$id',
+  path: '/campaigns/my/$id',
+  getParentRoute: () => appRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/organizer-profile': typeof appOrganizerProfileRoute
@@ -112,13 +123,14 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof authSignUpRoute
   '/reset-password': typeof specialResetPasswordRoute
   '/': typeof appIndexRoute
-  '/campaigns/$id': typeof appCampaignsIdRoute
   '/campaigns/my': typeof appCampaignsMyRoute
   '/campaigns/new': typeof appCampaignsNewRoute
   '/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
+  '/campaigns/$id': typeof publicCampaignsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
-  '/campaigns/': typeof appCampaignsIndexRoute
+  '/campaigns/': typeof publicCampaignsIndexRoute
+  '/campaigns/my/$id': typeof appCampaignsMyIdRoute
 }
 export interface FileRoutesByTo {
   '/organizer-profile': typeof appOrganizerProfileRoute
@@ -127,18 +139,20 @@ export interface FileRoutesByTo {
   '/sign-up': typeof authSignUpRoute
   '/reset-password': typeof specialResetPasswordRoute
   '/': typeof appIndexRoute
-  '/campaigns/$id': typeof appCampaignsIdRoute
   '/campaigns/my': typeof appCampaignsMyRoute
   '/campaigns/new': typeof appCampaignsNewRoute
   '/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
+  '/campaigns/$id': typeof publicCampaignsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
-  '/campaigns': typeof appCampaignsIndexRoute
+  '/campaigns': typeof publicCampaignsIndexRoute
+  '/campaigns/my/$id': typeof appCampaignsMyIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(app)': typeof appRouteRouteWithChildren
   '/(auth)': typeof authRouteRouteWithChildren
+  '/(public)': typeof publicRouteRouteWithChildren
   '/(special)': typeof specialRouteRouteWithChildren
   '/(app)/organizer-profile': typeof appOrganizerProfileRoute
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
@@ -146,13 +160,14 @@ export interface FileRoutesById {
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(special)/reset-password': typeof specialResetPasswordRoute
   '/(app)/': typeof appIndexRoute
-  '/(app)/campaigns/$id': typeof appCampaignsIdRoute
   '/(app)/campaigns/my': typeof appCampaignsMyRoute
   '/(app)/campaigns/new': typeof appCampaignsNewRoute
   '/(app)/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
+  '/(public)/campaigns/$id': typeof publicCampaignsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
-  '/(app)/campaigns/': typeof appCampaignsIndexRoute
+  '/(public)/campaigns/': typeof publicCampaignsIndexRoute
+  '/(app)/campaigns/my_/$id': typeof appCampaignsMyIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -163,13 +178,14 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/reset-password'
     | '/'
-    | '/campaigns/$id'
     | '/campaigns/my'
     | '/campaigns/new'
     | '/settings/{-$tab}'
+    | '/campaigns/$id'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/campaigns/'
+    | '/campaigns/my/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/organizer-profile'
@@ -178,17 +194,19 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/reset-password'
     | '/'
-    | '/campaigns/$id'
     | '/campaigns/my'
     | '/campaigns/new'
     | '/settings/{-$tab}'
+    | '/campaigns/$id'
     | '/api/auth/$'
     | '/api/rpc/$'
     | '/campaigns'
+    | '/campaigns/my/$id'
   id:
     | '__root__'
     | '/(app)'
     | '/(auth)'
+    | '/(public)'
     | '/(special)'
     | '/(app)/organizer-profile'
     | '/(auth)/forgot-password'
@@ -196,18 +214,20 @@ export interface FileRouteTypes {
     | '/(auth)/sign-up'
     | '/(special)/reset-password'
     | '/(app)/'
-    | '/(app)/campaigns/$id'
     | '/(app)/campaigns/my'
     | '/(app)/campaigns/new'
     | '/(app)/settings/{-$tab}'
+    | '/(public)/campaigns/$id'
     | '/api/auth/$'
     | '/api/rpc/$'
-    | '/(app)/campaigns/'
+    | '/(public)/campaigns/'
+    | '/(app)/campaigns/my_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   appRouteRoute: typeof appRouteRouteWithChildren
   authRouteRoute: typeof authRouteRouteWithChildren
+  publicRouteRoute: typeof publicRouteRouteWithChildren
   specialRouteRoute: typeof specialRouteRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
@@ -227,6 +247,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof authRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(public)': {
+      id: '/(public)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof publicRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(special)': {
@@ -278,20 +305,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof specialResetPasswordRouteImport
       parentRoute: typeof specialRouteRoute
     }
-    '/(app)/campaigns/': {
-      id: '/(app)/campaigns/'
-      path: '/campaigns'
-      fullPath: '/campaigns/'
-      preLoaderRoute: typeof appCampaignsIndexRouteImport
-      parentRoute: typeof appRouteRoute
-    }
-    '/(app)/campaigns/$id': {
-      id: '/(app)/campaigns/$id'
-      path: '/campaigns/$id'
-      fullPath: '/campaigns/$id'
-      preLoaderRoute: typeof appCampaignsIdRouteImport
-      parentRoute: typeof appRouteRoute
-    }
     '/(app)/campaigns/my': {
       id: '/(app)/campaigns/my'
       path: '/campaigns/my'
@@ -313,6 +326,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appSettingsChar123TabChar125RouteImport
       parentRoute: typeof appRouteRoute
     }
+    '/(public)/campaigns/': {
+      id: '/(public)/campaigns/'
+      path: '/campaigns'
+      fullPath: '/campaigns/'
+      preLoaderRoute: typeof publicCampaignsIndexRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
+    '/(public)/campaigns/$id': {
+      id: '/(public)/campaigns/$id'
+      path: '/campaigns/$id'
+      fullPath: '/campaigns/$id'
+      preLoaderRoute: typeof publicCampaignsIdRouteImport
+      parentRoute: typeof publicRouteRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -327,27 +354,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(app)/campaigns/my_/$id': {
+      id: '/(app)/campaigns/my_/$id'
+      path: '/campaigns/my/$id'
+      fullPath: '/campaigns/my/$id'
+      preLoaderRoute: typeof appCampaignsMyIdRouteImport
+      parentRoute: typeof appRouteRoute
+    }
   }
 }
 
 interface appRouteRouteChildren {
   appOrganizerProfileRoute: typeof appOrganizerProfileRoute
   appIndexRoute: typeof appIndexRoute
-  appCampaignsIdRoute: typeof appCampaignsIdRoute
   appCampaignsMyRoute: typeof appCampaignsMyRoute
   appCampaignsNewRoute: typeof appCampaignsNewRoute
   appSettingsChar123TabChar125Route: typeof appSettingsChar123TabChar125Route
-  appCampaignsIndexRoute: typeof appCampaignsIndexRoute
+  appCampaignsMyIdRoute: typeof appCampaignsMyIdRoute
 }
 
 const appRouteRouteChildren: appRouteRouteChildren = {
   appOrganizerProfileRoute: appOrganizerProfileRoute,
   appIndexRoute: appIndexRoute,
-  appCampaignsIdRoute: appCampaignsIdRoute,
   appCampaignsMyRoute: appCampaignsMyRoute,
   appCampaignsNewRoute: appCampaignsNewRoute,
   appSettingsChar123TabChar125Route: appSettingsChar123TabChar125Route,
-  appCampaignsIndexRoute: appCampaignsIndexRoute,
+  appCampaignsMyIdRoute: appCampaignsMyIdRoute,
 }
 
 const appRouteRouteWithChildren = appRouteRoute._addFileChildren(
@@ -370,6 +402,20 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
   authRouteRouteChildren,
 )
 
+interface publicRouteRouteChildren {
+  publicCampaignsIdRoute: typeof publicCampaignsIdRoute
+  publicCampaignsIndexRoute: typeof publicCampaignsIndexRoute
+}
+
+const publicRouteRouteChildren: publicRouteRouteChildren = {
+  publicCampaignsIdRoute: publicCampaignsIdRoute,
+  publicCampaignsIndexRoute: publicCampaignsIndexRoute,
+}
+
+const publicRouteRouteWithChildren = publicRouteRoute._addFileChildren(
+  publicRouteRouteChildren,
+)
+
 interface specialRouteRouteChildren {
   specialResetPasswordRoute: typeof specialResetPasswordRoute
 }
@@ -385,6 +431,7 @@ const specialRouteRouteWithChildren = specialRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   appRouteRoute: appRouteRouteWithChildren,
   authRouteRoute: authRouteRouteWithChildren,
+  publicRouteRoute: publicRouteRouteWithChildren,
   specialRouteRoute: specialRouteRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
