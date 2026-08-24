@@ -1,9 +1,12 @@
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import * as v from 'valibot';
 
 import { CampaignDetail } from '@/components/campaign/campaign-detail';
+import { CampaignParticipation } from '@/components/campaign/campaign-participation';
 import { Loading } from '@/components/misc/loading';
 import { rpc } from '@/lib/rpc';
+import { isPhysicalCampaign } from '@/utils/campaign-type';
 
 const paramsSchema = v.object({
   id: v.pipe(v.string(), v.ulid()),
@@ -55,11 +58,17 @@ export const Route = createFileRoute('/(public)/campaigns/$id')({
 });
 
 function PublicCampaignDetailPage() {
-  const data = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const { data } = useSuspenseQuery(rpc.campaign.publicById.queryOptions({ input: { id } }));
 
   return (
     <main className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8">
-      <CampaignDetail campaign={data} />
+      <CampaignDetail
+        campaign={data}
+        action={
+          isPhysicalCampaign(data.type) ? <CampaignParticipation campaignId={data.id} /> : undefined
+        }
+      />
     </main>
   );
 }

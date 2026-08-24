@@ -4,6 +4,7 @@ import {
   IconLayoutListFilled,
   IconPlus,
   IconUserHeart,
+  IconUsers,
 } from '@tabler/icons-react';
 import { Link, useLocation } from '@tanstack/react-router';
 
@@ -20,6 +21,7 @@ const mainItems = [{ title: 'Início', href: '/', icon: IconHomeFilled }];
 
 const campaignItems = [
   { title: 'Campanhas', href: '/campaigns', icon: IconHeartHandshake },
+  { title: 'Minhas participações', href: '/campaigns/participating', icon: IconUsers },
   { title: 'Minhas campanhas', href: '/campaigns/my', icon: IconLayoutListFilled },
   { title: 'Criar campanha', href: '/campaigns/new', icon: IconPlus },
   { title: 'Perfil organizador', href: '/organizer-profile', icon: IconUserHeart },

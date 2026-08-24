@@ -15,7 +15,13 @@ type CampaignDetailData =
   | Awaited<ReturnType<typeof rpc.campaign.publicById.call>>
   | Awaited<ReturnType<typeof rpc.campaign.byId.call>>;
 
-export function CampaignDetail({ campaign }: { campaign: CampaignDetailData }) {
+export function CampaignDetail({
+  campaign,
+  action,
+}: {
+  campaign: CampaignDetailData;
+  action?: React.ReactNode;
+}) {
   return (
     <div className="flex w-full flex-col gap-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -28,6 +34,7 @@ export function CampaignDetail({ campaign }: { campaign: CampaignDetailData }) {
           <h1 className="font-heading text-3xl font-semibold">{campaign.title}</h1>
           <p className="text-muted-foreground">{campaign.description}</p>
         </div>
+        {action && <div className="shrink-0">{action}</div>}
       </div>
 
       <div className="grid auto-rows-fr gap-4 md:grid-cols-3">

@@ -21,6 +21,7 @@ import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
 import { Route as specialResetPasswordRouteImport } from './routes/(special)/reset-password'
 import { Route as appCampaignsMyRouteImport } from './routes/(app)/campaigns/my'
 import { Route as appCampaignsNewRouteImport } from './routes/(app)/campaigns/new'
+import { Route as appCampaignsParticipatingRouteImport } from './routes/(app)/campaigns/participating'
 import { Route as appSettingsChar123TabChar125RouteImport } from './routes/(app)/settings/{-$tab}'
 import { Route as publicCampaignsIndexRouteImport } from './routes/(public)/campaigns/index'
 import { Route as publicCampaignsIdRouteImport } from './routes/(public)/campaigns/$id'
@@ -84,6 +85,12 @@ const appCampaignsNewRoute = appCampaignsNewRouteImport.update({
   path: '/campaigns/new',
   getParentRoute: () => appRouteRoute,
 } as any)
+const appCampaignsParticipatingRoute =
+  appCampaignsParticipatingRouteImport.update({
+    id: '/campaigns/participating',
+    path: '/campaigns/participating',
+    getParentRoute: () => appRouteRoute,
+  } as any)
 const appSettingsChar123TabChar125Route =
   appSettingsChar123TabChar125RouteImport.update({
     id: '/settings/{-$tab}',
@@ -125,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/': typeof appIndexRoute
   '/campaigns/my': typeof appCampaignsMyRoute
   '/campaigns/new': typeof appCampaignsNewRoute
+  '/campaigns/participating': typeof appCampaignsParticipatingRoute
   '/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
   '/campaigns/$id': typeof publicCampaignsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -141,6 +149,7 @@ export interface FileRoutesByTo {
   '/': typeof appIndexRoute
   '/campaigns/my': typeof appCampaignsMyRoute
   '/campaigns/new': typeof appCampaignsNewRoute
+  '/campaigns/participating': typeof appCampaignsParticipatingRoute
   '/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
   '/campaigns/$id': typeof publicCampaignsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -162,6 +171,7 @@ export interface FileRoutesById {
   '/(app)/': typeof appIndexRoute
   '/(app)/campaigns/my': typeof appCampaignsMyRoute
   '/(app)/campaigns/new': typeof appCampaignsNewRoute
+  '/(app)/campaigns/participating': typeof appCampaignsParticipatingRoute
   '/(app)/settings/{-$tab}': typeof appSettingsChar123TabChar125Route
   '/(public)/campaigns/$id': typeof publicCampaignsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/'
     | '/campaigns/my'
     | '/campaigns/new'
+    | '/campaigns/participating'
     | '/settings/{-$tab}'
     | '/campaigns/$id'
     | '/api/auth/$'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/'
     | '/campaigns/my'
     | '/campaigns/new'
+    | '/campaigns/participating'
     | '/settings/{-$tab}'
     | '/campaigns/$id'
     | '/api/auth/$'
@@ -216,6 +228,7 @@ export interface FileRouteTypes {
     | '/(app)/'
     | '/(app)/campaigns/my'
     | '/(app)/campaigns/new'
+    | '/(app)/campaigns/participating'
     | '/(app)/settings/{-$tab}'
     | '/(public)/campaigns/$id'
     | '/api/auth/$'
@@ -319,6 +332,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appCampaignsNewRouteImport
       parentRoute: typeof appRouteRoute
     }
+    '/(app)/campaigns/participating': {
+      id: '/(app)/campaigns/participating'
+      path: '/campaigns/participating'
+      fullPath: '/campaigns/participating'
+      preLoaderRoute: typeof appCampaignsParticipatingRouteImport
+      parentRoute: typeof appRouteRoute
+    }
     '/(app)/settings/{-$tab}': {
       id: '/(app)/settings/{-$tab}'
       path: '/settings/{-$tab}'
@@ -369,6 +389,7 @@ interface appRouteRouteChildren {
   appIndexRoute: typeof appIndexRoute
   appCampaignsMyRoute: typeof appCampaignsMyRoute
   appCampaignsNewRoute: typeof appCampaignsNewRoute
+  appCampaignsParticipatingRoute: typeof appCampaignsParticipatingRoute
   appSettingsChar123TabChar125Route: typeof appSettingsChar123TabChar125Route
   appCampaignsMyIdRoute: typeof appCampaignsMyIdRoute
 }
@@ -378,6 +399,7 @@ const appRouteRouteChildren: appRouteRouteChildren = {
   appIndexRoute: appIndexRoute,
   appCampaignsMyRoute: appCampaignsMyRoute,
   appCampaignsNewRoute: appCampaignsNewRoute,
+  appCampaignsParticipatingRoute: appCampaignsParticipatingRoute,
   appSettingsChar123TabChar125Route: appSettingsChar123TabChar125Route,
   appCampaignsMyIdRoute: appCampaignsMyIdRoute,
 }

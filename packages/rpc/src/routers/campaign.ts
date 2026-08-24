@@ -13,6 +13,8 @@ import * as v from 'valibot';
 import { authorized, publicProcedure } from '../procedures';
 import { toCampaignCreateData } from '../services/campaign-create';
 
+const activeParticipantWhere = { cancelledAt: null } as const;
+
 const campaignInclude = {
   organizerProfile: {
     select: {
@@ -32,7 +34,9 @@ const campaignInclude = {
   accountability: true,
   _count: {
     select: {
-      participants: true,
+      participants: {
+        where: activeParticipantWhere,
+      },
     },
   },
 } as const satisfies CampaignInclude;
@@ -55,7 +59,7 @@ const publicCampaignListSelect = {
   _count: {
     select: {
       participants: {
-        where: { cancelledAt: null },
+        where: activeParticipantWhere,
       },
     },
   },
@@ -105,6 +109,23 @@ function withParticipantCount<Campaign extends { _count: { participants: number 
 ) {
   const { _count, ...campaignData } = campaign;
   return { ...campaignData, participantCount: _count.participants };
+}
+
+function assertCampaignAcceptsParticipation(campaign: {
+  type: 'PHYSICAL' | 'VIRTUAL';
+  status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+}) {
+  if (campaign.type !== 'PHYSICAL') {
+    throw new ORPCError('BAD_REQUEST', {
+      message: 'Somente campanhas físicas aceitam participantes.',
+    });
+  }
+
+  if (campaign.status !== 'ACTIVE') {
+    throw new ORPCError('BAD_REQUEST', {
+      message: 'A campanha precisa estar ativa para alterar a participação.',
+    });
+  }
 }
 
 const campaignDateSchema = v.pipe(
@@ -221,13 +242,45 @@ export const campaignRouter = {
         },
         _count: {
           select: {
-            participants: true,
+            participants: {
+              where: activeParticipantWhere,
+            },
           },
         },
       },
       orderBy: [{ createdAt: 'desc' }],
     });
   }),
+
+  myParticipations: authorized.handler(async ({ context: { user } }) => {
+    const campaigns = await prisma.campaign.findMany({
+      where: {
+        status: 'ACTIVE',
+        type: 'PHYSICAL',
+        participants: {
+          some: {
+            userId: user.id,
+            ...activeParticipantWhere,
+          },
+        },
+      },
+      select: publicCampaignListSelect,
+      orderBy: [{ startDate: 'asc' }, { createdAt: 'desc' }],
+    });
+
+    return campaigns.map(withParticipantCount);
+  }),
+
+  participationState: authorized
+    .input(campaignByIdInputSchema)
+    .handler(async ({ input, context: { user } }) => {
+      const participant = await prisma.campaignParticipant.findUnique({
+        where: { campaignId_userId: { campaignId: input.id, userId: user.id } },
+        select: { cancelledAt: true },
+      });
+
+      return { isParticipating: participant?.cancelledAt === null };
+    }),
 
   canCreate: authorized.handler(async ({ context: { user } }) => {
     const organizerProfile = await prisma.organizerProfile.findUnique({
@@ -237,6 +290,81 @@ export const campaignRouter = {
 
     return { hasOrganizerProfile: Boolean(organizerProfile) };
   }),
+
+  join: authorized.input(campaignByIdInputSchema).handler(async ({ input, context: { user } }) =>
+    prisma.$transaction(async (transaction) => {
+      const campaign = await transaction.campaign.findUnique({
+        where: { id: input.id },
+        select: { status: true, type: true },
+      });
+
+      if (!campaign) {
+        throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
+      }
+
+      assertCampaignAcceptsParticipation(campaign);
+
+      const confirmedAt = new Date();
+      const reactivated = await transaction.campaignParticipant.updateMany({
+        where: {
+          campaignId: input.id,
+          userId: user.id,
+          cancelledAt: { not: null },
+        },
+        data: { confirmedAt, cancelledAt: null },
+      });
+
+      if (!reactivated.count) {
+        await transaction.campaignParticipant.upsert({
+          where: { campaignId_userId: { campaignId: input.id, userId: user.id } },
+          create: {
+            campaignId: input.id,
+            userId: user.id,
+            confirmedAt,
+          },
+          update: { cancelledAt: null },
+        });
+      }
+
+      const participantCount = await transaction.campaignParticipant.count({
+        where: { campaignId: input.id, ...activeParticipantWhere },
+      });
+
+      return { isParticipating: true, participantCount };
+    }),
+  ),
+
+  cancelParticipation: authorized
+    .input(campaignByIdInputSchema)
+    .handler(async ({ input, context: { user } }) =>
+      prisma.$transaction(async (transaction) => {
+        const campaign = await transaction.campaign.findUnique({
+          where: { id: input.id },
+          select: { status: true, type: true },
+        });
+
+        if (!campaign) {
+          throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
+        }
+
+        assertCampaignAcceptsParticipation(campaign);
+
+        await transaction.campaignParticipant.updateMany({
+          where: {
+            campaignId: input.id,
+            userId: user.id,
+            ...activeParticipantWhere,
+          },
+          data: { cancelledAt: new Date() },
+        });
+
+        const participantCount = await transaction.campaignParticipant.count({
+          where: { campaignId: input.id, ...activeParticipantWhere },
+        });
+
+        return { isParticipating: false, participantCount };
+      }),
+    ),
 
   create: authorized
     .input(campaignCreateInputSchema)
