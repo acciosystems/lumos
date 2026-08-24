@@ -1,14 +1,43 @@
 import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
 
 import { Logo } from '@/components/logo';
+import { getSidebarStateFn } from '@/components/sidebar';
+import { AppShell } from '@/components/sidebar/app-shell';
+import { AppInset } from '@/components/sidebar/inset';
 import { Button } from '@/components/ui/button';
+import { getIsAuthenticatedFn } from '@/lib/auth/functions';
 import { AuthGuard } from '@/lib/auth/guard';
+import { useAuth } from '@/lib/auth/hooks';
 
 export const Route = createFileRoute('/(public)')({
+  loader: async () => {
+    const [isAuthenticated, sidebarState] = await Promise.all([
+      getIsAuthenticatedFn(),
+      getSidebarStateFn(),
+    ]);
+
+    return { isAuthenticated, sidebarState };
+  },
   component: PublicLayout,
 });
 
 function PublicLayout() {
+  const { isAuthenticated: loaderIsAuthenticated, sidebarState } = Route.useLoaderData();
+  const { isAuthenticated, isPending } = useAuth();
+  const showAppLayout = isPending ? loaderIsAuthenticated : isAuthenticated;
+
+  if (showAppLayout)
+    return (
+      <AppShell defaultSidebarOpen={sidebarState}>
+        <AppInset
+          breadcrumbs={[{ label: 'Campanhas', href: '/campaigns' }]}
+          contentClassName="[&>[data-slot=campaign-content]]:mx-0 [&>[data-slot=campaign-content]]:max-w-none [&>[data-slot=campaign-content]]:p-0 sm:[&>[data-slot=campaign-content]]:p-0 lg:[&>[data-slot=campaign-content]]:p-0"
+        >
+          <Outlet />
+        </AppInset>
+      </AppShell>
+    );
+
   return (
     <div className="min-h-svh bg-background">
       <header className="border-b">
@@ -37,7 +66,9 @@ function PublicLayout() {
           </nav>
         </div>
       </header>
-      <Outlet />
+      <main>
+        <Outlet />
+      </main>
     </div>
   );
 }

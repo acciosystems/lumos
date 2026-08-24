@@ -50,9 +50,12 @@ export const Route = createFileRoute('/(public)/campaigns/$id')({
     };
   },
   pendingComponent: () => (
-    <main className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8">
+    <div
+      data-slot="campaign-content"
+      className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8"
+    >
       <Loading description="Carregando campanha" />
-    </main>
+    </div>
   ),
   component: PublicCampaignDetailPage,
 });
@@ -62,14 +65,17 @@ function PublicCampaignDetailPage() {
   const { data } = useSuspenseQuery(rpc.campaign.publicById.queryOptions({ input: { id } }));
 
   return (
-    <main className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8">
+    <div
+      data-slot="campaign-content"
+      className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8"
+    >
       <CampaignDetail
         campaign={data}
         action={
           isPhysicalCampaign(data.type) ? <CampaignParticipation campaignId={data.id} /> : undefined
         }
       />
-    </main>
+    </div>
   );
 }
 

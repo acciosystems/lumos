@@ -25,9 +25,11 @@ export interface BreadcrumbT {
 export function AppInset({
   children,
   breadcrumbs,
+  contentClassName,
 }: {
   children: React.ReactNode;
   breadcrumbs?: BreadcrumbT[];
+  contentClassName?: string;
 }) {
   return (
     <SidebarInset>
@@ -43,7 +45,7 @@ export function AppInset({
           {breadcrumbs?.length && <BreadcrumbNavigation items={breadcrumbs} />}
         </div>
       </header>
-      <div className="p-4">{children}</div>
+      <div className={cn('p-4', contentClassName)}>{children}</div>
     </SidebarInset>
   );
 }

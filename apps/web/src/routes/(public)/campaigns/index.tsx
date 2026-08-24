@@ -69,18 +69,24 @@ export const Route = createFileRoute('/(public)/campaigns/')({
     ],
   }),
   pendingComponent: () => (
-    <main className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8">
+    <div
+      data-slot="campaign-content"
+      className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8"
+    >
       <Loading description="Carregando campanhas" />
-    </main>
+    </div>
   ),
   errorComponent: ({ error }) => (
-    <main className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8">
+    <div
+      data-slot="campaign-content"
+      className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8"
+    >
       <Alert variant="destructive">
         <IconAlertCircle />
         <AlertTitle>Falha ao carregar campanhas</AlertTitle>
         <AlertDescription>{error.message}</AlertDescription>
       </Alert>
-    </main>
+    </div>
   ),
   component: CampaignsPage,
 });
@@ -110,7 +116,10 @@ function CampaignsPage() {
   const data = Route.useLoaderData();
 
   return (
-    <main className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8">
+    <div
+      data-slot="campaign-content"
+      className="mx-auto w-full max-w-7xl p-4 sm:px-6 sm:py-6 lg:px-8"
+    >
       <div className="flex w-full flex-col gap-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -199,7 +208,7 @@ function CampaignsPage() {
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }
 
