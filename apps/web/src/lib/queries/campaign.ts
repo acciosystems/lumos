@@ -1,3 +1,4 @@
+import type { CampaignListInput } from '@lumos/validation/campaign';
 import type { QueryClient } from '@tanstack/react-query';
 
 import { rpc } from '@/lib/rpc';
@@ -5,6 +6,19 @@ import { rpc } from '@/lib/rpc';
 interface CampaignParticipationQueryInput {
   campaignId: string;
   viewerId: string;
+}
+
+type CampaignListFilters = Omit<CampaignListInput, 'cursor' | 'limit'>;
+
+export function campaignListInfiniteOptions(filters: CampaignListFilters) {
+  return rpc.campaign.list.infiniteOptions({
+    input: (cursor: string | null) => ({
+      ...filters,
+      cursor: cursor ?? undefined,
+    }),
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
 }
 
 export function campaignParticipationQueryOptions({
@@ -20,7 +34,7 @@ export function campaignParticipationQueryOptions({
 export async function invalidateCampaignLists(queryClient: QueryClient) {
   await Promise.all([
     queryClient.invalidateQueries({
-      queryKey: rpc.campaign.list.key({ type: 'query' }),
+      queryKey: rpc.campaign.list.key(),
     }),
     queryClient.invalidateQueries({
       queryKey: rpc.campaign.myCampaigns.queryKey(),
@@ -39,7 +53,7 @@ export async function invalidateCampaignParticipation(
       queryKey: rpc.campaign.publicById.queryKey({ input: { id: campaignId } }),
     }),
     queryClient.invalidateQueries({
-      queryKey: rpc.campaign.list.key({ type: 'query' }),
+      queryKey: rpc.campaign.list.key(),
     }),
     queryClient.invalidateQueries({
       queryKey: rpc.campaign.byId.queryKey({ input: { id: campaignId } }),

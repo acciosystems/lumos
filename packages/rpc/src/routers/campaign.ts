@@ -179,10 +179,18 @@ export const campaignRouter = {
         ...(input.type ? { type: input.type } : {}),
       },
       select: publicCampaignListSelect,
-      orderBy: [{ startDate: 'asc' }, { createdAt: 'desc' }],
+      orderBy: [{ startDate: 'asc' }, { createdAt: 'desc' }, { id: 'desc' }],
+      ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+      take: input.limit + 1,
     });
 
-    return campaigns.map(withParticipantCount);
+    const hasNextPage = campaigns.length > input.limit;
+    const items = campaigns.slice(0, input.limit).map(withParticipantCount);
+
+    return {
+      items,
+      nextCursor: hasNextPage ? (items.at(-1)?.id ?? null) : null,
+    };
   }),
 
   publicById: publicProcedure.input(campaignByIdInputSchema).handler(async ({ input }) => {

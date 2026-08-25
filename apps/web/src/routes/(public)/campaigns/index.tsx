@@ -1,5 +1,6 @@
 import { CampaignType, campaignTypeSchema } from '@lumos/validation/campaign';
 import { IconAlertCircle, IconFilter, IconPlus, IconSearch } from '@tabler/icons-react';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ptBR } from 'date-fns/locale';
 import { useCallback } from 'react';
@@ -29,6 +30,7 @@ import {
 } from '@/components/ui/select';
 import { useDebouncedRouteInput } from '@/hooks/use-debounced-route-input';
 import { AuthGuard } from '@/lib/auth/guard';
+import { campaignListInfiniteOptions } from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
 import {
@@ -51,7 +53,7 @@ export const Route = createFileRoute('/(public)/campaigns/')({
   validateSearch: searchSchema,
   loaderDeps: ({ search }) => search,
   loader: ({ context, deps }) =>
-    context.queryClient.ensureQueryData(rpc.campaign.list.queryOptions({ input: deps })),
+    context.queryClient.ensureInfiniteQueryData(campaignListInfiniteOptions(deps)),
   head: () => ({
     meta: [
       { title: 'Campanhas de doação | Nossa Causa' },
@@ -113,7 +115,9 @@ function CampaignsPage() {
     value: region,
     onCommit: updateFilter,
   });
-  const data = Route.useLoaderData();
+  const { data, fetchNextPage, hasNextPage, isFetchNextPageError, isFetchingNextPage } =
+    useSuspenseInfiniteQuery(campaignListInfiniteOptions({ category, region, type }));
+  const campaigns = data.pages.flatMap((page) => page.items);
 
   return (
     <div
@@ -196,8 +200,8 @@ function CampaignsPage() {
         </Card>
 
         <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {data.length ? (
-            data.map((campaign) => <CampaignCard key={campaign.id} campaign={campaign} />)
+          {campaigns.length ? (
+            campaigns.map((campaign) => <CampaignCard key={campaign.id} campaign={campaign} />)
           ) : (
             <Empty className="md:col-span-2 xl:col-span-3">
               <EmptyHeader>
@@ -207,6 +211,26 @@ function CampaignsPage() {
             </Empty>
           )}
         </div>
+
+        {isFetchNextPageError ? (
+          <Alert variant="destructive">
+            <IconAlertCircle />
+            <AlertTitle>Falha ao carregar mais campanhas</AlertTitle>
+            <AlertDescription>Tente novamente para continuar a lista.</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {hasNextPage ? (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              disabled={isFetchingNextPage}
+              onClick={() => void fetchNextPage()}
+            >
+              {isFetchingNextPage ? 'Carregando campanhas...' : 'Carregar mais campanhas'}
+            </Button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -215,7 +239,7 @@ function CampaignsPage() {
 function CampaignCard({
   campaign,
 }: {
-  campaign: Awaited<ReturnType<typeof rpc.campaign.list.call>>[number];
+  campaign: Awaited<ReturnType<typeof rpc.campaign.list.call>>['items'][number];
 }) {
   return (
     <Card className="h-full">

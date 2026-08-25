@@ -28,10 +28,25 @@ const optionalHttpUrl = v.optional(
 // eslint-disable-next-line no-underscore-dangle -- Valibot intentionally names this API enum_.
 export const campaignTypeSchema = v.enum_(CampaignType);
 
+export const CAMPAIGN_LIST_DEFAULT_PAGE_SIZE = 12;
+export const CAMPAIGN_LIST_MAX_PAGE_SIZE = 48;
+
+const campaignListPageSizeSchema = v.pipe(
+  v.number('O tamanho da página deve ser um número.'),
+  v.integer('O tamanho da página deve ser um número inteiro.'),
+  v.minValue(1, 'O tamanho da página deve ser pelo menos 1.'),
+  v.maxValue(
+    CAMPAIGN_LIST_MAX_PAGE_SIZE,
+    `O tamanho da página não pode ser maior que ${CAMPAIGN_LIST_MAX_PAGE_SIZE}.`,
+  ),
+);
+
 export const campaignListInputSchema = v.object({
   category: optionalString,
   region: optionalString,
   type: v.optional(campaignTypeSchema),
+  cursor: v.optional(requiredString('Cursor inválido.')),
+  limit: v.optional(campaignListPageSizeSchema, CAMPAIGN_LIST_DEFAULT_PAGE_SIZE),
 });
 
 export const campaignByIdInputSchema = v.object({

@@ -45,6 +45,86 @@ function daysFromNow(days: number) {
   return new Date(Date.now() + days * DAY_IN_MS);
 }
 
+const paginationCampaignIds = [
+  '01BX5ZZKBKACTAV9WEVGEMMW10',
+  '01BX5ZZKBKACTAV9WEVGEMMW11',
+  '01BX5ZZKBKACTAV9WEVGEMMW12',
+  '01BX5ZZKBKACTAV9WEVGEMMW13',
+  '01BX5ZZKBKACTAV9WEVGEMMW14',
+  '01BX5ZZKBKACTAV9WEVGEMMW15',
+  '01BX5ZZKBKACTAV9WEVGEMMW16',
+  '01BX5ZZKBKACTAV9WEVGEMMW17',
+  '01BX5ZZKBKACTAV9WEVGEMMW18',
+  '01BX5ZZKBKACTAV9WEVGEMMW19',
+  '01BX5ZZKBKACTAV9WEVGEMMW1A',
+  '01BX5ZZKBKACTAV9WEVGEMMW1B',
+] as const;
+
+const paginationCampaigns = Array.from({ length: 12 }, (_, index) => {
+  const number = index + 1;
+  const isPhysical = index % 2 === 0;
+  const category = ['Alimentacao', 'Vestuario', 'Emergencia', 'Educacao'][index % 4] ?? 'Educacao';
+  const region =
+    ['Sao Paulo - SP', 'Campinas - SP', 'Rio Grande do Sul', 'Belo Horizonte - MG'][index % 4] ??
+    'Belo Horizonte - MG';
+  const id = paginationCampaignIds[index];
+
+  if (!id) throw new Error(`Missing pagination campaign ID for fixture ${number}.`);
+
+  return {
+    id,
+    organizerProfileId: index % 2 === 0 ? ids.organizers.instituto : ids.organizers.coletivo,
+    title: `Campanha de apoio comunitario ${number}`,
+    description: `Campanha de demonstracao para validar a navegacao paginada da descoberta publica (${number}).`,
+    status: 'ACTIVE' as const,
+    type: isPhysical ? CampaignType.PHYSICAL : CampaignType.VIRTUAL,
+    category,
+    region,
+    startDate: daysFromNow(3 + index),
+    endDate: daysFromNow(33 + index),
+    imageUrl: null,
+    location: isPhysical ? `Centro comunitario ${number}` : null,
+    targetItems: isPhysical ? 100 + number * 25 : null,
+    currentItems: isPhysical ? number * 7 : null,
+    pixKey: isPhysical ? null : `campanha-${number}@example.com`,
+    bankAccountInfo: isPhysical ? null : `Banco 001, agencia 000${number}, conta 00${number}-0`,
+  };
+});
+
+const paginationCollectionPointIds = [
+  '01BX5ZZKBKACTAV9WEVGEMMW20',
+  '01BX5ZZKBKACTAV9WEVGEMMW21',
+  '01BX5ZZKBKACTAV9WEVGEMMW22',
+  '01BX5ZZKBKACTAV9WEVGEMMW23',
+  '01BX5ZZKBKACTAV9WEVGEMMW24',
+  '01BX5ZZKBKACTAV9WEVGEMMW25',
+] as const;
+
+const paginationCollectionPoints = paginationCampaigns.flatMap((campaign, index) => {
+  if (index % 2 !== 0) return [];
+
+  const number = index + 1;
+  const id = paginationCollectionPointIds[index / 2];
+  const [city, state] = campaign.region.split(' - ');
+
+  if (!id) throw new Error(`Missing pagination collection point ID for fixture ${number}.`);
+
+  return [
+    {
+      id,
+      campaignId: campaign.id,
+      name: `Ponto de coleta comunitario ${number}`,
+      address: `Rua da Solidariedade, ${100 + number}`,
+      city: city || campaign.region,
+      state: state || (campaign.region === 'Rio Grande do Sul' ? 'RS' : 'SP'),
+      zipCode: `0100${String(number).padStart(2, '0')}-000`,
+      lat: null,
+      lon: null,
+      instructions: 'Recebemos doacoes durante o horario comercial.',
+    },
+  ];
+});
+
 async function seed() {
   await Promise.all([
     prisma.user.upsert({
@@ -138,6 +218,11 @@ async function seed() {
       },
     }),
   ]);
+
+  // Remove IDs from the previous pagination fixtures before upserting valid ULID fixtures.
+  await prisma.campaign.deleteMany({
+    where: { id: { startsWith: 'seed-campaign-pagination-' } },
+  });
 
   await Promise.all([
     prisma.organizerProfile.upsert({
@@ -318,6 +403,13 @@ async function seed() {
         currentItems: 342,
       },
     }),
+    ...paginationCampaigns.map(({ id, ...campaign }) =>
+      prisma.campaign.upsert({
+        where: { id },
+        update: campaign,
+        create: { id, ...campaign },
+      }),
+    ),
   ]);
 
   await Promise.all([
@@ -415,6 +507,13 @@ async function seed() {
         zipCode: '04010-200',
       },
     }),
+    ...paginationCollectionPoints.map(({ id, ...point }) =>
+      prisma.campaignCollectionPoint.upsert({
+        where: { id },
+        update: point,
+        create: { id, ...point },
+      }),
+    ),
   ]);
 
   await Promise.all([

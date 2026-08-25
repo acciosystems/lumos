@@ -51,10 +51,11 @@ model Campaign {
 
   @@index([status])
   @@index([type])
-  @@index([category])
-  @@index([region])
   @@index([organizerProfileId])
-  @@index([startDate, endDate])
+  @@index([status, startDate(sort: Asc), createdAt(sort: Desc), id(sort: Desc)])
+  @@index([status, type, startDate(sort: Asc), createdAt(sort: Desc), id(sort: Desc)])
+  @@index([category(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([region(ops: raw("gin_trgm_ops"))], type: Gin)
   @@map("campaigns")
 }
 
