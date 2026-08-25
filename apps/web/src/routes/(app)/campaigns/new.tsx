@@ -316,7 +316,7 @@ function NewCampaignPage() {
               disponível depois que o perfil for criado.
             </AlertDescription>
             <AlertAction className="top-auto bottom-3">
-              <Button size="sm" render={<Link to="/organizer-profile" />}>
+              <Button nativeButton={false} size="sm" render={<Link to="/organizer-profile" />}>
                 Configurar perfil organizador
               </Button>
             </AlertAction>
