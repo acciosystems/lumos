@@ -12,7 +12,8 @@ model OrganizerProfile {
   bio         String?
   websiteUrl  String?
 
-  // Transparency (P0)
+  // Transparency (P0). The `organizer_profiles_type_cnpj_check` SQL
+  // constraint keeps CNPJ presence and verification aligned with type.
   cnpj         String? @unique
   cnpjVerified Boolean @default(false)
 
@@ -23,7 +24,6 @@ model OrganizerProfile {
 
   campaigns Campaign[]
 
-  @@index([cnpj])
   @@index([type])
   @@map("organizer_profiles")
 }

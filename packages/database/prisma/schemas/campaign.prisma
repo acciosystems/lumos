@@ -28,10 +28,11 @@ model Campaign {
 
   imageUrl String?
 
-  // PHYSICAL only
+  // PHYSICAL only. Nullability is required for VIRTUAL campaigns; the
+  // subtype-specific CHECK constraints are maintained in SQL migrations.
   location     String?
   targetItems  Int?
-  currentItems Int?    @default(0)
+  currentItems Int?
 
   // VIRTUAL only
   // No amounts are being tracked, since the platform doesn't process payments (that's P3)
@@ -46,8 +47,9 @@ model Campaign {
   accountability   CampaignAccountability?
   donations        Donation[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  /// `campaigns_lifecycle_timestamps_check` keeps terminal timestamps aligned with status.
   completedAt DateTime?
   cancelledAt DateTime?
 
@@ -135,6 +137,5 @@ model CampaignAccountability {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([campaignId])
   @@map("campaign_accountabilities")
 }

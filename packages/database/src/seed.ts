@@ -289,6 +289,8 @@ async function seed() {
         location: 'Tatuape, Sao Paulo',
         targetItems: 500,
         currentItems: 185,
+        pixKey: null,
+        bankAccountInfo: null,
       },
       create: {
         id: ids.campaigns.food,
@@ -307,6 +309,8 @@ async function seed() {
         location: 'Tatuape, Sao Paulo',
         targetItems: 500,
         currentItems: 185,
+        pixKey: null,
+        bankAccountInfo: null,
       },
     }),
     prisma.campaign.upsert({
@@ -327,6 +331,8 @@ async function seed() {
         location: 'Centro, Campinas',
         targetItems: 800,
         currentItems: 126,
+        pixKey: null,
+        bankAccountInfo: null,
       },
       create: {
         id: ids.campaigns.winter,
@@ -345,6 +351,8 @@ async function seed() {
         location: 'Centro, Campinas',
         targetItems: 800,
         currentItems: 126,
+        pixKey: null,
+        bankAccountInfo: null,
       },
     }),
     prisma.campaign.upsert({
@@ -362,6 +370,9 @@ async function seed() {
         region: 'Rio Grande do Sul',
         startDate: daysFromNow(-10),
         endDate: daysFromNow(20),
+        location: null,
+        targetItems: null,
+        currentItems: null,
         pixKey: 'ajuda.chuvas@example.com',
         bankAccountInfo: 'Banco 001, agencia 1234, conta 56789-0',
       },
@@ -379,6 +390,9 @@ async function seed() {
         region: 'Rio Grande do Sul',
         startDate: daysFromNow(-10),
         endDate: daysFromNow(20),
+        location: null,
+        targetItems: null,
+        currentItems: null,
         pixKey: 'ajuda.chuvas@example.com',
         bankAccountInfo: 'Banco 001, agencia 1234, conta 56789-0',
       },
@@ -401,6 +415,8 @@ async function seed() {
         location: 'Vila Mariana, Sao Paulo',
         targetItems: 300,
         currentItems: 342,
+        pixKey: null,
+        bankAccountInfo: null,
       },
       create: {
         id: ids.campaigns.school,
@@ -419,6 +435,8 @@ async function seed() {
         location: 'Vila Mariana, Sao Paulo',
         targetItems: 300,
         currentItems: 342,
+        pixKey: null,
+        bankAccountInfo: null,
       },
     }),
     ...paginationCampaigns.map(({ id, ...campaign }) =>
@@ -627,6 +645,7 @@ async function seed() {
       itemDescription: 'Cadernos, lapis e estojos',
       status: 'COMPLETED',
       confirmedAt: daysFromNow(-40),
+      cancelledAt: null,
     },
     create: {
       id: 'seed-donation-school-supplies',
@@ -636,6 +655,7 @@ async function seed() {
       itemDescription: 'Cadernos, lapis e estojos',
       status: 'COMPLETED',
       confirmedAt: daysFromNow(-40),
+      cancelledAt: null,
     },
   });
 

@@ -14,6 +14,7 @@ model Donation {
   itemCount       Int?
   itemDescription String?
 
+  /// `donations_status_timestamps_check` keeps confirmation/cancellation timestamps aligned with status.
   status      DonationStatus @default(PENDING)
   confirmedAt DateTime?
   cancelledAt DateTime?
