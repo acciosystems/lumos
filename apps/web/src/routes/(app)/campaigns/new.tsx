@@ -42,6 +42,7 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
+import { invalidateCampaignLists } from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 import {
   campaignTypeMetadata,
@@ -128,10 +129,7 @@ function NewCampaignPage() {
   const mutation = useMutation(
     rpc.campaign.create.mutationOptions({
       onSuccess: async (campaign) => {
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: rpc.campaign.list.key() }),
-          queryClient.invalidateQueries({ queryKey: rpc.campaign.myCampaigns.key() }),
-        ]);
+        await invalidateCampaignLists(queryClient);
         toast.success('Campanha criada com sucesso.');
         await navigate({ to: '/campaigns/$id', params: { id: campaign.id } });
       },

@@ -28,7 +28,7 @@ const formSchema = v.object({
 });
 
 export function UserAvatarChange() {
-  const { user } = useStrictAuth();
+  const { refreshSession, user } = useStrictAuth();
 
   const [isOpen, setOpen] = useState(false);
 
@@ -47,7 +47,8 @@ export function UserAvatarChange() {
 
       await rpc.user.avatar.confirmUpload.call({ eventId });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      await refreshSession();
       toast.success('Foto de perfil atualizada com sucesso', {
         description: 'A mudança pode levar alguns minutos a se refletir',
       });
@@ -62,7 +63,11 @@ export function UserAvatarChange() {
 
   const deleteMutation = useMutation(
     rpc.user.avatar.delete.mutationOptions({
-      onSuccess: () => window.location.reload(),
+      onSuccess: async () => {
+        await refreshSession();
+        toast.success('Foto de perfil excluída com sucesso');
+        setOpen(false);
+      },
       onError: (error) =>
         toast.error('Falha ao excluir a foto de perfil', {
           description: error.message,

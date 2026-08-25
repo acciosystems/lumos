@@ -2,7 +2,7 @@ import { authClient } from '@lumos/auth/auth-client';
 import { confirmPasswordSchema, passwordSchema } from '@lumos/validation/user';
 import { IconPencilFilled } from '@tabler/icons-react';
 import { useForm } from '@tanstack/react-form';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useId, useState } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
@@ -21,6 +21,8 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Spinner } from '@/components/ui/spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useStrictAuth } from '@/lib/auth/hooks';
+import { authQueryKeys } from '@/lib/queries/auth';
 
 const formSchema = v.pipe(
   v.object({
@@ -35,6 +37,8 @@ const formSchema = v.pipe(
 );
 
 export function UserPasswordChange() {
+  const queryClient = useQueryClient();
+  const { user } = useStrictAuth();
   const [isOpen, setOpen] = useState(false);
 
   const mutation = useMutation({
@@ -44,7 +48,8 @@ export function UserPasswordChange() {
         newPassword: data.newPassword,
         revokeOtherSessions: true,
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: authQueryKeys.sessions(user.id) });
       toast.success('Senha alterada com sucesso');
       setOpen(false);
       form.reset();

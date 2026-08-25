@@ -21,10 +21,7 @@ export const Route = createFileRoute('/(app)/campaigns/my')({
 });
 
 function MyCampaignsPage() {
-  const { data, isPending, isError, error } = useQuery({
-    queryKey: ['my-campaigns'],
-    queryFn: async () => await rpc.campaign.myCampaigns.call(),
-  });
+  const { data, isPending, isError, error } = useQuery(rpc.campaign.myCampaigns.queryOptions());
 
   return (
     <AppInset

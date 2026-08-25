@@ -16,6 +16,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { AuthGuard } from '@/lib/auth/guard';
+import {
+  campaignParticipationQueryOptions,
+  invalidateCampaignParticipation,
+} from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 
 export function CampaignParticipation({ campaignId }: { campaignId: string }) {
@@ -50,30 +54,10 @@ function AuthenticatedCampaignParticipation({
   const queryClient = useQueryClient();
   const [isCancelOpen, setCancelOpen] = useState(false);
 
-  const participationOptions = rpc.campaign.participationState.queryOptions({
-    input: { id: campaignId },
-  });
-  const participationQuery = useQuery({
-    ...participationOptions,
-    queryKey: [...participationOptions.queryKey, { viewerId }],
-  });
+  const participationQuery = useQuery(campaignParticipationQueryOptions({ campaignId, viewerId }));
 
-  const invalidateCampaignQueries = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: rpc.campaign.publicById.key({ input: { id: campaignId } }),
-      }),
-      queryClient.invalidateQueries({ queryKey: rpc.campaign.list.key() }),
-      queryClient.invalidateQueries({
-        queryKey: rpc.campaign.byId.key({ input: { id: campaignId } }),
-      }),
-      queryClient.invalidateQueries({ queryKey: rpc.campaign.myCampaigns.key() }),
-      queryClient.invalidateQueries({ queryKey: rpc.campaign.myParticipations.key() }),
-      queryClient.invalidateQueries({
-        queryKey: rpc.campaign.participationState.key({ input: { id: campaignId } }),
-      }),
-    ]);
-  };
+  const invalidateCampaignQueries = async () =>
+    await invalidateCampaignParticipation(queryClient, { campaignId, viewerId });
 
   const joinMutation = useMutation(
     rpc.campaign.join.mutationOptions({

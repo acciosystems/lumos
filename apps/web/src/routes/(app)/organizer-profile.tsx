@@ -51,8 +51,8 @@ function OrganizerProfilePage() {
     rpc.organizer.upsert.mutationOptions({
       onSuccess: async () => {
         await Promise.all([
-          queryClient.invalidateQueries({ queryKey: rpc.organizer.me.key() }),
-          queryClient.invalidateQueries({ queryKey: rpc.campaign.canCreate.key() }),
+          queryClient.invalidateQueries({ queryKey: rpc.organizer.me.queryKey() }),
+          queryClient.invalidateQueries({ queryKey: rpc.campaign.key({ type: 'query' }) }),
         ]);
         toast.success('Perfil organizador salvo com sucesso.');
       },

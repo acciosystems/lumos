@@ -1,6 +1,6 @@
 import { authClient } from '@lumos/auth/auth-client';
 import { IconAlertCircle, IconBrandGoogle } from '@tabler/icons-react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { toast } from 'sonner';
 
@@ -23,24 +23,23 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item';
+import { useStrictAuth } from '@/lib/auth/hooks';
+import { authQueryKeys, authQueryOptions } from '@/lib/queries/auth';
 
 const providers = [{ id: 'google', name: 'Google', icon: IconBrandGoogle }];
 
 export function UserConnectedAccounts() {
+  const queryClient = useQueryClient();
+  const { user } = useStrictAuth();
   const {
     data: accounts = [],
     isPending,
     isSuccess,
     isError,
     error,
-    refetch,
   } = useQuery({
-    queryKey: ['connected-accounts'],
-    queryFn: async () => {
-      const response = await authClient.listAccounts();
-      // oxlint-disable-next-line typescript/no-non-null-assertion
-      return response.data!.filter((acc) => acc.providerId !== 'credential');
-    },
+    ...authQueryOptions.accounts(user.id),
+    select: (allAccounts) => allAccounts.filter((account) => account.providerId !== 'credential'),
   });
 
   const { formattedProviders, availableProviders } = useMemo(() => {
@@ -62,9 +61,9 @@ export function UserConnectedAccounts() {
   const unlinkMutation = useMutation({
     mutationFn: async (provider: string) =>
       await authClient.unlinkAccount({ providerId: provider }),
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success('Conta desvinculada com sucesso');
-      refetch();
+      await queryClient.invalidateQueries({ queryKey: authQueryKeys.accounts(user.id) });
     },
     onError: (err) => toast.error('Falha ao desvincular conta', { description: err.message }),
   });

@@ -15,5 +15,9 @@ export function useStrictAuth() {
   if (!context.isAuthenticated)
     throw new Error('useStrictAuth requires the user to be authenticated');
 
-  return { session: context.session, user: context.user };
+  return {
+    refreshSession: context.refreshSession,
+    session: context.session,
+    user: context.user,
+  };
 }

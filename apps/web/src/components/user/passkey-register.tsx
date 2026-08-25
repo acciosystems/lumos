@@ -1,9 +1,12 @@
 import { authClient } from '@lumos/auth/auth-client';
 import { useForm } from '@tanstack/react-form';
-import { useMutation, type QueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useId, useState } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
+
+import { useStrictAuth } from '@/lib/auth/hooks';
+import { authQueryKeys } from '@/lib/queries/auth';
 
 import { Button } from '../ui/button';
 import {
@@ -23,20 +26,16 @@ const formSchema = v.object({
   name: v.pipe(v.string('Nome deve ser uma string'), v.nonEmpty('Nome não pode ser vazio')),
 });
 
-export function UserPasskeyRegister({
-  isPending,
-  queryClient,
-}: {
-  isPending: boolean;
-  queryClient: QueryClient;
-}) {
+export function UserPasskeyRegister({ isPending }: { isPending: boolean }) {
+  const queryClient = useQueryClient();
+  const { user } = useStrictAuth();
   const [isOpen, setOpen] = useState(false);
 
   const mutation = useMutation({
     mutationFn: async (data: v.InferOutput<typeof formSchema>) =>
       await authClient.passkey.addPasskey({ name: data.name }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['passkeys'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: authQueryKeys.passkeys(user.id) });
       toast.success('Chave de acesso registrada com sucesso');
       setOpen(false);
     },

@@ -17,30 +17,26 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item';
+import { useStrictAuth } from '@/lib/auth/hooks';
+import { authQueryKeys, authQueryOptions } from '@/lib/queries/auth';
 
 import { UserPasskeyRegister } from './passkey-register';
 
 export function UserPasskeys() {
   const queryClient = useQueryClient();
+  const { user } = useStrictAuth();
   const {
     data: passkeys,
     isPending,
     isSuccess,
     isError,
     error,
-  } = useQuery({
-    queryKey: ['passkeys'],
-    queryFn: async () => {
-      const result = await authClient.passkey.listUserPasskeys();
-      // oxlint-disable-next-line typescript/no-non-null-assertion
-      return result.data!;
-    },
-  });
+  } = useQuery(authQueryOptions.passkeys(user.id));
 
   const removeMutation = useMutation({
     mutationFn: async (id: string) => await authClient.passkey.deletePasskey({ id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['passkeys'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: authQueryKeys.passkeys(user.id) });
       toast.success('Chave de acesso removida com sucesso');
     },
     onError: (err) => toast.error('Falha ao remover chave de acesso', { description: err.message }),
@@ -98,7 +94,7 @@ export function UserPasskeys() {
       </CardContent>
 
       <CardFooter className="justify-end">
-        <UserPasskeyRegister queryClient={queryClient} isPending={isPending} />
+        <UserPasskeyRegister isPending={isPending} />
       </CardFooter>
     </Card>
   );
