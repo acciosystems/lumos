@@ -14,7 +14,7 @@ model OrganizerProfile {
 
   // Transparency (P0)
   cnpj         String? @unique
-  cpnjVerified Boolean @default(false)
+  cnpjVerified Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

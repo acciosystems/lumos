@@ -106,7 +106,19 @@ export function CampaignDetail({
               }
             />
             {campaign.organizerProfile.cnpj && (
-              <DetailRow label="CNPJ" value={formatCnpj(campaign.organizerProfile.cnpj)} />
+              <div className="grid gap-1">
+                <span className="text-muted-foreground">CNPJ</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium wrap-break-word">
+                    {formatCnpj(campaign.organizerProfile.cnpj)}
+                  </span>
+                  <Badge variant={campaign.organizerProfile.cnpjVerified ? 'default' : 'outline'}>
+                    {campaign.organizerProfile.cnpjVerified
+                      ? 'CNPJ verificado'
+                      : 'CNPJ não verificado'}
+                  </Badge>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>

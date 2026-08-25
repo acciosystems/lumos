@@ -236,7 +236,7 @@ async function seed() {
         bio: 'Organizacao dedicada a seguranca alimentar e apoio comunitario.',
         websiteUrl: 'https://example.com/instituto-esperanca',
         cnpj: '12345678000195',
-        cpnjVerified: true,
+        cnpjVerified: true,
       },
       create: {
         id: ids.organizers.instituto,
@@ -246,7 +246,7 @@ async function seed() {
         bio: 'Organizacao dedicada a seguranca alimentar e apoio comunitario.',
         websiteUrl: 'https://example.com/instituto-esperanca',
         cnpj: '12345678000195',
-        cpnjVerified: true,
+        cnpjVerified: true,
       },
     }),
     prisma.organizerProfile.upsert({
@@ -258,7 +258,7 @@ async function seed() {
         bio: 'Rede de voluntarios que mobiliza doacoes em Sao Paulo.',
         websiteUrl: null,
         cnpj: null,
-        cpnjVerified: false,
+        cnpjVerified: false,
       },
       create: {
         id: ids.organizers.coletivo,

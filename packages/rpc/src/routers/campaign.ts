@@ -25,6 +25,7 @@ const campaignInclude = {
       type: true,
       displayName: true,
       cnpj: true,
+      cnpjVerified: true,
     },
   },
   collectionPoints: {
@@ -80,6 +81,7 @@ const publicCampaignDetailSelect = {
       type: true,
       displayName: true,
       cnpj: true,
+      cnpjVerified: true,
     },
   },
   collectionPoints: {
