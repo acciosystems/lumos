@@ -1,7 +1,8 @@
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import * as v from 'valibot';
 
-import { CampaignDetail } from '@/components/campaign/campaign-detail';
+import { CampaignDashboard } from '@/components/campaign/campaign-dashboard';
 import { Loading } from '@/components/misc/loading';
 import { AppInset } from '@/components/sidebar/inset';
 import { rpc } from '@/lib/rpc';
@@ -30,7 +31,8 @@ export const Route = createFileRoute('/(app)/campaigns/my_/$id')({
 });
 
 function OwnerCampaignDetailPage() {
-  const data = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const { data } = useSuspenseQuery(rpc.campaign.byId.queryOptions({ input: { id } }));
 
   return (
     <AppInset
@@ -40,7 +42,7 @@ function OwnerCampaignDetailPage() {
         { label: 'Detalhes' },
       ]}
     >
-      <CampaignDetail campaign={data} />
+      <CampaignDashboard campaign={data} />
     </AppInset>
   );
 }

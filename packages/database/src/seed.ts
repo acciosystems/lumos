@@ -86,6 +86,8 @@ const paginationCampaigns = Array.from({ length: 12 }, (_, index) => {
     location: isPhysical ? `Centro comunitario ${number}` : null,
     targetItems: isPhysical ? 100 + number * 25 : null,
     currentItems: isPhysical ? number * 7 : null,
+    completedAt: null,
+    cancelledAt: null,
     pixKey: isPhysical ? null : `campanha-${number}@example.com`,
     bankAccountInfo: isPhysical ? null : `Banco 001, agencia 000${number}, conta 00${number}-0`,
   };
@@ -277,6 +279,8 @@ async function seed() {
         description:
           'Arrecadacao de cestas basicas e alimentos nao pereciveis para familias acompanhadas pelo instituto.',
         status: 'ACTIVE',
+        completedAt: null,
+        cancelledAt: null,
         type: CampaignType.PHYSICAL,
         category: 'Alimentacao',
         region: 'Sao Paulo - SP',
@@ -293,6 +297,8 @@ async function seed() {
         description:
           'Arrecadacao de cestas basicas e alimentos nao pereciveis para familias acompanhadas pelo instituto.',
         status: 'ACTIVE',
+        completedAt: null,
+        cancelledAt: null,
         type: CampaignType.PHYSICAL,
         category: 'Alimentacao',
         region: 'Sao Paulo - SP',
@@ -311,6 +317,8 @@ async function seed() {
         description:
           'Recebemos casacos, cobertores e roupas de inverno em bom estado para distribuicao durante as noites frias.',
         status: 'ACTIVE',
+        completedAt: null,
+        cancelledAt: null,
         type: CampaignType.PHYSICAL,
         category: 'Vestuario',
         region: 'Campinas - SP',
@@ -327,6 +335,8 @@ async function seed() {
         description:
           'Recebemos casacos, cobertores e roupas de inverno em bom estado para distribuicao durante as noites frias.',
         status: 'ACTIVE',
+        completedAt: null,
+        cancelledAt: null,
         type: CampaignType.PHYSICAL,
         category: 'Vestuario',
         region: 'Campinas - SP',
@@ -345,6 +355,8 @@ async function seed() {
         description:
           'Doacoes financeiras para compra local de agua, produtos de higiene e materiais de limpeza.',
         status: 'ACTIVE',
+        completedAt: null,
+        cancelledAt: null,
         type: CampaignType.VIRTUAL,
         category: 'Emergencia',
         region: 'Rio Grande do Sul',
@@ -360,6 +372,8 @@ async function seed() {
         description:
           'Doacoes financeiras para compra local de agua, produtos de higiene e materiais de limpeza.',
         status: 'ACTIVE',
+        completedAt: null,
+        cancelledAt: null,
         type: CampaignType.VIRTUAL,
         category: 'Emergencia',
         region: 'Rio Grande do Sul',
@@ -377,6 +391,8 @@ async function seed() {
         description:
           'Campanha concluida para arrecadar cadernos, mochilas, lapis e estojos para estudantes da rede publica.',
         status: 'COMPLETED',
+        completedAt: daysFromNow(-30),
+        cancelledAt: null,
         type: CampaignType.PHYSICAL,
         category: 'Educacao',
         region: 'Sao Paulo - SP',
@@ -393,6 +409,8 @@ async function seed() {
         description:
           'Campanha concluida para arrecadar cadernos, mochilas, lapis e estojos para estudantes da rede publica.',
         status: 'COMPLETED',
+        completedAt: daysFromNow(-30),
+        cancelledAt: null,
         type: CampaignType.PHYSICAL,
         category: 'Educacao',
         region: 'Sao Paulo - SP',

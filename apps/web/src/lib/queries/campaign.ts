@@ -69,3 +69,26 @@ export async function invalidateCampaignParticipation(
     }),
   ]);
 }
+
+export async function invalidateCampaignManagement(queryClient: QueryClient, campaignId: string) {
+  await Promise.all([
+    queryClient.invalidateQueries({
+      queryKey: rpc.campaign.publicById.queryKey({ input: { id: campaignId } }),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: rpc.campaign.list.key(),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: rpc.campaign.byId.queryKey({ input: { id: campaignId } }),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: rpc.campaign.myCampaigns.queryKey(),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: rpc.campaign.myParticipations.queryKey(),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: rpc.campaign.participationState.key(),
+    }),
+  ]);
+}

@@ -1,11 +1,11 @@
-import { CampaignType } from '@lumos/database/generated/prisma/enums';
+import { CampaignStatus, CampaignType } from '@lumos/database/generated/prisma/enums';
 import * as v from 'valibot';
 
 /**
  * Canonical persisted and API values for campaign behavior.
  * PHYSICAL campaigns collect items at collection points; VIRTUAL campaigns receive direct funds.
  */
-export { CampaignType };
+export { CampaignStatus, CampaignType };
 
 const requiredString = (message: string) => v.pipe(v.string(), v.trim(), v.nonEmpty(message));
 const optionalString = v.optional(v.pipe(v.string(), v.trim()));
@@ -51,6 +51,21 @@ export const campaignListInputSchema = v.object({
 
 export const campaignByIdInputSchema = v.object({
   id: requiredString('Campanha é obrigatória'),
+});
+
+export const campaignProgressUpdateInputSchema = v.object({
+  id: requiredString('Campanha é obrigatória'),
+  currentItems: v.pipe(
+    v.number('A quantidade atual deve ser um número.'),
+    v.integer('A quantidade atual deve ser um número inteiro.'),
+    v.minValue(0, 'A quantidade atual não pode ser negativa.'),
+    v.maxValue(2_147_483_647, 'A quantidade atual excede o limite permitido.'),
+  ),
+});
+
+export const campaignLifecycleTransitionInputSchema = v.object({
+  id: requiredString('Campanha é obrigatória'),
+  status: v.picklist([CampaignStatus.COMPLETED, CampaignStatus.CANCELLED]),
 });
 
 export const campaignCollectionPointInputSchema = v.object({
@@ -116,6 +131,10 @@ export const campaignCreateInputSchema = v.pipe(
 
 export type CampaignListInput = v.InferOutput<typeof campaignListInputSchema>;
 export type CampaignCreateInput = v.InferOutput<typeof campaignCreateInputSchema>;
+export type CampaignProgressUpdateInput = v.InferOutput<typeof campaignProgressUpdateInputSchema>;
+export type CampaignLifecycleTransitionInput = v.InferOutput<
+  typeof campaignLifecycleTransitionInputSchema
+>;
 
 function isHttpUrl(value: string): boolean {
   try {

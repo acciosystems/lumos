@@ -1,10 +1,13 @@
 import { prisma } from '@lumos/database';
+import { Prisma } from '@lumos/database/generated/prisma/client';
 import type { CampaignInclude, CampaignSelect } from '@lumos/database/generated/prisma/models';
 import {
   CampaignType,
   campaignByIdInputSchema,
   campaignCreateInputSchema,
+  campaignLifecycleTransitionInputSchema,
   campaignListInputSchema,
+  campaignProgressUpdateInputSchema,
   type CampaignCreateInput,
 } from '@lumos/validation/campaign';
 import { ORPCError } from '@orpc/client';
@@ -128,6 +131,16 @@ function assertCampaignAcceptsParticipation(campaign: {
   }
 }
 
+function assertCampaignIsActive(campaign: {
+  status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+}) {
+  if (campaign.status !== 'ACTIVE') {
+    throw new ORPCError('BAD_REQUEST', {
+      message: 'A campanha precisa estar ativa para realizar esta ação.',
+    });
+  }
+}
+
 const campaignDateSchema = v.pipe(
   v.string(),
   v.isoDate(),
@@ -238,7 +251,7 @@ export const campaignRouter = {
 
     if (!organizerProfile) return [];
 
-    return prisma.campaign.findMany({
+    const campaigns = await prisma.campaign.findMany({
       where: {
         organizerProfileId: organizerProfile.id,
       },
@@ -258,6 +271,8 @@ export const campaignRouter = {
       },
       orderBy: [{ createdAt: 'desc' }],
     });
+
+    return campaigns.map(withParticipantCount);
   }),
 
   myParticipations: authorized.handler(async ({ context: { user } }) => {
@@ -301,6 +316,10 @@ export const campaignRouter = {
 
   join: authorized.input(campaignByIdInputSchema).handler(async ({ input, context: { user } }) =>
     prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw(
+        Prisma.sql`SELECT "id" FROM "campaigns" WHERE "id" = ${input.id} FOR UPDATE`,
+      );
+
       const campaign = await transaction.campaign.findUnique({
         where: { id: input.id },
         select: { status: true, type: true },
@@ -371,6 +390,82 @@ export const campaignRouter = {
         });
 
         return { isParticipating: false, participantCount };
+      }),
+    ),
+
+  updateProgress: authorized
+    .input(campaignProgressUpdateInputSchema)
+    .handler(async ({ input, context: { user } }) =>
+      prisma.$transaction(async (transaction) => {
+        const campaign = await transaction.campaign.findFirst({
+          where: {
+            id: input.id,
+            organizerProfile: { userId: user.id },
+          },
+          select: { status: true, type: true },
+        });
+
+        if (!campaign) {
+          throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
+        }
+
+        if (campaign.type !== 'PHYSICAL') {
+          throw new ORPCError('BAD_REQUEST', {
+            message: 'Somente campanhas físicas possuem progresso de itens.',
+          });
+        }
+
+        assertCampaignIsActive(campaign);
+
+        const result = await transaction.campaign.updateMany({
+          where: { id: input.id, status: 'ACTIVE', type: 'PHYSICAL' },
+          data: { currentItems: input.currentItems },
+        });
+
+        if (!result.count) {
+          throw new ORPCError('BAD_REQUEST', {
+            message: 'A campanha não está mais ativa para atualizar o progresso.',
+          });
+        }
+
+        return { currentItems: input.currentItems };
+      }),
+    ),
+
+  transitionLifecycle: authorized
+    .input(campaignLifecycleTransitionInputSchema)
+    .handler(async ({ input, context: { user } }) =>
+      prisma.$transaction(async (transaction) => {
+        const campaign = await transaction.campaign.findFirst({
+          where: {
+            id: input.id,
+            organizerProfile: { userId: user.id },
+          },
+          select: { status: true },
+        });
+
+        if (!campaign) {
+          throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
+        }
+
+        assertCampaignIsActive(campaign);
+
+        const transitionedAt = new Date();
+        const result = await transaction.campaign.updateMany({
+          where: { id: input.id, status: 'ACTIVE' },
+          data:
+            input.status === 'COMPLETED'
+              ? { status: 'COMPLETED', completedAt: transitionedAt }
+              : { status: 'CANCELLED', cancelledAt: transitionedAt },
+        });
+
+        if (!result.count) {
+          throw new ORPCError('BAD_REQUEST', {
+            message: 'A campanha não está mais ativa para alterar o ciclo de vida.',
+          });
+        }
+
+        return { status: input.status, transitionedAt };
       }),
     ),
 
