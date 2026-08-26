@@ -1,3 +1,4 @@
+import { CampaignStatus } from '@lumos/validation/campaign';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import * as v from 'valibot';
@@ -72,7 +73,9 @@ function PublicCampaignDetailPage() {
       <CampaignDetail
         campaign={data}
         action={
-          isPhysicalCampaign(data.type) ? <CampaignParticipation campaignId={data.id} /> : undefined
+          data.status === CampaignStatus.ACTIVE && isPhysicalCampaign(data.type) ? (
+            <CampaignParticipation campaignId={data.id} />
+          ) : undefined
         }
       />
     </div>

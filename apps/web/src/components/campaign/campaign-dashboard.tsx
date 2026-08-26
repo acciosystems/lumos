@@ -11,6 +11,7 @@ import { ptBR } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import { CampaignAccountabilityForm } from '@/components/campaign/campaign-accountability-form';
 import { CampaignDetail } from '@/components/campaign/campaign-detail';
 import {
   AlertDialog,
@@ -172,6 +173,13 @@ export function CampaignDashboard({ campaign }: { campaign: OwnerCampaign }) {
               </form>
             </CardContent>
           </Card>
+        )}
+
+        {campaign.status === CampaignStatus.COMPLETED && (
+          <CampaignAccountabilityForm
+            key={campaign.accountability?.updatedAt?.toString() ?? 'new-accountability'}
+            campaign={campaign}
+          />
         )}
 
         <CampaignLifecycleControls campaign={campaign} />

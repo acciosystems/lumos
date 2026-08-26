@@ -12,7 +12,10 @@ export const authMiddleware = base.middleware(async ({ context, next }) => {
 
   if (!sessionData?.session || !sessionData.user) throw new ORPCError('UNAUTHORIZED');
 
-  identifyUser(context.log, sessionData, identifyOptions);
+  // In-process server RPC calls (for example, route loaders during SSR) only
+  // provide request headers. HTTP calls are wrapped by `withEvlog` and still
+  // receive the request logger here.
+  if (context.log) identifyUser(context.log, sessionData, identifyOptions);
 
   return next({
     context: {

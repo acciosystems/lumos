@@ -25,6 +25,11 @@ const optionalHttpUrl = v.optional(
   ),
 );
 
+const publicHttpUrl = v.pipe(
+  requiredString('Informe uma URL de evidência válida.'),
+  v.check(isHttpUrl, 'Informe uma URL válida com http:// ou https://.'),
+);
+
 // eslint-disable-next-line no-underscore-dangle -- Valibot intentionally names this API enum_.
 export const campaignTypeSchema = v.enum_(CampaignType);
 
@@ -71,6 +76,42 @@ export const campaignLifecycleTransitionInputSchema = v.object({
 const campaignIdInputEntry = {
   id: requiredString('Campanha é obrigatória'),
 };
+
+const accountabilityCommonInputEntries = {
+  ...campaignIdInputEntry,
+  outcomeSummary: requiredString('O resumo do resultado é obrigatório.'),
+  evidenceUrls: v.pipe(
+    v.array(publicHttpUrl),
+    v.transform((urls) => [...urls]),
+  ),
+};
+
+const physicalCampaignAccountabilityInputSchema = v.object({
+  ...accountabilityCommonInputEntries,
+  type: v.literal(CampaignType.PHYSICAL),
+  totalItems: v.pipe(
+    v.number('O total de itens deve ser um número.'),
+    v.integer('O total de itens deve ser um número inteiro.'),
+    v.minValue(0, 'O total de itens não pode ser negativo.'),
+    v.maxValue(2_147_483_647, 'O total de itens excede o limite permitido.'),
+  ),
+});
+
+const virtualCampaignAccountabilityInputSchema = v.object({
+  ...accountabilityCommonInputEntries,
+  type: v.literal(CampaignType.VIRTUAL),
+  totalAmountCents: v.pipe(
+    v.number('O total em BRL deve ser um número.'),
+    v.integer('O total em BRL deve estar em centavos inteiros.'),
+    v.minValue(0, 'O total em BRL não pode ser negativo.'),
+    v.maxValue(2_147_483_647, 'O total em BRL excede o limite permitido.'),
+  ),
+});
+
+export const campaignAccountabilityInputSchema = v.variant('type', [
+  physicalCampaignAccountabilityInputSchema,
+  virtualCampaignAccountabilityInputSchema,
+]);
 
 export const campaignCollectionPointInputSchema = v.object({
   name: requiredString('Nome do ponto de coleta é obrigatório'),
@@ -215,6 +256,20 @@ export type CampaignProgressUpdateInput = v.InferOutput<typeof campaignProgressU
 export type CampaignLifecycleTransitionInput = v.InferOutput<
   typeof campaignLifecycleTransitionInputSchema
 >;
+export type CampaignAccountabilityInput = v.InferOutput<typeof campaignAccountabilityInputSchema>;
+
+export function parseBrlAmountToCents(value: string): number | null {
+  const normalized = value.trim().replace(',', '.');
+  if (!/^\d+(?:\.\d{1,2})?$/.test(normalized)) return null;
+
+  const [whole, fraction = ''] = normalized.split('.');
+  const cents = Number(whole) * 100 + Number(fraction.padEnd(2, '0'));
+  return Number.isSafeInteger(cents) && cents <= 2_147_483_647 ? cents : null;
+}
+
+export function formatBrlCents(cents: number): string {
+  return (cents / 100).toFixed(2);
+}
 
 function isHttpUrl(value: string): boolean {
   try {

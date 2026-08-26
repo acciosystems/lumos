@@ -20,6 +20,7 @@ const ids = {
     winter: '01BX5ZZKBKACTAV9WEVGEMMVRZ',
     flood: '01BX5ZZKBKACTAV9WEVGEMMVS0',
     school: '01BX5ZZKBKACTAV9WEVGEMMVS1',
+    virtualCompleted: '01BX5ZZKBKACTAV9WEVGEMMVS8',
   },
   collectionPoints: {
     institute: '01BX5ZZKBKACTAV9WEVGEMMVS2',
@@ -439,6 +440,48 @@ async function seed() {
         bankAccountInfo: null,
       },
     }),
+    prisma.campaign.upsert({
+      where: { id: ids.campaigns.virtualCompleted },
+      update: {
+        organizerProfileId: ids.organizers.instituto,
+        title: 'Apoio financeiro para a biblioteca comunitária',
+        description:
+          'Campanha concluída para apoiar a compra de livros e materiais para a biblioteca do bairro.',
+        status: 'COMPLETED',
+        completedAt: daysFromNow(-45),
+        cancelledAt: null,
+        type: CampaignType.VIRTUAL,
+        category: 'Educação',
+        region: 'São Paulo - SP',
+        startDate: daysFromNow(-80),
+        endDate: daysFromNow(-50),
+        location: null,
+        targetItems: null,
+        currentItems: null,
+        pixKey: 'biblioteca@example.com',
+        bankAccountInfo: null,
+      },
+      create: {
+        id: ids.campaigns.virtualCompleted,
+        organizerProfileId: ids.organizers.instituto,
+        title: 'Apoio financeiro para a biblioteca comunitária',
+        description:
+          'Campanha concluída para apoiar a compra de livros e materiais para a biblioteca do bairro.',
+        status: 'COMPLETED',
+        completedAt: daysFromNow(-45),
+        cancelledAt: null,
+        type: CampaignType.VIRTUAL,
+        category: 'Educação',
+        region: 'São Paulo - SP',
+        startDate: daysFromNow(-80),
+        endDate: daysFromNow(-50),
+        location: null,
+        targetItems: null,
+        currentItems: null,
+        pixKey: 'biblioteca@example.com',
+        bankAccountInfo: null,
+      },
+    }),
     ...paginationCampaigns.map(({ id, ...campaign }) =>
       prisma.campaign.upsert({
         where: { id },
@@ -665,16 +708,41 @@ async function seed() {
       totalItems: 342,
       submittedAt: daysFromNow(-25),
       submittedOnTime: true,
-      notes: 'Os materiais foram separados em 57 kits e entregues a duas escolas publicas.',
-      evidencesUrls: ['https://example.com/prestacao-de-contas/material-escolar'],
+      outcomeSummary:
+        'Os materiais foram separados em 57 kits e entregues a duas escolas publicas.',
+      evidenceUrls: ['https://example.com/prestacao-de-contas/material-escolar'],
     },
     create: {
       campaignId: ids.campaigns.school,
       totalItems: 342,
-      notes: 'Os materiais foram separados em 57 kits e entregues a duas escolas publicas.',
-      evidencesUrls: ['https://example.com/prestacao-de-contas/material-escolar'],
+      outcomeSummary:
+        'Os materiais foram separados em 57 kits e entregues a duas escolas publicas.',
+      evidenceUrls: ['https://example.com/prestacao-de-contas/material-escolar'],
       submittedOnTime: true,
       submittedAt: daysFromNow(-25),
+    },
+  });
+
+  await prisma.campaignAccountability.upsert({
+    where: { campaignId: ids.campaigns.virtualCompleted },
+    update: {
+      totalItems: null,
+      totalAmountCents: 18_750,
+      submittedAt: daysFromNow(-40),
+      submittedOnTime: false,
+      outcomeSummary:
+        'A arrecadação financiou 125 livros e a reforma das estantes da biblioteca comunitária.',
+      evidenceUrls: ['https://example.com/prestacao-de-contas/biblioteca-comunitaria'],
+    },
+    create: {
+      campaignId: ids.campaigns.virtualCompleted,
+      totalItems: null,
+      totalAmountCents: 18_750,
+      outcomeSummary:
+        'A arrecadação financiou 125 livros e a reforma das estantes da biblioteca comunitária.',
+      evidenceUrls: ['https://example.com/prestacao-de-contas/biblioteca-comunitaria'],
+      submittedOnTime: false,
+      submittedAt: daysFromNow(-40),
     },
   });
 

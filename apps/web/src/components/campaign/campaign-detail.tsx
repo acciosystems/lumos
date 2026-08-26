@@ -1,5 +1,6 @@
+import { CampaignStatus } from '@lumos/validation/campaign';
 import { formatCnpj } from '@lumos/validation/organizer';
-import { IconCalendar, IconMapPin, IconUsers } from '@tabler/icons-react';
+import { IconCalendar, IconExternalLink, IconMapPin, IconUsers } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -60,15 +61,25 @@ export function CampaignDetail({
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <Card>
           <CardHeader>
-            <CardTitle>Como doar</CardTitle>
+            <CardTitle>
+              {campaign.status === CampaignStatus.COMPLETED ? 'Campanha concluída' : 'Como doar'}
+            </CardTitle>
             <CardDescription>
-              {isPhysicalCampaign(campaign.type)
-                ? 'Entregue os itens em um dos pontos de coleta cadastrados.'
-                : 'Contribua diretamente usando os dados de pagamento do organizador.'}
+              {campaign.status === CampaignStatus.COMPLETED
+                ? campaign.accountability
+                  ? 'Esta campanha foi encerrada. Consulte abaixo a prestação de contas publicada.'
+                  : 'Esta campanha foi encerrada. A prestação de contas ainda não foi publicada.'
+                : isPhysicalCampaign(campaign.type)
+                  ? 'Entregue os itens em um dos pontos de coleta cadastrados.'
+                  : 'Contribua diretamente usando os dados de pagamento do organizador.'}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            {isPhysicalCampaign(campaign.type) ? (
+            {campaign.status === CampaignStatus.COMPLETED ? (
+              <p className="text-sm text-muted-foreground">
+                Não são aceitas novas doações para esta campanha.
+              </p>
+            ) : isPhysicalCampaign(campaign.type) ? (
               <>
                 <div className="grid gap-3 text-sm">
                   {campaign.location && (
@@ -135,6 +146,13 @@ export function CampaignDetail({
         </Card>
       </div>
 
+      {campaign.accountability && (
+        <CampaignAccountabilityReport
+          campaignType={campaign.type}
+          report={campaign.accountability}
+        />
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Atualizações</CardTitle>
@@ -167,6 +185,73 @@ export function CampaignDetail({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function CampaignAccountabilityReport({
+  campaignType,
+  report,
+}: {
+  campaignType: CampaignDetailData['type'];
+  report: NonNullable<CampaignDetailData['accountability']>;
+}) {
+  const total = isPhysicalCampaign(campaignType)
+    ? `${report.totalItems ?? 0} itens coletados`
+    : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+        (report.totalAmountCents ?? 0) / 100,
+      );
+  const evidenceKeyCounts = new Map<string, number>();
+  const evidenceItems = report.evidenceUrls.map((url) => {
+    const occurrence = evidenceKeyCounts.get(url) ?? 0;
+    evidenceKeyCounts.set(url, occurrence + 1);
+
+    return { key: JSON.stringify([url, occurrence]), url };
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Prestação de contas</CardTitle>
+        <CardDescription>Resultado informado pelo organizador após o encerramento.</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        <DetailRow
+          label={isPhysicalCampaign(campaignType) ? 'Total de itens' : 'Total arrecadado'}
+          value={total}
+        />
+        <div className="grid gap-1">
+          <span className="text-muted-foreground">Resumo do resultado</span>
+          <p className="font-medium whitespace-pre-wrap">{report.outcomeSummary}</p>
+        </div>
+        {report.evidenceUrls.length > 0 && (
+          <div className="grid gap-2">
+            <span className="text-muted-foreground">Evidências públicas</span>
+            <ItemGroup>
+              {evidenceItems.map(({ key, url }) => (
+                <Item
+                  key={key}
+                  variant="outline"
+                  size="sm"
+                  render={
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Abrir evidência ${url}`}
+                    />
+                  }
+                >
+                  <ItemContent>
+                    <ItemTitle className="wrap-break-word">{url}</ItemTitle>
+                  </ItemContent>
+                  <IconExternalLink className="size-4 shrink-0" />
+                </Item>
+              ))}
+            </ItemGroup>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 

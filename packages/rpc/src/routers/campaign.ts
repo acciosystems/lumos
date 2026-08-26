@@ -7,6 +7,7 @@ import {
   campaignCreateInputSchema,
   campaignLifecycleTransitionInputSchema,
   campaignListInputSchema,
+  campaignAccountabilityInputSchema,
   campaignDetailsUpdateInputSchema,
   campaignPublishUpdateInputSchema,
   campaignProgressUpdateInputSchema,
@@ -16,6 +17,12 @@ import { ORPCError } from '@orpc/client';
 import * as v from 'valibot';
 
 import { authorized, publicProcedure } from '../procedures';
+import {
+  getCampaignAccountabilityDeadline,
+  getCampaignAccountabilityStatus,
+  saveCampaignAccountability,
+  toPublicCampaignAccountability,
+} from '../services/campaign-accountability';
 import { toCampaignCreateData } from '../services/campaign-create';
 import {
   toCampaignCollectionPointData,
@@ -83,6 +90,7 @@ const publicCampaignListSelect = {
 
 const publicCampaignDetailSelect = {
   ...publicCampaignListSelect,
+  status: true,
   location: true,
   targetItems: true,
   currentItems: true,
@@ -119,6 +127,14 @@ const publicCampaignDetailSelect = {
     orderBy: { publishedAt: 'desc' as const },
     take: 5,
   },
+  accountability: {
+    select: {
+      totalItems: true,
+      totalAmountCents: true,
+      outcomeSummary: true,
+      evidenceUrls: true,
+    },
+  },
 } as const satisfies CampaignSelect;
 
 function withParticipantCount<Campaign extends { _count: { participants: number } }>(
@@ -126,6 +142,44 @@ function withParticipantCount<Campaign extends { _count: { participants: number 
 ) {
   const { _count, ...campaignData } = campaign;
   return { ...campaignData, participantCount: _count.participants };
+}
+
+function withOwnerCampaignData<
+  Campaign extends {
+    _count: { participants: number };
+    status: string;
+    endDate: Date;
+    accountability: {
+      id: string;
+      campaignId: string;
+      totalItems: number | null;
+      totalAmountCents: number | null;
+      outcomeSummary: string;
+      evidenceUrls: string[] | null;
+      submittedAt: Date;
+      submittedOnTime: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+    } | null;
+  },
+>(campaign: Campaign) {
+  const { _count, accountability, ...campaignData } = campaign;
+  const deadline =
+    campaign.status === 'COMPLETED' ? getCampaignAccountabilityDeadline(campaign.endDate) : null;
+
+  return {
+    ...campaignData,
+    accountability: accountability
+      ? { ...accountability, evidenceUrls: accountability.evidenceUrls ?? [] }
+      : null,
+    participantCount: _count.participants,
+    accountabilityDeadline: deadline,
+    accountabilityStatus: getCampaignAccountabilityStatus({
+      campaignStatus: campaign.status,
+      accountability: campaign.accountability,
+      deadline,
+    }),
+  };
 }
 
 function assertCampaignAcceptsParticipation(campaign: {
@@ -224,16 +278,23 @@ export const campaignRouter = {
     const campaign = await prisma.campaign.findFirst({
       where: {
         id: input.id,
-        status: 'ACTIVE',
+        status: { in: ['ACTIVE', 'COMPLETED'] },
       },
       select: publicCampaignDetailSelect,
     });
 
     if (!campaign) {
-      throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada ou não está ativa.' });
+      throw new ORPCError('NOT_FOUND', {
+        message: 'Campanha não encontrada ou não está disponível publicamente.',
+      });
     }
 
-    return withParticipantCount(campaign);
+    const publicCampaign = withParticipantCount(campaign);
+    return {
+      ...publicCampaign,
+      accountability: toPublicCampaignAccountability(campaign.accountability),
+      ...(campaign.status === 'COMPLETED' ? { pixKey: null, bankAccountInfo: null } : {}),
+    };
   }),
 
   byId: authorized.input(campaignByIdInputSchema).handler(async ({ input, context: { user } }) => {
@@ -249,12 +310,7 @@ export const campaignRouter = {
       throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
     }
 
-    const { _count, ...campaignData } = campaign;
-
-    return {
-      ...campaignData,
-      participantCount: _count.participants,
-    };
+    return withOwnerCampaignData(campaign);
   }),
 
   myCampaigns: authorized.handler(async ({ context: { user } }) => {
@@ -635,6 +691,12 @@ export const campaignRouter = {
 
         return { status: input.status, transitionedAt };
       }),
+    ),
+
+  saveAccountability: authorized
+    .input(campaignAccountabilityInputSchema)
+    .handler(async ({ input, context: { user } }) =>
+      prisma.$transaction((transaction) => saveCampaignAccountability(transaction, user.id, input)),
     ),
 
   create: authorized

@@ -125,9 +125,12 @@ model CampaignAccountability {
   id         String @id @default(ulid())
   campaignId String @unique
 
-  totalItems    Int
-  notes         String?
-  evidencesUrls String[]
+  // Exactly one total is populated according to the campaign type. Integer
+  // cents keep virtual totals exact across database and JSON boundaries.
+  totalItems      Int?
+  totalAmountCents Int?
+  outcomeSummary  String
+  evidenceUrls    String[]
 
   submittedAt     DateTime @default(now())
   submittedOnTime Boolean
