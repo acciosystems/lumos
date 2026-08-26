@@ -15,7 +15,7 @@
   "scripts": {
     "lint": "oxlint",
     "format": "oxfmt",
-    "cloc": "cloc --exclude-dir=node_modules,.git,.output,.turbo,dist,build,coverage ."
+    "cloc": "cloc --exclude-dir=node_modules,.git,.output,.turbo,dist,build,coverage,generated ."
   },
   "devDependencies": {
     "@types/bun": "latest",
