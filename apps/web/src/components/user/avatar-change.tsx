@@ -22,6 +22,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { useStrictAuth } from '@/lib/auth/hooks';
 import { rpc } from '@/lib/rpc';
 import { prepareAvatar } from '@/utils/image';
+import { reconcileSingleWriteUpload } from '@/utils/upload';
 
 const formSchema = v.object({
   image: imageSchema,
@@ -36,22 +37,29 @@ export function UserAvatarChange() {
     mutationFn: async (file: File) => {
       const image = await prepareAvatar(file);
 
-      const { signedUrl, eventId } = await rpc.user.avatar.getUploadUrl.call();
-
-      await ky.put(signedUrl, {
-        body: image,
-        headers: {
-          'Content-Type': 'image/webp',
-        },
+      const { signedUrl, uploadId } = await rpc.user.avatar.getUploadUrl.call({
+        contentType: image.type,
+        contentLength: image.size,
       });
 
-      await rpc.user.avatar.confirmUpload.call({ eventId });
+      await reconcileSingleWriteUpload(
+        () =>
+          ky.put(signedUrl, {
+            body: image,
+            headers: {
+              'Content-Type': image.type,
+              'If-None-Match': '*',
+            },
+            // This URL is single-write. A retry after a lost success response
+            // would receive 412 even though R2 already stored the object.
+            retry: 0,
+          }),
+        () => rpc.user.avatar.confirmUpload.call({ uploadId }),
+      );
     },
     onSuccess: async () => {
       await refreshSession();
-      toast.success('Foto de perfil atualizada com sucesso', {
-        description: 'A mudança pode levar alguns minutos a se refletir',
-      });
+      toast.success('Foto de perfil atualizada com sucesso');
       setOpen(false);
       form.reset();
     },

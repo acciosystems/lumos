@@ -1,0 +1,14 @@
+{
+  "rules": [
+    {
+      "id": "lumos-web",
+      "allowed": {
+        "origins": ["http://localhost:3000"],
+        "methods": ["GET", "PUT"],
+        "headers": ["content-type", "if-none-match"]
+      },
+      "exposeHeaders": ["ETag"],
+      "maxAgeSeconds": 3600
+    }
+  ]
+}

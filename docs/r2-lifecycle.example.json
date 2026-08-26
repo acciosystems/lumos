@@ -1,0 +1,17 @@
+{
+  "rules": [
+    {
+      "id": "expire-avatar-staging",
+      "enabled": true,
+      "conditions": {
+        "prefix": "avatar-staging/"
+      },
+      "deleteObjectsTransition": {
+        "condition": {
+          "type": "Age",
+          "maxAge": 86400
+        }
+      }
+    }
+  ]
+}
