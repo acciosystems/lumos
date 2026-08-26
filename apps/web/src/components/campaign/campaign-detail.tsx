@@ -69,19 +69,30 @@ export function CampaignDetail({
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             {isPhysicalCampaign(campaign.type) ? (
-              <ItemGroup>
-                {campaign.collectionPoints.map((point) => (
-                  <Item key={point.id} variant="outline">
-                    <ItemContent>
-                      <ItemTitle>{point.name}</ItemTitle>
-                      <ItemDescription>
-                        {point.address}, {point.city} - {point.state}, {point.zipCode}
-                      </ItemDescription>
-                      {point.instructions && <p>{point.instructions}</p>}
-                    </ItemContent>
-                  </Item>
-                ))}
-              </ItemGroup>
+              <>
+                <div className="grid gap-3 text-sm">
+                  {campaign.location && (
+                    <DetailRow label="Local principal" value={campaign.location} />
+                  )}
+                  <DetailRow
+                    label="Meta de itens"
+                    value={`${campaign.currentItems ?? 0} de ${campaign.targetItems ?? 0} itens`}
+                  />
+                </div>
+                <ItemGroup>
+                  {campaign.collectionPoints.map((point) => (
+                    <Item key={point.id} variant="outline">
+                      <ItemContent>
+                        <ItemTitle>{point.name}</ItemTitle>
+                        <ItemDescription>
+                          {point.address}, {point.city} - {point.state}, {point.zipCode}
+                        </ItemDescription>
+                        {point.instructions && <p>{point.instructions}</p>}
+                      </ItemContent>
+                    </Item>
+                  ))}
+                </ItemGroup>
+              </>
             ) : (
               <div className="grid gap-3 text-sm">
                 {campaign.pixKey && <DetailRow label="PIX" value={campaign.pixKey} />}
@@ -138,7 +149,9 @@ export function CampaignDetail({
                       {update.message}
                     </ItemDescription>
                     <ItemDescription className="text-xs">
-                      {format(update.publishedAt, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                      {format(update.publishedAt, "dd 'de' MMMM 'de' yyyy 'às' HH:mm", {
+                        locale: ptBR,
+                      })}
                     </ItemDescription>
                   </ItemContent>
                 </Item>

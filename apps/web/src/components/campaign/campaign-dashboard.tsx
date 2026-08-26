@@ -1,6 +1,11 @@
-import { CampaignStatus, type CampaignProgressUpdateInput } from '@lumos/validation/campaign';
-import { IconCircleCheck, IconCircleX, IconUsers } from '@tabler/icons-react';
+import {
+  CampaignStatus,
+  type CampaignProgressUpdateInput,
+  type CampaignPublishUpdateInput,
+} from '@lumos/validation/campaign';
+import { IconCircleCheck, IconCircleX, IconEdit, IconSend, IconUsers } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
@@ -24,6 +29,7 @@ import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Progress, ProgressLabel } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/spinner';
+import { Textarea } from '@/components/ui/textarea';
 import { invalidateCampaignManagement } from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 import { campaignStatusMetadata } from '@/utils/campaign-status';
@@ -69,13 +75,24 @@ export function CampaignDashboard({ campaign }: { campaign: OwnerCampaign }) {
   return (
     <div className="flex w-full flex-col gap-5">
       <section className="flex flex-col gap-4" aria-labelledby="campaign-management-title">
-        <div>
-          <h2 id="campaign-management-title" className="font-heading text-2xl font-semibold">
-            Painel da campanha
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Acompanhe a participação, o progresso e o ciclo de vida da sua campanha.
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 id="campaign-management-title" className="font-heading text-2xl font-semibold">
+              Painel de controle
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Acompanhe a participação, o progresso e o ciclo de vida da sua campanha.
+            </p>
+          </div>
+          {isActive && (
+            <Button
+              nativeButton={false}
+              variant="outline"
+              render={<Link to="/campaigns/my/$id/edit" params={{ id: campaign.id }} />}
+            >
+              <IconEdit /> Editar detalhes
+            </Button>
+          )}
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
@@ -158,17 +175,88 @@ export function CampaignDashboard({ campaign }: { campaign: OwnerCampaign }) {
         )}
 
         <CampaignLifecycleControls campaign={campaign} />
+        {isActive && <CampaignUpdateComposer campaignId={campaign.id} />}
       </section>
 
-      <CampaignDetail
-        campaign={campaign}
-        action={
-          <Badge variant={campaignStatusMetadata[campaign.status].variant}>
-            {campaignStatusMetadata[campaign.status].label}
-          </Badge>
-        }
-      />
+      <section
+        className="flex flex-col gap-4 border-t pt-6"
+        aria-labelledby="campaign-current-preview-title"
+      >
+        <div>
+          <h2 id="campaign-current-preview-title" className="font-heading text-2xl font-semibold">
+            Visualização pública atual
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            É assim que a campanha aparece para os doadores.
+          </p>
+        </div>
+        <CampaignDetail
+          campaign={campaign}
+          action={
+            <Badge variant={campaignStatusMetadata[campaign.status].variant}>
+              {campaignStatusMetadata[campaign.status].label}
+            </Badge>
+          }
+        />
+      </section>
     </div>
+  );
+}
+
+function CampaignUpdateComposer({ campaignId }: { campaignId: string }) {
+  const queryClient = useQueryClient();
+  const [message, setMessage] = useState('');
+  const mutation = useMutation(
+    rpc.campaign.publishUpdate.mutationOptions({
+      onSuccess: async () => {
+        await invalidateCampaignManagement(queryClient, campaignId);
+        setMessage('');
+        toast.success('Atualização publicada.');
+      },
+      onError: (error) =>
+        toast.error('Não foi possível publicar a atualização.', { description: error.message }),
+    }),
+  );
+
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const input = { id: campaignId, message: message.trim() } satisfies CampaignPublishUpdateInput;
+    if (input.message) mutation.mutate(input);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Publicar atualização</CardTitle>
+        <CardDescription>
+          Compartilhe mudanças de local, horário ou outras informações importantes com os doadores.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form className="flex flex-col gap-3" onSubmit={submit}>
+          <Field>
+            <FieldLabel htmlFor="campaign-update-message">Mensagem</FieldLabel>
+            <Textarea
+              id="campaign-update-message"
+              value={message}
+              maxLength={2000}
+              placeholder="Informe uma novidade sobre a campanha"
+              disabled={mutation.isPending}
+              onChange={(event) => setMessage(event.target.value)}
+            />
+            <FieldDescription>{message.length}/2.000 caracteres</FieldDescription>
+          </Field>
+          <Button
+            type="submit"
+            className="self-start"
+            disabled={!message.trim() || mutation.isPending}
+          >
+            {mutation.isPending ? <Spinner /> : <IconSend />}
+            {mutation.isPending ? 'Publicando...' : 'Publicar atualização'}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 

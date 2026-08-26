@@ -68,7 +68,21 @@ export const campaignLifecycleTransitionInputSchema = v.object({
   status: v.picklist([CampaignStatus.COMPLETED, CampaignStatus.CANCELLED]),
 });
 
+const campaignIdInputEntry = {
+  id: requiredString('Campanha é obrigatória'),
+};
+
 export const campaignCollectionPointInputSchema = v.object({
+  name: requiredString('Nome do ponto de coleta é obrigatório'),
+  address: requiredString('Endereço é obrigatório'),
+  city: requiredString('Cidade é obrigatória'),
+  state: requiredString('Estado é obrigatório'),
+  zipCode: requiredString('CEP é obrigatório'),
+  instructions: optionalString,
+});
+
+const campaignCollectionPointUpdateInputSchema = v.object({
+  id: v.optional(requiredString('Identificador do ponto de coleta inválido.')),
   name: requiredString('Nome do ponto de coleta é obrigatório'),
   address: requiredString('Endereço é obrigatório'),
   city: requiredString('Cidade é obrigatória'),
@@ -85,6 +99,15 @@ const campaignCommonInputEntries = {
   startDate: requiredDate('Data inicial é obrigatória'),
   endDate: requiredDate('Data final é obrigatória'),
   imageUrl: optionalHttpUrl,
+};
+
+const campaignEditableCommonInputEntries = {
+  title: requiredString('Título é obrigatório'),
+  description: requiredString('Descrição é obrigatória'),
+  category: requiredString('Categoria é obrigatória'),
+  region: requiredString('Região é obrigatória'),
+  startDate: requiredDate('Data inicial é obrigatória'),
+  endDate: requiredDate('Data final é obrigatória'),
 };
 
 const physicalCampaignCreateInputSchema = v.object({
@@ -129,8 +152,65 @@ export const campaignCreateInputSchema = v.pipe(
   ),
 );
 
+const physicalCampaignDetailsUpdateInputSchema = v.object({
+  ...campaignIdInputEntry,
+  ...campaignEditableCommonInputEntries,
+  type: v.literal(CampaignType.PHYSICAL),
+  location: requiredString('Local principal é obrigatório'),
+  targetItems: v.pipe(
+    v.number('Meta de itens é obrigatória'),
+    v.integer('Meta de itens deve ser um número inteiro.'),
+    v.minValue(1, 'Meta de itens deve ser maior que zero.'),
+  ),
+  collectionPoints: v.pipe(
+    v.array(campaignCollectionPointUpdateInputSchema),
+    v.minLength(1, 'Informe pelo menos um ponto de coleta.'),
+  ),
+});
+
+const virtualCampaignDetailsUpdateInputSchema = v.object({
+  ...campaignIdInputEntry,
+  ...campaignEditableCommonInputEntries,
+  type: v.literal(CampaignType.VIRTUAL),
+  pixKey: optionalString,
+  bankAccountInfo: optionalString,
+});
+
+export const campaignDetailsUpdateInputSchema = v.pipe(
+  v.variant('type', [
+    physicalCampaignDetailsUpdateInputSchema,
+    virtualCampaignDetailsUpdateInputSchema,
+  ]),
+  v.forward(
+    v.check(
+      (input) =>
+        !isIsoDate(input.startDate) || !isIsoDate(input.endDate) || input.endDate > input.startDate,
+      'Data final deve ser posterior à data inicial.',
+    ),
+    ['endDate'],
+  ),
+  v.forward(
+    v.check(
+      (input) =>
+        input.type !== CampaignType.VIRTUAL || Boolean(input.pixKey || input.bankAccountInfo),
+      'Informe uma chave PIX ou os dados bancários.',
+    ),
+    ['pixKey'],
+  ),
+);
+
+export const campaignPublishUpdateInputSchema = v.object({
+  id: requiredString('Campanha é obrigatória'),
+  message: v.pipe(
+    requiredString('A mensagem da atualização é obrigatória'),
+    v.maxLength(2_000, 'A mensagem deve ter no máximo 2.000 caracteres.'),
+  ),
+});
+
 export type CampaignListInput = v.InferOutput<typeof campaignListInputSchema>;
 export type CampaignCreateInput = v.InferOutput<typeof campaignCreateInputSchema>;
+export type CampaignDetailsUpdateInput = v.InferOutput<typeof campaignDetailsUpdateInputSchema>;
+export type CampaignPublishUpdateInput = v.InferOutput<typeof campaignPublishUpdateInputSchema>;
 export type CampaignProgressUpdateInput = v.InferOutput<typeof campaignProgressUpdateInputSchema>;
 export type CampaignLifecycleTransitionInput = v.InferOutput<
   typeof campaignLifecycleTransitionInputSchema

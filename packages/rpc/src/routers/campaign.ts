@@ -7,6 +7,8 @@ import {
   campaignCreateInputSchema,
   campaignLifecycleTransitionInputSchema,
   campaignListInputSchema,
+  campaignDetailsUpdateInputSchema,
+  campaignPublishUpdateInputSchema,
   campaignProgressUpdateInputSchema,
   type CampaignCreateInput,
 } from '@lumos/validation/campaign';
@@ -15,6 +17,11 @@ import * as v from 'valibot';
 
 import { authorized, publicProcedure } from '../procedures';
 import { toCampaignCreateData } from '../services/campaign-create';
+import {
+  toCampaignCollectionPointData,
+  toCampaignCollectionPointFields,
+  toCampaignUpdateData,
+} from '../services/campaign-update';
 
 const activeParticipantWhere = { cancelledAt: null } as const;
 
@@ -32,6 +39,11 @@ const campaignInclude = {
     orderBy: { createdAt: 'asc' as const },
   },
   updates: {
+    select: {
+      id: true,
+      message: true,
+      publishedAt: true,
+    },
     orderBy: { publishedAt: 'desc' as const },
     take: 5,
   },
@@ -431,6 +443,160 @@ export const campaignRouter = {
         }
 
         return { currentItems: input.currentItems };
+      }),
+    ),
+
+  updateDetails: authorized
+    .input(campaignDetailsUpdateInputSchema)
+    .handler(async ({ input, context: { user } }) =>
+      prisma.$transaction(async (transaction) => {
+        await transaction.$queryRaw(
+          Prisma.sql`SELECT "id" FROM "campaigns" WHERE "id" = ${input.id} FOR UPDATE`,
+        );
+
+        const campaign = await transaction.campaign.findFirst({
+          where: {
+            id: input.id,
+            organizerProfile: { userId: user.id },
+          },
+          select: { status: true, type: true },
+        });
+
+        if (!campaign) {
+          throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
+        }
+
+        assertCampaignIsActive(campaign);
+
+        if (campaign.type !== input.type) {
+          throw new ORPCError('BAD_REQUEST', {
+            message: 'O tipo da campanha não pode ser alterado.',
+          });
+        }
+
+        const startDate = parseDate(input.startDate, 'A data inicial');
+        const endDate = parseDate(input.endDate, 'A data final');
+
+        if (endDate <= startDate) {
+          throw new ORPCError('BAD_REQUEST', {
+            message: 'A data final deve ser posterior à data inicial.',
+          });
+        }
+
+        const result = await transaction.campaign.updateMany({
+          where: { id: input.id, status: 'ACTIVE', type: input.type },
+          data: toCampaignUpdateData(input, { startDate, endDate }),
+        });
+
+        if (!result.count) {
+          throw new ORPCError('BAD_REQUEST', {
+            message: 'A campanha não está mais ativa para editar seus detalhes.',
+          });
+        }
+
+        if (input.type === CampaignType.PHYSICAL) {
+          const existingPoints = await transaction.campaignCollectionPoint.findMany({
+            where: { campaignId: input.id },
+            select: { id: true },
+          });
+          const existingPointIds = new Set(existingPoints.map((point) => point.id));
+          const retainedPointIds = input.collectionPoints.flatMap((point) =>
+            point.id ? [point.id] : [],
+          );
+          const retainedPointIdSet = new Set(retainedPointIds);
+
+          if (
+            retainedPointIds.length !== retainedPointIdSet.size ||
+            retainedPointIds.some((pointId) => !existingPointIds.has(pointId))
+          ) {
+            throw new ORPCError('BAD_REQUEST', {
+              message: 'Um ou mais pontos de coleta não pertencem à campanha.',
+            });
+          }
+
+          await transaction.campaignCollectionPoint.deleteMany({
+            where: {
+              campaignId: input.id,
+              ...(retainedPointIds.length ? { id: { notIn: retainedPointIds } } : {}),
+            },
+          });
+
+          await Promise.all(
+            input.collectionPoints.flatMap((point) =>
+              point.id
+                ? [
+                    transaction.campaignCollectionPoint.update({
+                      where: { id: point.id },
+                      data: toCampaignCollectionPointFields(point),
+                    }),
+                  ]
+                : [],
+            ),
+          );
+
+          const newPointData = toCampaignCollectionPointData(
+            {
+              ...input,
+              collectionPoints: input.collectionPoints.filter((point) => !point.id),
+            },
+            input.id,
+          );
+          if (newPointData.length) {
+            await transaction.campaignCollectionPoint.createMany({ data: newPointData });
+          }
+        }
+
+        const updatedCampaign = await transaction.campaign.findFirst({
+          where: {
+            id: input.id,
+            organizerProfile: { userId: user.id },
+          },
+          include: campaignInclude,
+        });
+
+        if (!updatedCampaign) {
+          throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
+        }
+
+        const { _count, ...campaignData } = updatedCampaign;
+        return { ...campaignData, participantCount: _count.participants };
+      }),
+    ),
+
+  publishUpdate: authorized
+    .input(campaignPublishUpdateInputSchema)
+    .handler(async ({ input, context: { user } }) =>
+      prisma.$transaction(async (transaction) => {
+        await transaction.$queryRaw(
+          Prisma.sql`SELECT "id" FROM "campaigns" WHERE "id" = ${input.id} FOR UPDATE`,
+        );
+
+        const campaign = await transaction.campaign.findFirst({
+          where: {
+            id: input.id,
+            organizerProfile: { userId: user.id },
+          },
+          select: { status: true },
+        });
+
+        if (!campaign) {
+          throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
+        }
+
+        assertCampaignIsActive(campaign);
+
+        return transaction.campaignUpdate.create({
+          data: {
+            campaignId: input.id,
+            authorId: user.id,
+            message: input.message,
+          },
+          select: {
+            id: true,
+            message: true,
+            publishedAt: true,
+          },
+        });
       }),
     ),
 

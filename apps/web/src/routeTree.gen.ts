@@ -28,6 +28,7 @@ import { Route as publicCampaignsIdRouteImport } from './routes/(public)/campaig
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
 import { Route as appCampaignsMyIdRouteImport } from './routes/(app)/campaigns/my_.$id'
+import { Route as appCampaignsMyIdEditRouteImport } from './routes/(app)/campaigns/my_.$id_.edit'
 
 const appRouteRoute = appRouteRouteImport.update({
   id: '/(app)',
@@ -122,6 +123,11 @@ const appCampaignsMyIdRoute = appCampaignsMyIdRouteImport.update({
   path: '/campaigns/my/$id',
   getParentRoute: () => appRouteRoute,
 } as any)
+const appCampaignsMyIdEditRoute = appCampaignsMyIdEditRouteImport.update({
+  id: '/campaigns/my_/$id_/edit',
+  path: '/campaigns/my/$id/edit',
+  getParentRoute: () => appRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/organizer-profile': typeof appOrganizerProfileRoute
@@ -139,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/campaigns/': typeof publicCampaignsIndexRoute
   '/campaigns/my/$id': typeof appCampaignsMyIdRoute
+  '/campaigns/my/$id/edit': typeof appCampaignsMyIdEditRoute
 }
 export interface FileRoutesByTo {
   '/organizer-profile': typeof appOrganizerProfileRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/campaigns': typeof publicCampaignsIndexRoute
   '/campaigns/my/$id': typeof appCampaignsMyIdRoute
+  '/campaigns/my/$id/edit': typeof appCampaignsMyIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/(public)/campaigns/': typeof publicCampaignsIndexRoute
   '/(app)/campaigns/my_/$id': typeof appCampaignsMyIdRoute
+  '/(app)/campaigns/my_/$id_/edit': typeof appCampaignsMyIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/campaigns/'
     | '/campaigns/my/$id'
+    | '/campaigns/my/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/organizer-profile'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/campaigns'
     | '/campaigns/my/$id'
+    | '/campaigns/my/$id/edit'
   id:
     | '__root__'
     | '/(app)'
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/(public)/campaigns/'
     | '/(app)/campaigns/my_/$id'
+    | '/(app)/campaigns/my_/$id_/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -381,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appCampaignsMyIdRouteImport
       parentRoute: typeof appRouteRoute
     }
+    '/(app)/campaigns/my_/$id_/edit': {
+      id: '/(app)/campaigns/my_/$id_/edit'
+      path: '/campaigns/my/$id/edit'
+      fullPath: '/campaigns/my/$id/edit'
+      preLoaderRoute: typeof appCampaignsMyIdEditRouteImport
+      parentRoute: typeof appRouteRoute
+    }
   }
 }
 
@@ -392,6 +411,7 @@ interface appRouteRouteChildren {
   appCampaignsParticipatingRoute: typeof appCampaignsParticipatingRoute
   appSettingsChar123TabChar125Route: typeof appSettingsChar123TabChar125Route
   appCampaignsMyIdRoute: typeof appCampaignsMyIdRoute
+  appCampaignsMyIdEditRoute: typeof appCampaignsMyIdEditRoute
 }
 
 const appRouteRouteChildren: appRouteRouteChildren = {
@@ -402,6 +422,7 @@ const appRouteRouteChildren: appRouteRouteChildren = {
   appCampaignsParticipatingRoute: appCampaignsParticipatingRoute,
   appSettingsChar123TabChar125Route: appSettingsChar123TabChar125Route,
   appCampaignsMyIdRoute: appCampaignsMyIdRoute,
+  appCampaignsMyIdEditRoute: appCampaignsMyIdEditRoute,
 }
 
 const appRouteRouteWithChildren = appRouteRoute._addFileChildren(
