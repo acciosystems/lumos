@@ -3,11 +3,8 @@ import * as v from 'valibot';
 
 export const env = createEnv({
   server: {
-    EMAIL_HOST: v.pipe(v.string(), v.domain()),
-    EMAIL_PORT: v.pipe(v.string(), v.toNumber()),
-    EMAIL_USER: v.string(),
-    EMAIL_PASSWORD: v.string(),
-    EMAIL_FROM: v.string(),
+    RESEND_API_KEY: v.pipe(v.string(), v.startsWith('re_')),
+    EMAIL_FROM: v.pipe(v.string(), v.email()),
   },
 
   runtimeEnv: process.env,
