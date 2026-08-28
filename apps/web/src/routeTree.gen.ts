@@ -13,11 +13,11 @@ import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as publicRouteRouteImport } from './routes/(public)/route'
 import { Route as specialRouteRouteImport } from './routes/(special)/route'
-import { Route as appIndexRouteImport } from './routes/(app)/index'
 import { Route as appOrganizerProfileRouteImport } from './routes/(app)/organizer-profile'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authSignUpRouteImport } from './routes/(auth)/sign-up'
+import { Route as publicIndexRouteImport } from './routes/(public)/index'
 import { Route as specialResetPasswordRouteImport } from './routes/(special)/reset-password'
 import { Route as appCampaignsMyRouteImport } from './routes/(app)/campaigns/my'
 import { Route as appCampaignsNewRouteImport } from './routes/(app)/campaigns/new'
@@ -46,11 +46,6 @@ const specialRouteRoute = specialRouteRouteImport.update({
   id: '/(special)',
   getParentRoute: () => rootRouteImport,
 } as any)
-const appIndexRoute = appIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => appRouteRoute,
-} as any)
 const appOrganizerProfileRoute = appOrganizerProfileRouteImport.update({
   id: '/organizer-profile',
   path: '/organizer-profile',
@@ -70,6 +65,11 @@ const authSignUpRoute = authSignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
   getParentRoute: () => authRouteRoute,
+} as any)
+const publicIndexRoute = publicIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => publicRouteRoute,
 } as any)
 const specialResetPasswordRoute = specialResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -135,7 +135,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/reset-password': typeof specialResetPasswordRoute
-  '/': typeof appIndexRoute
+  '/': typeof publicIndexRoute
   '/campaigns/my': typeof appCampaignsMyRoute
   '/campaigns/new': typeof appCampaignsNewRoute
   '/campaigns/participating': typeof appCampaignsParticipatingRoute
@@ -153,7 +153,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof authSignInRoute
   '/sign-up': typeof authSignUpRoute
   '/reset-password': typeof specialResetPasswordRoute
-  '/': typeof appIndexRoute
+  '/': typeof publicIndexRoute
   '/campaigns/my': typeof appCampaignsMyRoute
   '/campaigns/new': typeof appCampaignsNewRoute
   '/campaigns/participating': typeof appCampaignsParticipatingRoute
@@ -176,7 +176,7 @@ export interface FileRoutesById {
   '/(auth)/sign-in': typeof authSignInRoute
   '/(auth)/sign-up': typeof authSignUpRoute
   '/(special)/reset-password': typeof specialResetPasswordRoute
-  '/(app)/': typeof appIndexRoute
+  '/(public)/': typeof publicIndexRoute
   '/(app)/campaigns/my': typeof appCampaignsMyRoute
   '/(app)/campaigns/new': typeof appCampaignsNewRoute
   '/(app)/campaigns/participating': typeof appCampaignsParticipatingRoute
@@ -236,7 +236,7 @@ export interface FileRouteTypes {
     | '/(auth)/sign-in'
     | '/(auth)/sign-up'
     | '/(special)/reset-password'
-    | '/(app)/'
+    | '/(public)/'
     | '/(app)/campaigns/my'
     | '/(app)/campaigns/new'
     | '/(app)/campaigns/participating'
@@ -288,13 +288,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof specialRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/(app)/': {
-      id: '/(app)/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof appIndexRouteImport
-      parentRoute: typeof appRouteRoute
-    }
     '/(app)/organizer-profile': {
       id: '/(app)/organizer-profile'
       path: '/organizer-profile'
@@ -322,6 +315,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/sign-up'
       preLoaderRoute: typeof authSignUpRouteImport
       parentRoute: typeof authRouteRoute
+    }
+    '/(public)/': {
+      id: '/(public)/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof publicIndexRouteImport
+      parentRoute: typeof publicRouteRoute
     }
     '/(special)/reset-password': {
       id: '/(special)/reset-password'
@@ -405,7 +405,6 @@ declare module '@tanstack/react-router' {
 
 interface appRouteRouteChildren {
   appOrganizerProfileRoute: typeof appOrganizerProfileRoute
-  appIndexRoute: typeof appIndexRoute
   appCampaignsMyRoute: typeof appCampaignsMyRoute
   appCampaignsNewRoute: typeof appCampaignsNewRoute
   appCampaignsParticipatingRoute: typeof appCampaignsParticipatingRoute
@@ -416,7 +415,6 @@ interface appRouteRouteChildren {
 
 const appRouteRouteChildren: appRouteRouteChildren = {
   appOrganizerProfileRoute: appOrganizerProfileRoute,
-  appIndexRoute: appIndexRoute,
   appCampaignsMyRoute: appCampaignsMyRoute,
   appCampaignsNewRoute: appCampaignsNewRoute,
   appCampaignsParticipatingRoute: appCampaignsParticipatingRoute,
@@ -446,11 +444,13 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 )
 
 interface publicRouteRouteChildren {
+  publicIndexRoute: typeof publicIndexRoute
   publicCampaignsIdRoute: typeof publicCampaignsIdRoute
   publicCampaignsIndexRoute: typeof publicCampaignsIndexRoute
 }
 
 const publicRouteRouteChildren: publicRouteRouteChildren = {
+  publicIndexRoute: publicIndexRoute,
   publicCampaignsIdRoute: publicCampaignsIdRoute,
   publicCampaignsIndexRoute: publicCampaignsIndexRoute,
 }

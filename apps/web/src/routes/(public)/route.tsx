@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet } from '@tanstack/react-router';
+import { createFileRoute, Link, Outlet, useLocation } from '@tanstack/react-router';
 
 import { Logo } from '@/components/logo';
 import { getSidebarStateFn } from '@/components/sidebar';
@@ -24,14 +24,17 @@ export const Route = createFileRoute('/(public)')({
 function PublicLayout() {
   const { isAuthenticated: loaderIsAuthenticated, sidebarState } = Route.useLoaderData();
   const { isAuthenticated, isPending } = useAuth();
+  const pathname = useLocation({ select: (location) => location.pathname });
   const showAppLayout = isPending ? loaderIsAuthenticated : isAuthenticated;
+  const breadcrumbs =
+    pathname === '/' ? [{ label: 'Início' }] : [{ label: 'Campanhas', href: '/campaigns' }];
 
   if (showAppLayout)
     return (
       <AppShell defaultSidebarOpen={sidebarState}>
         <AppInset
-          breadcrumbs={[{ label: 'Campanhas', href: '/campaigns' }]}
-          contentClassName="[&>[data-slot=campaign-content]]:mx-0 [&>[data-slot=campaign-content]]:max-w-none [&>[data-slot=campaign-content]]:p-0 sm:[&>[data-slot=campaign-content]]:p-0 lg:[&>[data-slot=campaign-content]]:p-0"
+          breadcrumbs={breadcrumbs}
+          contentClassName="[&>[data-slot=campaign-content]]:mx-0 [&>[data-slot=campaign-content]]:max-w-none [&>[data-slot=campaign-content]]:p-0 [&>[data-slot=landing-content]]:mx-0 [&>[data-slot=landing-content]]:max-w-none [&>[data-slot=landing-content]]:p-0 sm:[&>[data-slot=campaign-content]]:p-0 sm:[&>[data-slot=landing-content]]:p-0 lg:[&>[data-slot=campaign-content]]:p-0 lg:[&>[data-slot=landing-content]]:p-0"
         >
           <Outlet />
         </AppInset>
@@ -42,7 +45,7 @@ function PublicLayout() {
     <div className="min-h-svh bg-background">
       <header className="border-b">
         <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <Link to="/campaigns" aria-label="Nossa Causa — campanhas">
+          <Link to="/" aria-label="Nossa Causa — início">
             <Logo className="text-lg" />
           </Link>
 
