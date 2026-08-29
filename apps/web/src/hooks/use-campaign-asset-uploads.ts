@@ -57,9 +57,7 @@ export function useCampaignAssetUploads({
     let uploadId: string | null = null;
     try {
       const file =
-        kind === 'IMAGE'
-          ? await prepareCampaignImage(sourceFile, controller.signal)
-          : sourceFile;
+        kind === 'IMAGE' ? await prepareCampaignImage(sourceFile, controller.signal) : sourceFile;
       controller.signal.throwIfAborted();
       updateAsset(key, { file, status: 'uploading', progress: 0, error: null });
       const intent =

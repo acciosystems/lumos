@@ -5,8 +5,10 @@ type CampaignDates = {
   endDate: Date;
 };
 
-type CampaignCollectionPointInput =
-  Extract<CampaignDetailsUpdateInput, { type: 'PHYSICAL' }>['collectionPoints'][number];
+type CampaignCollectionPointInput = Extract<
+  CampaignDetailsUpdateInput,
+  { type: 'PHYSICAL' }
+>['collectionPoints'][number];
 
 export function toCampaignUpdateData(input: CampaignDetailsUpdateInput, dates: CampaignDates) {
   const commonData = {
