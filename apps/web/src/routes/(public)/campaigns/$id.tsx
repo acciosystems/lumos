@@ -1,4 +1,3 @@
-import { CampaignStatus } from '@lumos/validation/campaign';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import * as v from 'valibot';
@@ -6,6 +5,7 @@ import * as v from 'valibot';
 import { CampaignDetail } from '@/components/campaign/campaign-detail';
 import { CampaignParticipation } from '@/components/campaign/campaign-participation';
 import { Loading } from '@/components/misc/loading';
+import { useCampaignEffectiveStatus } from '@/hooks/use-campaign-effective-status';
 import { rpc } from '@/lib/rpc';
 import { isPhysicalCampaign } from '@/utils/campaign-type';
 
@@ -64,6 +64,7 @@ export const Route = createFileRoute('/(public)/campaigns/$id')({
 function PublicCampaignDetailPage() {
   const { id } = Route.useParams();
   const { data } = useSuspenseQuery(rpc.campaign.publicById.queryOptions({ input: { id } }));
+  const status = useCampaignEffectiveStatus(data);
 
   return (
     <div
@@ -73,7 +74,7 @@ function PublicCampaignDetailPage() {
       <CampaignDetail
         campaign={data}
         action={
-          data.status === CampaignStatus.ACTIVE && isPhysicalCampaign(data.type) ? (
+          status === 'ACTIVE' && isPhysicalCampaign(data.type) ? (
             <CampaignParticipation campaignId={data.id} />
           ) : undefined
         }

@@ -2,6 +2,7 @@ import { prisma } from '@lumos/database';
 import { Prisma } from '@lumos/database/generated/prisma/client';
 import type { CampaignInclude, CampaignSelect } from '@lumos/database/generated/prisma/models';
 import {
+  CampaignStatus,
   CampaignType,
   campaignAssetUploadIdInputSchema,
   campaignAssetUploadInputSchema,
@@ -38,6 +39,12 @@ import {
   verifyCampaignAssetUpload,
 } from '../services/campaign-assets';
 import { toCampaignCreateData } from '../services/campaign-create';
+import {
+  assertCampaignDatesNotEnded,
+  getEffectiveCampaignStatus,
+  getSaoPauloCalendarDate,
+  reconcileCampaignLifecycle,
+} from '../services/campaign-lifecycle';
 import {
   toCampaignCollectionPointData,
   toCampaignCollectionPointFields,
@@ -94,6 +101,7 @@ const publicCampaignListSelect = {
   id: true,
   title: true,
   description: true,
+  status: true,
   type: true,
   category: true,
   region: true,
@@ -126,7 +134,6 @@ const publicCampaignListSelect = {
 
 const publicCampaignDetailSelect = {
   ...publicCampaignListSelect,
-  status: true,
   location: true,
   targetItems: true,
   currentItems: true,
@@ -197,15 +204,27 @@ function withParticipantCount<
   };
 }
 
+function withEffectiveCampaignStatus<
+  Campaign extends { status: CampaignStatus; startDate: Date; endDate: Date },
+>(campaign: Campaign, now = new Date()) {
+  return {
+    ...campaign,
+    status: getEffectiveCampaignStatus({ ...campaign, now }),
+  };
+}
+
 function withOwnerCampaignData(
   campaign: Prisma.CampaignGetPayload<{ include: typeof campaignInclude }>,
 ) {
   const { _count, accountability, assets, ...campaignData } = campaign;
+  const effectiveCampaign = withEffectiveCampaignStatus(campaignData);
   const deadline =
-    campaign.status === 'COMPLETED' ? getCampaignAccountabilityDeadline(campaign.endDate) : null;
+    effectiveCampaign.status === 'COMPLETED'
+      ? getCampaignAccountabilityDeadline(campaign.endDate)
+      : null;
 
   return {
-    ...campaignData,
+    ...effectiveCampaign,
     image: assets[0] ? toPublicCampaignAsset(assets[0]) : null,
     accountability: accountability
       ? {
@@ -216,7 +235,7 @@ function withOwnerCampaignData(
     participantCount: _count.participants,
     accountabilityDeadline: deadline,
     accountabilityStatus: getCampaignAccountabilityStatus({
-      campaignStatus: campaign.status,
+      campaignStatus: effectiveCampaign.status,
       accountability: campaign.accountability,
       deadline,
     }),
@@ -226,6 +245,8 @@ function withOwnerCampaignData(
 function assertCampaignAcceptsParticipation(campaign: {
   type: 'PHYSICAL' | 'VIRTUAL';
   status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+  startDate: Date;
+  endDate: Date;
 }) {
   if (campaign.type !== 'PHYSICAL') {
     throw new ORPCError('BAD_REQUEST', {
@@ -233,7 +254,7 @@ function assertCampaignAcceptsParticipation(campaign: {
     });
   }
 
-  if (campaign.status !== 'ACTIVE') {
+  if (getEffectiveCampaignStatus(campaign) !== 'ACTIVE') {
     throw new ORPCError('BAD_REQUEST', {
       message: 'A campanha precisa estar ativa para alterar a participação.',
     });
@@ -242,8 +263,10 @@ function assertCampaignAcceptsParticipation(campaign: {
 
 function assertCampaignIsActive(campaign: {
   status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+  startDate: Date;
+  endDate: Date;
 }) {
-  if (campaign.status !== 'ACTIVE') {
+  if (getEffectiveCampaignStatus(campaign) !== 'ACTIVE') {
     throw new ORPCError('BAD_REQUEST', {
       message: 'A campanha precisa estar ativa para realizar esta ação.',
     });
@@ -255,6 +278,17 @@ const campaignDateSchema = v.pipe(
   v.isoDate(),
   v.transform((value) => new Date(value)),
 );
+
+function todayAsDate(now = new Date()) {
+  return new Date(`${getSaoPauloCalendarDate(now)}T00:00:00.000Z`);
+}
+
+async function lockAndReconcileCampaign(transaction: Prisma.TransactionClient, campaignId: string) {
+  await transaction.$queryRaw(
+    Prisma.sql`SELECT "id" FROM "campaigns" WHERE "id" = ${campaignId} FOR UPDATE`,
+  );
+  await reconcileCampaignLifecycle(transaction, campaignId);
+}
 
 function parseDate(value: string, label: string) {
   const result = v.safeParse(campaignDateSchema, value);
@@ -274,6 +308,12 @@ function assertCreateInput(input: CampaignCreateInput) {
     });
   }
 
+  if (!assertCampaignDatesNotEnded(startDate, endDate)) {
+    throw new ORPCError('BAD_REQUEST', {
+      message: 'A data final não pode estar no passado.',
+    });
+  }
+
   if (input.type === CampaignType.PHYSICAL) {
     if (!input.location || !input.targetItems || !input.collectionPoints?.length) {
       throw new ORPCError('BAD_REQUEST', {
@@ -288,14 +328,26 @@ function assertCreateInput(input: CampaignCreateInput) {
     });
   }
 
-  return { startDate, endDate };
+  return {
+    startDate,
+    endDate,
+    status: getEffectiveCampaignStatus({
+      status: 'ACTIVE',
+      startDate,
+      endDate,
+    }),
+  };
 }
 
 export const campaignRouter = {
   list: publicProcedure.input(campaignListInputSchema).handler(async ({ input }) => {
+    const now = new Date();
+    const today = todayAsDate(now);
     const campaigns = await prisma.campaign.findMany({
       where: {
-        status: 'ACTIVE',
+        status: { in: [CampaignStatus.ACTIVE, CampaignStatus.PENDING] },
+        startDate: { lte: today },
+        endDate: { gte: today },
         ...(input.category ? { category: { contains: input.category, mode: 'insensitive' } } : {}),
         ...(input.region ? { region: { contains: input.region, mode: 'insensitive' } } : {}),
         ...(input.type ? { type: input.type } : {}),
@@ -307,7 +359,9 @@ export const campaignRouter = {
     });
 
     const hasNextPage = campaigns.length > input.limit;
-    const items = campaigns.slice(0, input.limit).map(withParticipantCount);
+    const items = campaigns
+      .slice(0, input.limit)
+      .map((campaign) => withEffectiveCampaignStatus(withParticipantCount(campaign), now));
 
     return {
       items,
@@ -316,12 +370,20 @@ export const campaignRouter = {
   }),
 
   publicById: publicProcedure.input(campaignByIdInputSchema).handler(async ({ input }) => {
-    const campaign = await prisma.campaign.findFirst({
-      where: {
-        id: input.id,
-        status: { in: ['ACTIVE', 'COMPLETED'] },
-      },
-      select: publicCampaignDetailSelect,
+    const now = new Date();
+    const today = todayAsDate(now);
+    const campaign = await prisma.$transaction(async (transaction) => {
+      await reconcileCampaignLifecycle(transaction, input.id, now);
+      return transaction.campaign.findFirst({
+        where: {
+          id: input.id,
+          OR: [
+            { status: CampaignStatus.COMPLETED },
+            { status: CampaignStatus.ACTIVE, startDate: { lte: today }, endDate: { gte: today } },
+          ],
+        },
+        select: publicCampaignDetailSelect,
+      });
     });
 
     if (!campaign) {
@@ -330,15 +392,18 @@ export const campaignRouter = {
       });
     }
 
-    const publicCampaign = withParticipantCount(campaign);
+    const publicCampaign = withParticipantCount(withEffectiveCampaignStatus(campaign, now));
     return {
       ...publicCampaign,
       accountability: toPublicCampaignAccountability(campaign.accountability),
-      ...(campaign.status === 'COMPLETED' ? { pixKey: null, bankAccountInfo: null } : {}),
+      ...(publicCampaign.status === 'COMPLETED' ? { pixKey: null, bankAccountInfo: null } : {}),
     };
   }),
 
   byId: authorized.input(campaignByIdInputSchema).handler(async ({ input, context: { user } }) => {
+    await prisma.$transaction(async (transaction) => {
+      await lockAndReconcileCampaign(transaction, input.id);
+    });
     const campaign = await prisma.campaign.findFirst({
       where: {
         id: input.id,
@@ -388,14 +453,18 @@ export const campaignRouter = {
       orderBy: [{ createdAt: 'desc' }],
     });
 
-    return campaigns.map(withParticipantCount);
+    return campaigns.map((campaign) => withEffectiveCampaignStatus(withParticipantCount(campaign)));
   }),
 
   myParticipations: authorized.handler(async ({ context: { user } }) => {
+    const now = new Date();
+    const today = todayAsDate(now);
     const campaigns = await prisma.campaign.findMany({
       where: {
-        status: 'ACTIVE',
+        status: { in: [CampaignStatus.ACTIVE, CampaignStatus.PENDING] },
         type: 'PHYSICAL',
+        startDate: { lte: today },
+        endDate: { gte: today },
         participants: {
           some: {
             userId: user.id,
@@ -407,18 +476,35 @@ export const campaignRouter = {
       orderBy: [{ startDate: 'asc' }, { createdAt: 'desc' }],
     });
 
-    return campaigns.map(withParticipantCount);
+    return campaigns.map((campaign) =>
+      withParticipantCount(withEffectiveCampaignStatus(campaign, now)),
+    );
   }),
 
   participationState: authorized
     .input(campaignByIdInputSchema)
     .handler(async ({ input, context: { user } }) => {
-      const participant = await prisma.campaignParticipant.findUnique({
-        where: { campaignId_userId: { campaignId: input.id, userId: user.id } },
-        select: { cancelledAt: true },
+      const now = new Date();
+      const state = await prisma.$transaction(async (transaction) => {
+        await reconcileCampaignLifecycle(transaction, input.id, now);
+        const campaign = await transaction.campaign.findUnique({
+          where: { id: input.id },
+          select: { status: true, startDate: true, endDate: true },
+        });
+        if (
+          !campaign ||
+          getEffectiveCampaignStatus({ ...campaign, now }) !== CampaignStatus.ACTIVE
+        ) {
+          return false;
+        }
+        const participant = await transaction.campaignParticipant.findUnique({
+          where: { campaignId_userId: { campaignId: input.id, userId: user.id } },
+          select: { cancelledAt: true },
+        });
+        return participant?.cancelledAt === null;
       });
 
-      return { isParticipating: participant?.cancelledAt === null };
+      return { isParticipating: state };
     }),
 
   canCreate: authorized.handler(async ({ context: { user } }) => {
@@ -450,13 +536,11 @@ export const campaignRouter = {
 
   join: authorized.input(campaignByIdInputSchema).handler(async ({ input, context: { user } }) =>
     prisma.$transaction(async (transaction) => {
-      await transaction.$queryRaw(
-        Prisma.sql`SELECT "id" FROM "campaigns" WHERE "id" = ${input.id} FOR UPDATE`,
-      );
+      await lockAndReconcileCampaign(transaction, input.id);
 
       const campaign = await transaction.campaign.findUnique({
         where: { id: input.id },
-        select: { status: true, type: true },
+        select: { status: true, type: true, startDate: true, endDate: true },
       });
 
       if (!campaign) {
@@ -499,9 +583,10 @@ export const campaignRouter = {
     .input(campaignByIdInputSchema)
     .handler(async ({ input, context: { user } }) =>
       prisma.$transaction(async (transaction) => {
+        await lockAndReconcileCampaign(transaction, input.id);
         const campaign = await transaction.campaign.findUnique({
           where: { id: input.id },
-          select: { status: true, type: true },
+          select: { status: true, type: true, startDate: true, endDate: true },
         });
 
         if (!campaign) {
@@ -531,12 +616,13 @@ export const campaignRouter = {
     .input(campaignProgressUpdateInputSchema)
     .handler(async ({ input, context: { user } }) =>
       prisma.$transaction(async (transaction) => {
+        await lockAndReconcileCampaign(transaction, input.id);
         const campaign = await transaction.campaign.findFirst({
           where: {
             id: input.id,
             organizerProfile: { userId: user.id },
           },
-          select: { status: true, type: true },
+          select: { status: true, type: true, startDate: true, endDate: true },
         });
 
         if (!campaign) {
@@ -551,8 +637,15 @@ export const campaignRouter = {
 
         assertCampaignIsActive(campaign);
 
+        const today = todayAsDate();
         const result = await transaction.campaign.updateMany({
-          where: { id: input.id, status: 'ACTIVE', type: 'PHYSICAL' },
+          where: {
+            id: input.id,
+            status: 'ACTIVE',
+            type: 'PHYSICAL',
+            startDate: { lte: today },
+            endDate: { gte: today },
+          },
           data: { currentItems: input.currentItems },
         });
 
@@ -570,23 +663,28 @@ export const campaignRouter = {
     .input(campaignDetailsUpdateInputSchema)
     .handler(async ({ input, context: { user } }) =>
       prisma.$transaction(async (transaction) => {
-        await transaction.$queryRaw(
-          Prisma.sql`SELECT "id" FROM "campaigns" WHERE "id" = ${input.id} FOR UPDATE`,
-        );
+        await lockAndReconcileCampaign(transaction, input.id);
 
         const campaign = await transaction.campaign.findFirst({
           where: {
             id: input.id,
             organizerProfile: { userId: user.id },
           },
-          select: { status: true, type: true },
+          select: { status: true, type: true, startDate: true, endDate: true },
         });
 
         if (!campaign) {
           throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
         }
 
-        assertCampaignIsActive(campaign);
+        if (
+          campaign.status !== CampaignStatus.PENDING &&
+          campaign.status !== CampaignStatus.ACTIVE
+        ) {
+          throw new ORPCError('BAD_REQUEST', {
+            message: 'A campanha não pode mais ser editada.',
+          });
+        }
 
         if (campaign.type !== input.type) {
           throw new ORPCError('BAD_REQUEST', {
@@ -603,9 +701,36 @@ export const campaignRouter = {
           });
         }
 
+        if (!assertCampaignDatesNotEnded(startDate, endDate)) {
+          throw new ORPCError('BAD_REQUEST', {
+            message: 'A data final não pode estar no passado.',
+          });
+        }
+
+        if (
+          getEffectiveCampaignStatus(campaign) === CampaignStatus.ACTIVE &&
+          getEffectiveCampaignStatus({ status: CampaignStatus.ACTIVE, startDate, endDate }) !==
+            CampaignStatus.ACTIVE
+        ) {
+          throw new ORPCError('BAD_REQUEST', {
+            message: 'Uma campanha ativa deve continuar abrangendo a data atual.',
+          });
+        }
+
+        const today = todayAsDate();
+        const nextStatus = getEffectiveCampaignStatus({
+          status: CampaignStatus.ACTIVE,
+          startDate,
+          endDate,
+        });
         const result = await transaction.campaign.updateMany({
-          where: { id: input.id, status: 'ACTIVE', type: input.type },
-          data: toCampaignUpdateData(input, { startDate, endDate }),
+          where: {
+            id: input.id,
+            status: { in: [CampaignStatus.PENDING, CampaignStatus.ACTIVE] },
+            type: input.type,
+            endDate: { gte: today },
+          },
+          data: { ...toCampaignUpdateData(input, { startDate, endDate }), status: nextStatus },
         });
 
         if (!result.count) {
@@ -687,16 +812,14 @@ export const campaignRouter = {
     .input(campaignPublishUpdateInputSchema)
     .handler(async ({ input, context: { user } }) =>
       prisma.$transaction(async (transaction) => {
-        await transaction.$queryRaw(
-          Prisma.sql`SELECT "id" FROM "campaigns" WHERE "id" = ${input.id} FOR UPDATE`,
-        );
+        await lockAndReconcileCampaign(transaction, input.id);
 
         const campaign = await transaction.campaign.findFirst({
           where: {
             id: input.id,
             organizerProfile: { userId: user.id },
           },
-          select: { status: true },
+          select: { status: true, startDate: true, endDate: true },
         });
 
         if (!campaign) {
@@ -724,23 +847,43 @@ export const campaignRouter = {
     .input(campaignLifecycleTransitionInputSchema)
     .handler(async ({ input, context: { user } }) =>
       prisma.$transaction(async (transaction) => {
+        await lockAndReconcileCampaign(transaction, input.id);
         const campaign = await transaction.campaign.findFirst({
           where: {
             id: input.id,
             organizerProfile: { userId: user.id },
           },
-          select: { status: true },
+          select: { status: true, startDate: true, endDate: true },
         });
 
         if (!campaign) {
           throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
         }
 
-        assertCampaignIsActive(campaign);
+        const effectiveStatus = getEffectiveCampaignStatus(campaign);
+        if (
+          input.status === CampaignStatus.COMPLETED
+            ? effectiveStatus !== CampaignStatus.ACTIVE
+            : effectiveStatus !== CampaignStatus.PENDING &&
+              effectiveStatus !== CampaignStatus.ACTIVE
+        ) {
+          throw new ORPCError('BAD_REQUEST', {
+            message:
+              input.status === CampaignStatus.COMPLETED
+                ? 'A campanha precisa estar ativa para ser concluída.'
+                : 'A campanha precisa estar pendente ou ativa para ser cancelada.',
+          });
+        }
 
         const transitionedAt = new Date();
+        const today = todayAsDate();
         const result = await transaction.campaign.updateMany({
-          where: { id: input.id, status: 'ACTIVE' },
+          where: {
+            id: input.id,
+            status: { in: [CampaignStatus.PENDING, CampaignStatus.ACTIVE] },
+            endDate: { gte: today },
+            ...(input.status === CampaignStatus.COMPLETED ? { startDate: { lte: today } } : {}),
+          },
           data:
             input.status === 'COMPLETED'
               ? { status: 'COMPLETED', completedAt: transitionedAt }
@@ -793,7 +936,7 @@ export const campaignRouter = {
         });
       }
 
-      const { startDate, endDate } = assertCreateInput(input);
+      const { startDate, endDate, status } = assertCreateInput(input);
       const campaignId = ulid();
       const prepared = input.imageUploadId
         ? await prepareCampaignAssetUploads({
@@ -810,7 +953,7 @@ export const campaignRouter = {
           await transaction.campaign.create({
             data: {
               id: campaignId,
-              ...toCampaignCreateData(input, organizerProfile.id, { startDate, endDate }),
+              ...toCampaignCreateData(input, organizerProfile.id, { startDate, endDate }, status),
             },
           });
           if (prepared[0]) {

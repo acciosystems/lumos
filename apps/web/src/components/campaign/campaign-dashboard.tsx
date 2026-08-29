@@ -6,8 +6,6 @@ import {
 import { IconCircleCheck, IconCircleX, IconEdit, IconSend, IconUsers } from '@tabler/icons-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -31,6 +29,7 @@ import { Input } from '@/components/ui/input';
 import { Progress, ProgressLabel } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
+import { useCampaignEffectiveStatus } from '@/hooks/use-campaign-effective-status';
 import { invalidateCampaignManagement } from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 import { campaignStatusMetadata } from '@/utils/campaign-status';
@@ -41,7 +40,11 @@ type OwnerCampaign = Awaited<ReturnType<typeof rpc.campaign.byId.call>>;
 export function CampaignDashboard({ campaign }: { campaign: OwnerCampaign }) {
   const queryClient = useQueryClient();
   const [currentItems, setCurrentItems] = useState(String(campaign.currentItems ?? 0));
-  const isActive = campaign.status === CampaignStatus.ACTIVE;
+  const status = useCampaignEffectiveStatus(campaign);
+  const isActive = status === CampaignStatus.ACTIVE;
+  const canEdit = ([CampaignStatus.PENDING, CampaignStatus.ACTIVE] as CampaignStatus[]).includes(
+    status,
+  );
   const isPhysical = isPhysicalCampaign(campaign.type);
   const targetItems = campaign.targetItems ?? 0;
   const progressPercentage =
@@ -51,6 +54,11 @@ export function CampaignDashboard({ campaign }: { campaign: OwnerCampaign }) {
   useEffect(() => {
     setCurrentItems(String(campaign.currentItems ?? 0));
   }, [campaign.currentItems, campaign.id]);
+
+  useEffect(() => {
+    if (status === campaign.status) return;
+    void invalidateCampaignManagement(queryClient, campaign.id).catch(() => undefined);
+  }, [campaign.id, campaign.status, queryClient, status]);
 
   const invalidate = async () => await invalidateCampaignManagement(queryClient, campaign.id);
 
@@ -85,7 +93,7 @@ export function CampaignDashboard({ campaign }: { campaign: OwnerCampaign }) {
               Acompanhe a participação, o progresso e o ciclo de vida da sua campanha.
             </p>
           </div>
-          {isActive && (
+          {canEdit && (
             <Button
               nativeButton={false}
               variant="outline"
@@ -103,12 +111,12 @@ export function CampaignDashboard({ campaign }: { campaign: OwnerCampaign }) {
               <CardDescription>Estado atual da campanha.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Badge variant={campaignStatusMetadata[campaign.status].variant}>
-                {campaignStatusMetadata[campaign.status].label}
+              <Badge variant={campaignStatusMetadata[status].variant}>
+                {campaignStatusMetadata[status].label}
               </Badge>
               {terminalAt && (
                 <p className="mt-3 text-sm text-muted-foreground">
-                  Registrada em {format(terminalAt, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}.
+                  Registrada em {formatCampaignDateTime(terminalAt)}.
                 </p>
               )}
             </CardContent>
@@ -164,7 +172,7 @@ export function CampaignDashboard({ campaign }: { campaign: OwnerCampaign }) {
                     disabled={!isActive || progressMutation.isPending}
                     onChange={(event) => setCurrentItems(event.target.value)}
                   />
-                  <FieldDescription>Informe o total acumulado de itens recebidos.</FieldDescription>
+                  <CampaignProgressDescription status={status} />
                 </Field>
                 <Button type="submit" disabled={!isActive || progressMutation.isPending}>
                   {progressMutation.isPending && <Spinner />}
@@ -182,7 +190,7 @@ export function CampaignDashboard({ campaign }: { campaign: OwnerCampaign }) {
           />
         )}
 
-        <CampaignLifecycleControls campaign={campaign} />
+        <CampaignLifecycleControls campaign={campaign} status={status} />
         {isActive && <CampaignUpdateComposer campaignId={campaign.id} />}
       </section>
 
@@ -201,13 +209,32 @@ export function CampaignDashboard({ campaign }: { campaign: OwnerCampaign }) {
         <CampaignDetail
           campaign={campaign}
           action={
-            <Badge variant={campaignStatusMetadata[campaign.status].variant}>
-              {campaignStatusMetadata[campaign.status].label}
+            <Badge variant={campaignStatusMetadata[status].variant}>
+              {campaignStatusMetadata[status].label}
             </Badge>
           }
         />
       </section>
     </div>
+  );
+}
+
+function formatCampaignDateTime(value: Date) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    dateStyle: 'long',
+  }).format(value);
+}
+
+function CampaignProgressDescription({ status }: { status: CampaignStatus }) {
+  return (
+    <FieldDescription>
+      {status === CampaignStatus.ACTIVE
+        ? 'Informe o total acumulado de itens recebidos.'
+        : status === CampaignStatus.PENDING
+          ? 'O progresso poderá ser atualizado quando a campanha começar.'
+          : 'O progresso não pode mais ser atualizado.'}
+    </FieldDescription>
   );
 }
 
@@ -268,10 +295,17 @@ function CampaignUpdateComposer({ campaignId }: { campaignId: string }) {
   );
 }
 
-function CampaignLifecycleControls({ campaign }: { campaign: OwnerCampaign }) {
+function CampaignLifecycleControls({
+  campaign,
+  status,
+}: {
+  campaign: OwnerCampaign;
+  status: CampaignStatus;
+}) {
   const queryClient = useQueryClient();
   const [transitionStatus, setTransitionStatus] = useState<TerminalStatus | null>(null);
-  const isActive = campaign.status === CampaignStatus.ACTIVE;
+  const isActive = status === CampaignStatus.ACTIVE;
+  const canCancel = status === CampaignStatus.PENDING || isActive;
 
   const lifecycleMutation = useMutation(
     rpc.campaign.transitionLifecycle.mutationOptions({
@@ -295,9 +329,11 @@ function CampaignLifecycleControls({ campaign }: { campaign: OwnerCampaign }) {
         <CardHeader>
           <CardTitle>Ciclo de vida</CardTitle>
           <CardDescription>
-            {isActive
-              ? 'Conclua a campanha quando a coleta terminar ou cancele-a se ela não puder continuar.'
-              : 'Campanhas concluídas ou canceladas não podem ser reabertas.'}
+            {status === CampaignStatus.PENDING
+              ? 'A campanha está agendada. Cancele-a se ela não puder ser realizada.'
+              : isActive
+                ? 'Conclua a campanha quando a coleta terminar ou cancele-a se ela não puder continuar.'
+                : 'Campanhas concluídas ou canceladas não podem ser reabertas.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-3">
@@ -309,7 +345,7 @@ function CampaignLifecycleControls({ campaign }: { campaign: OwnerCampaign }) {
           </Button>
           <Button
             variant="destructive"
-            disabled={!isActive || lifecycleMutation.isPending}
+            disabled={!canCancel || lifecycleMutation.isPending}
             onClick={() => setTransitionStatus(CampaignStatus.CANCELLED)}
           >
             <IconCircleX /> Cancelar campanha

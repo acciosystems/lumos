@@ -1,4 +1,4 @@
-import { CampaignType, type CampaignCreateInput } from '@lumos/validation/campaign';
+import { CampaignStatus, CampaignType, type CampaignCreateInput } from '@lumos/validation/campaign';
 
 type CampaignDates = {
   startDate: Date;
@@ -9,12 +9,13 @@ export function toCampaignCreateData(
   input: CampaignCreateInput,
   organizerProfileId: string,
   dates: CampaignDates,
+  status: CampaignStatus = CampaignStatus.ACTIVE,
 ) {
   const commonData = {
     organizerProfileId,
     title: input.title,
     description: input.description,
-    status: 'ACTIVE' as const,
+    status,
     type: input.type,
     category: input.category,
     region: input.region,

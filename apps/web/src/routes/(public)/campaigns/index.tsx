@@ -33,6 +33,7 @@ import { AuthGuard } from '@/lib/auth/guard';
 import { campaignListInfiniteOptions } from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
+import { getMillisecondsUntilNextCampaignDay } from '@/utils/campaign-status';
 import {
   campaignTypeMetadata,
   campaignTypeValues,
@@ -116,7 +117,11 @@ function CampaignsPage() {
     onCommit: updateFilter,
   });
   const { data, fetchNextPage, hasNextPage, isFetchNextPageError, isFetchingNextPage } =
-    useSuspenseInfiniteQuery(campaignListInfiniteOptions({ category, region, type }));
+    useSuspenseInfiniteQuery({
+      ...campaignListInfiniteOptions({ category, region, type }),
+      refetchInterval: () => getMillisecondsUntilNextCampaignDay(),
+      refetchOnWindowFocus: 'always',
+    });
   const campaigns = data.pages.flatMap((page) => page.items);
 
   return (

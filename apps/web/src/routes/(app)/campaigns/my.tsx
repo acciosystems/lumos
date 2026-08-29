@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
+import { useCampaignEffectiveStatus } from '@/hooks/use-campaign-effective-status';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
 import { campaignStatusMetadata } from '@/utils/campaign-status';
@@ -56,37 +57,7 @@ function MyCampaignsPage() {
           (data.length ? (
             <div className="grid auto-rows-fr gap-3">
               {data.map((campaign) => (
-                <Card key={campaign.id} size="sm" className="min-h-28">
-                  <CardHeader className="min-h-12">
-                    <CardTitle className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
-                      <span className="line-clamp-2">{campaign.title}</span>
-                      <Badge variant={campaignStatusMetadata[campaign.status].variant}>
-                        {campaignStatusMetadata[campaign.status].label}
-                      </Badge>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-1 flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                    <div className="flex flex-col gap-1 text-sm text-muted-foreground">
-                      <span className="line-clamp-1">
-                        {campaign.category} · {campaign.region} ·{' '}
-                        {formatCampaignDate(campaign.startDate, 'dd MMM yyyy', { locale: ptBR })}
-                      </span>
-                      <span>
-                        {isPhysicalCampaign(campaign.type)
-                          ? `${campaign.participantCount} participantes · ${campaign.currentItems ?? 0}/${campaign.targetItems ?? 0} itens`
-                          : 'Campanha virtual'}
-                      </span>
-                    </div>
-                    <Button
-                      nativeButton={false}
-                      variant="outline"
-                      size="sm"
-                      render={<Link to="/campaigns/my/$id" params={{ id: campaign.id }} />}
-                    >
-                      Abrir painel
-                    </Button>
-                  </CardContent>
-                </Card>
+                <MyCampaignCard key={campaign.id} campaign={campaign} />
               ))}
             </div>
           ) : (
@@ -101,5 +72,45 @@ function MyCampaignsPage() {
           ))}
       </div>
     </AppInset>
+  );
+}
+
+type MyCampaign = Awaited<ReturnType<typeof rpc.campaign.myCampaigns.call>>[number];
+
+function MyCampaignCard({ campaign }: { campaign: MyCampaign }) {
+  const status = useCampaignEffectiveStatus(campaign);
+
+  return (
+    <Card size="sm" className="min-h-28">
+      <CardHeader className="min-h-12">
+        <CardTitle className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+          <span className="line-clamp-2">{campaign.title}</span>
+          <Badge variant={campaignStatusMetadata[status].variant}>
+            {campaignStatusMetadata[status].label}
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-1 text-sm text-muted-foreground">
+          <span className="line-clamp-1">
+            {campaign.category} · {campaign.region} ·{' '}
+            {formatCampaignDate(campaign.startDate, 'dd MMM yyyy', { locale: ptBR })}
+          </span>
+          <span>
+            {isPhysicalCampaign(campaign.type)
+              ? `${campaign.participantCount} participantes · ${campaign.currentItems ?? 0}/${campaign.targetItems ?? 0} itens`
+              : 'Campanha virtual'}
+          </span>
+        </div>
+        <Button
+          nativeButton={false}
+          variant="outline"
+          size="sm"
+          render={<Link to="/campaigns/my/$id" params={{ id: campaign.id }} />}
+        >
+          Abrir painel
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

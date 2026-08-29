@@ -21,6 +21,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from '@/components/ui/item';
+import { useCampaignEffectiveStatus } from '@/hooks/use-campaign-effective-status';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
 import { campaignTypeMetadata, isPhysicalCampaign } from '@/utils/campaign-type';
@@ -37,6 +38,8 @@ export function CampaignDetail({
   campaign: CampaignDetailData;
   action?: React.ReactNode;
 }) {
+  const status = useCampaignEffectiveStatus(campaign);
+
   return (
     <div className="flex w-full flex-col gap-5">
       <CampaignHero campaign={campaign} />
@@ -74,61 +77,7 @@ export function CampaignDetail({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {campaign.status === CampaignStatus.COMPLETED ? 'Campanha concluída' : 'Como doar'}
-            </CardTitle>
-            <CardDescription>
-              {campaign.status === CampaignStatus.COMPLETED
-                ? campaign.accountability
-                  ? 'Esta campanha foi encerrada. Consulte abaixo a prestação de contas publicada.'
-                  : 'Esta campanha foi encerrada. A prestação de contas ainda não foi publicada.'
-                : isPhysicalCampaign(campaign.type)
-                  ? 'Entregue os itens em um dos pontos de coleta cadastrados.'
-                  : 'Contribua diretamente usando os dados de pagamento do organizador.'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            {campaign.status === CampaignStatus.COMPLETED ? (
-              <p className="text-sm text-muted-foreground">
-                Não são aceitas novas doações para esta campanha.
-              </p>
-            ) : isPhysicalCampaign(campaign.type) ? (
-              <>
-                <div className="grid gap-3 text-sm">
-                  {campaign.location && (
-                    <DetailRow label="Local principal" value={campaign.location} />
-                  )}
-                  <DetailRow
-                    label="Meta de itens"
-                    value={`${campaign.currentItems ?? 0} de ${campaign.targetItems ?? 0} itens`}
-                  />
-                </div>
-                <ItemGroup>
-                  {campaign.collectionPoints.map((point) => (
-                    <Item key={point.id} variant="outline">
-                      <ItemContent>
-                        <ItemTitle>{point.name}</ItemTitle>
-                        <ItemDescription>
-                          {point.address}, {point.city} - {point.state}, {point.zipCode}
-                        </ItemDescription>
-                        {point.instructions && <p>{point.instructions}</p>}
-                      </ItemContent>
-                    </Item>
-                  ))}
-                </ItemGroup>
-              </>
-            ) : (
-              <div className="grid gap-3 text-sm">
-                {campaign.pixKey && <DetailRow label="PIX" value={campaign.pixKey} />}
-                {campaign.bankAccountInfo && (
-                  <DetailRow label="Dados bancários" value={campaign.bankAccountInfo} />
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <CampaignAvailabilityCard campaign={campaign} status={status} />
 
         <Card>
           <CardHeader>
@@ -200,6 +149,97 @@ export function CampaignDetail({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function CampaignAvailabilityCard({
+  campaign,
+  status,
+}: {
+  campaign: CampaignDetailData;
+  status: CampaignStatus;
+}) {
+  const title =
+    status === CampaignStatus.COMPLETED
+      ? 'Campanha concluída'
+      : status === CampaignStatus.PENDING
+        ? 'Campanha agendada'
+        : status === CampaignStatus.CANCELLED
+          ? 'Campanha cancelada'
+          : 'Como doar';
+  const description = getCampaignAvailabilityDescription(campaign, status);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-4">
+        {status === CampaignStatus.COMPLETED ? (
+          <p className="text-sm text-muted-foreground">
+            Não são aceitas novas doações para esta campanha.
+          </p>
+        ) : status !== CampaignStatus.ACTIVE ? (
+          <p className="text-sm text-muted-foreground">
+            Consulte o período da campanha acima para acompanhar sua disponibilidade.
+          </p>
+        ) : isPhysicalCampaign(campaign.type) ? (
+          <PhysicalCampaignAvailability campaign={campaign} />
+        ) : (
+          <div className="grid gap-3 text-sm">
+            {campaign.pixKey && <DetailRow label="PIX" value={campaign.pixKey} />}
+            {campaign.bankAccountInfo && (
+              <DetailRow label="Dados bancários" value={campaign.bankAccountInfo} />
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function getCampaignAvailabilityDescription(campaign: CampaignDetailData, status: CampaignStatus) {
+  if (status === CampaignStatus.COMPLETED) {
+    return campaign.accountability
+      ? 'Esta campanha foi encerrada. Consulte abaixo a prestação de contas publicada.'
+      : 'Esta campanha foi encerrada. A prestação de contas ainda não foi publicada.';
+  }
+  if (status === CampaignStatus.PENDING) {
+    return 'As doações e participações estarão disponíveis a partir da data inicial.';
+  }
+  if (status === CampaignStatus.CANCELLED) {
+    return 'Esta campanha não está mais aceitando doações ou participações.';
+  }
+  return isPhysicalCampaign(campaign.type)
+    ? 'Entregue os itens em um dos pontos de coleta cadastrados.'
+    : 'Contribua diretamente usando os dados de pagamento do organizador.';
+}
+
+function PhysicalCampaignAvailability({ campaign }: { campaign: CampaignDetailData }) {
+  return (
+    <>
+      <div className="grid gap-3 text-sm">
+        {campaign.location && <DetailRow label="Local principal" value={campaign.location} />}
+        <DetailRow
+          label="Meta de itens"
+          value={`${campaign.currentItems ?? 0} de ${campaign.targetItems ?? 0} itens`}
+        />
+      </div>
+      <ItemGroup>
+        {campaign.collectionPoints.map((point) => (
+          <Item key={point.id} variant="outline">
+            <ItemContent>
+              <ItemTitle>{point.name}</ItemTitle>
+              <ItemDescription>
+                {point.address}, {point.city} - {point.state}, {point.zipCode}
+              </ItemDescription>
+              {point.instructions && <p>{point.instructions}</p>}
+            </ItemContent>
+          </Item>
+        ))}
+      </ItemGroup>
+    </>
   );
 }
 

@@ -135,7 +135,7 @@ function NewCampaignPage() {
         imageUpload.releaseAssets();
         await invalidateCampaignLists(queryClient);
         toast.success('Campanha criada com sucesso.');
-        await navigate({ to: '/campaigns/$id', params: { id: campaign.id } });
+        await navigate({ to: '/campaigns/my/$id', params: { id: campaign.id } });
       },
       onError: (error) => {
         imageUpload.markReadyAssetsFailed('Verifique a imagem e tente enviá-la novamente.');

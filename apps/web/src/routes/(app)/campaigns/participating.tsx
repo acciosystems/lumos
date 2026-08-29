@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/empty';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
+import { getMillisecondsUntilNextCampaignDay } from '@/utils/campaign-status';
 
 export const Route = createFileRoute('/(app)/campaigns/participating')({
   loader: ({ context }) =>
@@ -41,7 +42,11 @@ export const Route = createFileRoute('/(app)/campaigns/participating')({
 });
 
 function ParticipatingCampaignsPage() {
-  const { data } = useSuspenseQuery(rpc.campaign.myParticipations.queryOptions());
+  const { data } = useSuspenseQuery({
+    ...rpc.campaign.myParticipations.queryOptions(),
+    refetchInterval: () => getMillisecondsUntilNextCampaignDay(),
+    refetchOnWindowFocus: 'always',
+  });
 
   return (
     <AppInset

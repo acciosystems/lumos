@@ -81,7 +81,7 @@ const paginationCampaigns = Array.from({ length: 12 }, (_, index) => {
     type: isPhysical ? CampaignType.PHYSICAL : CampaignType.VIRTUAL,
     category,
     region,
-    startDate: daysFromNow(3 + index),
+    startDate: daysFromNow(-14 + index),
     endDate: daysFromNow(33 + index),
     location: isPhysical ? `Centro comunitario ${number}` : null,
     targetItems: isPhysical ? 100 + number * 25 : null,

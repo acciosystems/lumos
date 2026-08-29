@@ -28,8 +28,9 @@ model Campaign {
   category String
   region   String
 
-  startDate DateTime
-  endDate   DateTime
+  /// Calendar dates interpreted in `America/Sao_Paulo`; no time-of-day is stored.
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
 
   // PHYSICAL only. Nullability is required for VIRTUAL campaigns; the
   // subtype-specific CHECK constraints are maintained in SQL migrations.
@@ -59,6 +60,7 @@ model Campaign {
   cancelledAt DateTime?
 
   @@index([status])
+  @@index([status, endDate])
   @@index([type])
   @@index([organizerProfileId])
   @@index([status, startDate(sort: Asc), createdAt(sort: Desc), id(sort: Desc)])

@@ -11,8 +11,9 @@ import {
   toPublicCampaignAsset,
   type PreparedCampaignAsset,
 } from './campaign-assets';
+import { CAMPAIGN_TIME_ZONE, reconcileCampaignLifecycle } from './campaign-lifecycle';
 
-export const CAMPAIGN_ACCOUNTABILITY_TIME_ZONE = 'America/Sao_Paulo';
+export const CAMPAIGN_ACCOUNTABILITY_TIME_ZONE = CAMPAIGN_TIME_ZONE;
 
 export type CampaignAccountabilityStatus =
   | 'NOT_REQUIRED'
@@ -22,9 +23,10 @@ export type CampaignAccountabilityStatus =
   | 'SUBMITTED_LATE';
 
 /**
- * Campaign dates are persisted as UTC-midnight calendar dates. This helper
- * converts the seventh following calendar day at 23:59:59 in São Paulo into
- * the UTC instant used for server-side comparisons.
+ * Campaign dates are persisted as PostgreSQL calendar dates and represented by
+ * Prisma as UTC-midnight dates. This helper converts the seventh following
+ * calendar day at 23:59:59 in São Paulo into the UTC instant used for
+ * server-side comparisons.
  */
 export function getCampaignAccountabilityDeadline(endDate: Date): Date {
   const endCalendarDate = new Date(
@@ -95,6 +97,7 @@ export async function saveCampaignAccountability(
   await transaction.$queryRaw(Prisma.sql`
     SELECT "id" FROM "campaigns" WHERE "id" = ${input.id} FOR UPDATE
   `);
+  await reconcileCampaignLifecycle(transaction, input.id, now);
 
   const campaign = await transaction.campaign.findFirst({
     where: {

@@ -9,6 +9,7 @@ import { Loading } from '@/components/misc/loading';
 import { AppInset } from '@/components/sidebar/inset';
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { useCampaignEffectiveStatus } from '@/hooks/use-campaign-effective-status';
 import { rpc } from '@/lib/rpc';
 
 const paramsSchema = v.object({
@@ -38,6 +39,7 @@ function EditCampaignPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const { data: campaign } = useSuspenseQuery(rpc.campaign.byId.queryOptions({ input: { id } }));
+  const status = useCampaignEffectiveStatus(campaign);
 
   const goToCampaign = () => navigate({ to: '/campaigns/my/$id', params: { id: campaign.id } });
 
@@ -51,13 +53,19 @@ function EditCampaignPage() {
       ]}
     >
       <div className="flex w-full flex-col gap-5">
-        {campaign.status === CampaignStatus.ACTIVE ? (
-          <CampaignDetailsForm campaign={campaign} onCancel={goToCampaign} onSuccess={goToCampaign} />
+        {status === CampaignStatus.ACTIVE || status === CampaignStatus.PENDING ? (
+          <CampaignDetailsForm
+            campaign={campaign}
+            onCancel={goToCampaign}
+            onSuccess={goToCampaign}
+          />
         ) : (
           <Alert className="w-fit pb-14 has-data-[slot=alert-action]:pr-4">
             <IconAlertCircle />
             <AlertTitle>Campanha não pode ser editada</AlertTitle>
-            <AlertDescription>Apenas campanhas ativas podem ser editadas.</AlertDescription>
+            <AlertDescription>
+              Apenas campanhas pendentes ou ativas podem ser editadas.
+            </AlertDescription>
             <AlertAction className="top-auto bottom-3">
               <Button type="button" size="sm" onClick={goToCampaign}>
                 Voltar ao painel

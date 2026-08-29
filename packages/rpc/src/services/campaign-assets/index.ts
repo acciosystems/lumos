@@ -16,6 +16,7 @@ import {
 import { ORPCError } from '@orpc/client';
 import { ulid } from 'ulid';
 
+import { reconcileCampaignLifecycle } from '../campaign-lifecycle';
 import { isLeaseStale } from '../upload/policy';
 import { isOwnedCampaignAssetIntent, isValidCampaignAssetObject } from './policy';
 import {
@@ -76,9 +77,15 @@ export async function createCampaignAssetUploadIntent({
       });
     }
   } else {
-    const campaign = await prisma.campaign.findFirst({
-      where: { id: input.campaignId, organizerProfile: { userId } },
-      select: { status: true },
+    const campaign = await prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw(
+        Prisma.sql`SELECT "id" FROM "campaigns" WHERE "id" = ${input.campaignId} FOR UPDATE`,
+      );
+      await reconcileCampaignLifecycle(transaction, input.campaignId);
+      return transaction.campaign.findFirst({
+        where: { id: input.campaignId, organizerProfile: { userId } },
+        select: { status: true },
+      });
     });
     if (!campaign) throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
     if (campaign.status !== 'COMPLETED') {
