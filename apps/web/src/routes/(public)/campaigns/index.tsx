@@ -242,7 +242,16 @@ function CampaignCard({
   campaign: Awaited<ReturnType<typeof rpc.campaign.list.call>>['items'][number];
 }) {
   return (
-    <Card className="h-full">
+    <Card className="h-full overflow-hidden">
+      {campaign.image ? (
+        <img
+          src={campaign.image.url}
+          alt=""
+          className="aspect-video w-full border-b bg-muted object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : null}
       <CardHeader>
         <CardTitle className="line-clamp-2">{campaign.title}</CardTitle>
         <CardDescription>{campaign.organizerProfile.displayName}</CardDescription>

@@ -1,6 +1,8 @@
 import { UploadIntentStatus } from '@lumos/database/generated/prisma/client';
 import { AVATAR_CONTENT_TYPE, AVATAR_MAX_SIZE_BYTES } from '@lumos/validation/user';
 
+export { isLeaseStale } from '../upload/policy';
+
 export const TERMINAL_AVATAR_UPLOAD_STATUSES = [
   UploadIntentStatus.CONFIRMED,
   UploadIntentStatus.REJECTED,
@@ -9,10 +11,6 @@ export const TERMINAL_AVATAR_UPLOAD_STATUSES = [
 
 export function isTerminalAvatarUploadStatus(status: UploadIntentStatus) {
   return (TERMINAL_AVATAR_UPLOAD_STATUSES as readonly UploadIntentStatus[]).includes(status);
-}
-
-export function isLeaseStale(startedAt: Date | null, now: Date, leaseMs: number) {
-  return !startedAt || startedAt.getTime() <= now.getTime() - leaseMs;
 }
 
 export function getAvatarCleanupKeys({

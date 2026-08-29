@@ -10,6 +10,11 @@ enum CampaignStatus {
   CANCELLED
 }
 
+enum CampaignAssetKind {
+  IMAGE
+  ACCOUNTABILITY_EVIDENCE
+}
+
 model Campaign {
   id                 String @id @default(ulid())
   organizerProfileId String
@@ -25,8 +30,6 @@ model Campaign {
 
   startDate DateTime
   endDate   DateTime
-
-  imageUrl String?
 
   // PHYSICAL only. Nullability is required for VIRTUAL campaigns; the
   // subtype-specific CHECK constraints are maintained in SQL migrations.
@@ -46,6 +49,8 @@ model Campaign {
   updates          CampaignUpdate[]
   accountability   CampaignAccountability?
   donations        Donation[]
+  assets           CampaignAsset[]
+  uploadIntents    UploadIntent[]
 
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -130,7 +135,7 @@ model CampaignAccountability {
   totalItems      Int?
   totalAmountCents Int?
   outcomeSummary  String
-  evidenceUrls    String[]
+  evidenceAssets  CampaignAsset[]
 
   submittedAt     DateTime @default(now())
   submittedOnTime Boolean
@@ -141,4 +146,30 @@ model CampaignAccountability {
   updatedAt DateTime @updatedAt
 
   @@map("campaign_accountabilities")
+}
+
+model CampaignAsset {
+  id               String            @id
+  campaignId       String
+  accountabilityId String?
+  uploaderId       String
+  kind             CampaignAssetKind
+  objectKey        String            @unique
+  originalFileName String
+  contentType      String
+  contentLength    Int
+  position         Int               @default(0)
+  removedAt        DateTime?
+
+  campaign       Campaign                @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  accountability CampaignAccountability? @relation(fields: [accountabilityId], references: [id], onDelete: Cascade)
+  uploader       User                    @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([campaignId, kind, removedAt, position])
+  @@index([accountabilityId, removedAt, position])
+  @@index([uploaderId, removedAt])
+  @@map("campaign_assets")
 }

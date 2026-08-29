@@ -1,16 +1,30 @@
 import { CampaignStatus } from '@lumos/validation/campaign';
 import { formatCnpj } from '@lumos/validation/organizer';
-import { IconCalendar, IconExternalLink, IconMapPin, IconUsers } from '@tabler/icons-react';
+import {
+  IconCalendar,
+  IconExternalLink,
+  IconFile,
+  IconMapPin,
+  IconUsers,
+} from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Empty, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
-import { Item, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '@/components/ui/item';
+import {
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from '@/components/ui/item';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
 import { campaignTypeMetadata, isPhysicalCampaign } from '@/utils/campaign-type';
+import { formatFileSize } from '@/utils/file-size';
 
 type CampaignDetailData =
   | Awaited<ReturnType<typeof rpc.campaign.publicById.call>>
@@ -25,6 +39,7 @@ export function CampaignDetail({
 }) {
   return (
     <div className="flex w-full flex-col gap-5">
+      <CampaignHero campaign={campaign} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap gap-2">
@@ -188,6 +203,20 @@ export function CampaignDetail({
   );
 }
 
+function CampaignHero({ campaign }: { campaign: CampaignDetailData }) {
+  if (!campaign.image) return null;
+  return (
+    <div className="aspect-16/7 overflow-hidden rounded-xl border bg-muted">
+      <img
+        src={campaign.image.url}
+        alt={`Imagem da campanha ${campaign.title}`}
+        className="size-full object-cover"
+        decoding="async"
+      />
+    </div>
+  );
+}
+
 function CampaignAccountabilityReport({
   campaignType,
   report,
@@ -200,14 +229,6 @@ function CampaignAccountabilityReport({
     : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
         (report.totalAmountCents ?? 0) / 100,
       );
-  const evidenceKeyCounts = new Map<string, number>();
-  const evidenceItems = report.evidenceUrls.map((url) => {
-    const occurrence = evidenceKeyCounts.get(url) ?? 0;
-    evidenceKeyCounts.set(url, occurrence + 1);
-
-    return { key: JSON.stringify([url, occurrence]), url };
-  });
-
   return (
     <Card>
       <CardHeader>
@@ -223,26 +244,37 @@ function CampaignAccountabilityReport({
           <span className="text-muted-foreground">Resumo do resultado</span>
           <p className="font-medium whitespace-pre-wrap">{report.outcomeSummary}</p>
         </div>
-        {report.evidenceUrls.length > 0 && (
+        {report.evidenceAssets.length > 0 && (
           <div className="grid gap-2">
             <span className="text-muted-foreground">Evidências públicas</span>
             <ItemGroup>
-              {evidenceItems.map(({ key, url }) => (
+              {report.evidenceAssets.map((asset) => (
                 <Item
-                  key={key}
+                  key={asset.id}
                   variant="outline"
                   size="sm"
                   render={
                     <a
-                      href={url}
+                      href={asset.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label={`Abrir evidência ${url}`}
+                      aria-label={`Abrir evidência ${asset.name}`}
                     />
                   }
                 >
+                  <ItemMedia variant={asset.contentType.startsWith('image/') ? 'image' : 'icon'}>
+                    {asset.contentType.startsWith('image/') ? (
+                      <img src={asset.url} alt="" loading="lazy" decoding="async" />
+                    ) : (
+                      <IconFile />
+                    )}
+                  </ItemMedia>
                   <ItemContent>
-                    <ItemTitle className="wrap-break-word">{url}</ItemTitle>
+                    <ItemTitle className="wrap-break-word">{asset.name}</ItemTitle>
+                    <ItemDescription>
+                      {asset.contentType === 'application/pdf' ? 'Documento PDF' : 'Imagem'} ·{' '}
+                      {formatFileSize(asset.contentLength)}
+                    </ItemDescription>
                   </ItemContent>
                   <IconExternalLink className="size-4 shrink-0" />
                 </Item>

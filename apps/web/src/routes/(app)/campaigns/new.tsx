@@ -11,6 +11,7 @@ import { useId } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 
+import { CampaignAssetUploadField } from '@/components/campaign/campaign-asset-upload-field';
 import { Loading } from '@/components/misc/loading';
 import { AppInset } from '@/components/sidebar/inset';
 import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -42,6 +43,7 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
+import { useCampaignAssetUploads } from '@/hooks/use-campaign-asset-uploads';
 import { invalidateCampaignLists } from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 import {
@@ -71,7 +73,7 @@ type CampaignCommonFormValue = {
   region: string;
   startDate: string;
   endDate: string;
-  imageUrl?: string;
+  imageUploadId?: string;
 };
 
 type CampaignFormValue = CampaignCommonFormValue &
@@ -102,7 +104,7 @@ const defaultValues: CampaignFormValue = {
   region: '',
   startDate: '',
   endDate: '',
-  imageUrl: '',
+  imageUploadId: undefined,
   location: '',
   targetItems: 1,
   pixKey: '',
@@ -123,18 +125,22 @@ function NewCampaignPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const formId = useId();
+  const imageUpload = useCampaignAssetUploads({ kind: 'IMAGE' });
 
   const organizerProfileQuery = useQuery(rpc.campaign.canCreate.queryOptions());
 
   const mutation = useMutation(
     rpc.campaign.create.mutationOptions({
       onSuccess: async (campaign) => {
+        imageUpload.releaseAssets();
         await invalidateCampaignLists(queryClient);
         toast.success('Campanha criada com sucesso.');
         await navigate({ to: '/campaigns/$id', params: { id: campaign.id } });
       },
-      onError: (error) =>
-        toast.error('Não foi possível criar a campanha.', { description: error.message }),
+      onError: (error) => {
+        imageUpload.markReadyAssetsFailed('Verifique a imagem e tente enviá-la novamente.');
+        toast.error('Não foi possível criar a campanha.', { description: error.message });
+      },
     }),
   );
 
@@ -143,7 +149,10 @@ function NewCampaignPage() {
     validators: { onDynamic: campaignCreateInputSchema },
     validationLogic: revalidateLogic({ mode: 'submit', modeAfterSubmission: 'change' }),
     onSubmit: ({ value }) => {
-      const result = v.safeParse(campaignCreateInputSchema, value);
+      const result = v.safeParse(campaignCreateInputSchema, {
+        ...value,
+        imageUploadId: imageUpload.readyUploadIds[0],
+      });
       if (result.success) mutation.mutate(result.output);
     },
   });
@@ -451,8 +460,7 @@ function NewCampaignPage() {
                   <FieldSet>
                     <FieldLegend>Período e imagem</FieldLegend>
                     <FieldDescription>
-                      Defina quando a campanha estará ativa e, se desejar, adicione uma imagem
-                      pública.
+                      Defina quando a campanha estará ativa e, se desejar, envie uma imagem.
                     </FieldDescription>
                     <FieldGroup>
                       <div className="grid gap-4 md:grid-cols-2">
@@ -475,17 +483,18 @@ function NewCampaignPage() {
                         </form.Field>
                       </div>
 
-                      <form.Field name="imageUrl">
-                        {(field) => (
-                          <TextField
-                            field={field}
-                            label="Imagem da campanha"
-                            type="url"
-                            placeholder="https://exemplo.com/imagem.jpg"
-                            description="Opcional. Use uma URL pública com http:// ou https://."
-                          />
-                        )}
-                      </form.Field>
+                      <CampaignAssetUploadField
+                        id="campaign-image"
+                        label="Imagem da campanha"
+                        description="Opcional. Envie uma imagem JPEG, PNG ou WebP; ela será otimizada antes do envio."
+                        kind="IMAGE"
+                        assets={imageUpload.assets}
+                        maxCount={1}
+                        disabled={mutation.isPending}
+                        onFiles={imageUpload.addFiles}
+                        onRemove={(key) => void imageUpload.removeAsset(key)}
+                        onRetry={(key) => void imageUpload.retryAsset(key)}
+                      />
                     </FieldGroup>
                   </FieldSet>
 
@@ -498,7 +507,16 @@ function NewCampaignPage() {
             <CardFooter className="justify-end">
               <form.Subscribe selector={(state) => state.canSubmit}>
                 {(canSubmit) => (
-                  <Button type="submit" form={formId} disabled={!canSubmit || mutation.isPending}>
+                  <Button
+                    type="submit"
+                    form={formId}
+                    disabled={
+                      !canSubmit ||
+                      mutation.isPending ||
+                      imageUpload.isBusy ||
+                      imageUpload.hasErrors
+                    }
+                  >
                     {mutation.isPending ? <Spinner /> : <IconDeviceFloppy />}
                     {mutation.isPending ? 'Criando campanha...' : 'Criar campanha'}
                   </Button>

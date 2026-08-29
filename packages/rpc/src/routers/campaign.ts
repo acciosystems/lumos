@@ -3,6 +3,8 @@ import { Prisma } from '@lumos/database/generated/prisma/client';
 import type { CampaignInclude, CampaignSelect } from '@lumos/database/generated/prisma/models';
 import {
   CampaignType,
+  campaignAssetUploadIdInputSchema,
+  campaignAssetUploadInputSchema,
   campaignByIdInputSchema,
   campaignCreateInputSchema,
   campaignLifecycleTransitionInputSchema,
@@ -14,6 +16,7 @@ import {
   type CampaignCreateInput,
 } from '@lumos/validation/campaign';
 import { ORPCError } from '@orpc/client';
+import { ulid } from 'ulid';
 import * as v from 'valibot';
 
 import { authorized, publicProcedure } from '../procedures';
@@ -23,6 +26,17 @@ import {
   saveCampaignAccountability,
   toPublicCampaignAccountability,
 } from '../services/campaign-accountability';
+import {
+  cleanupRemovedCampaignAssets,
+  compensatePreparedCampaignAssets,
+  confirmPreparedCampaignAsset,
+  createCampaignAssetUploadIntent,
+  discardCampaignAssetUpload,
+  finishPreparedCampaignAssets,
+  prepareCampaignAssetUploads,
+  toPublicCampaignAsset,
+  verifyCampaignAssetUpload,
+} from '../services/campaign-assets';
 import { toCampaignCreateData } from '../services/campaign-create';
 import {
   toCampaignCollectionPointData,
@@ -54,7 +68,19 @@ const campaignInclude = {
     orderBy: { publishedAt: 'desc' as const },
     take: 5,
   },
-  accountability: true,
+  accountability: {
+    include: {
+      evidenceAssets: {
+        where: { removedAt: null },
+        orderBy: [{ position: 'asc' as const }, { createdAt: 'asc' as const }],
+      },
+    },
+  },
+  assets: {
+    where: { kind: 'IMAGE' as const, removedAt: null },
+    orderBy: { createdAt: 'desc' as const },
+    take: 1,
+  },
   _count: {
     select: {
       participants: {
@@ -73,7 +99,17 @@ const publicCampaignListSelect = {
   region: true,
   startDate: true,
   endDate: true,
-  imageUrl: true,
+  assets: {
+    where: { kind: 'IMAGE' as const, removedAt: null },
+    select: {
+      id: true,
+      objectKey: true,
+      originalFileName: true,
+      contentType: true,
+      contentLength: true,
+    },
+    take: 1,
+  },
   organizerProfile: {
     select: {
       displayName: true,
@@ -132,45 +168,50 @@ const publicCampaignDetailSelect = {
       totalItems: true,
       totalAmountCents: true,
       outcomeSummary: true,
-      evidenceUrls: true,
+      evidenceAssets: {
+        where: { removedAt: null },
+        orderBy: [{ position: 'asc' as const }, { createdAt: 'asc' as const }],
+        select: {
+          id: true,
+          objectKey: true,
+          originalFileName: true,
+          contentType: true,
+          contentLength: true,
+        },
+      },
     },
   },
 } as const satisfies CampaignSelect;
 
-function withParticipantCount<Campaign extends { _count: { participants: number } }>(
-  campaign: Campaign,
-) {
-  const { _count, ...campaignData } = campaign;
-  return { ...campaignData, participantCount: _count.participants };
-}
-
-function withOwnerCampaignData<
+function withParticipantCount<
   Campaign extends {
     _count: { participants: number };
-    status: string;
-    endDate: Date;
-    accountability: {
-      id: string;
-      campaignId: string;
-      totalItems: number | null;
-      totalAmountCents: number | null;
-      outcomeSummary: string;
-      evidenceUrls: string[] | null;
-      submittedAt: Date;
-      submittedOnTime: boolean;
-      createdAt: Date;
-      updatedAt: Date;
-    } | null;
+    assets: Array<Parameters<typeof toPublicCampaignAsset>[0]>;
   },
 >(campaign: Campaign) {
-  const { _count, accountability, ...campaignData } = campaign;
+  const { _count, assets, ...campaignData } = campaign;
+  return {
+    ...campaignData,
+    image: assets[0] ? toPublicCampaignAsset(assets[0]) : null,
+    participantCount: _count.participants,
+  };
+}
+
+function withOwnerCampaignData(
+  campaign: Prisma.CampaignGetPayload<{ include: typeof campaignInclude }>,
+) {
+  const { _count, accountability, assets, ...campaignData } = campaign;
   const deadline =
     campaign.status === 'COMPLETED' ? getCampaignAccountabilityDeadline(campaign.endDate) : null;
 
   return {
     ...campaignData,
+    image: assets[0] ? toPublicCampaignAsset(assets[0]) : null,
     accountability: accountability
-      ? { ...accountability, evidenceUrls: accountability.evidenceUrls ?? [] }
+      ? {
+          ...accountability,
+          evidenceAssets: accountability.evidenceAssets.map(toPublicCampaignAsset),
+        }
       : null,
     participantCount: _count.participants,
     accountabilityDeadline: deadline,
@@ -331,6 +372,11 @@ export const campaignRouter = {
             displayName: true,
           },
         },
+        assets: {
+          where: { kind: 'IMAGE', removedAt: null },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
         _count: {
           select: {
             participants: {
@@ -383,6 +429,24 @@ export const campaignRouter = {
 
     return { hasOrganizerProfile: Boolean(organizerProfile) };
   }),
+
+  assetUpload: {
+    createIntent: authorized
+      .input(campaignAssetUploadInputSchema)
+      .handler(async ({ input, context: { user, log } }) =>
+        createCampaignAssetUploadIntent({ input, userId: user.id, log }),
+      ),
+    verify: authorized
+      .input(campaignAssetUploadIdInputSchema)
+      .handler(async ({ input, context: { user, log } }) =>
+        verifyCampaignAssetUpload({ uploadId: input.uploadId, userId: user.id, log }),
+      ),
+    discard: authorized
+      .input(campaignAssetUploadIdInputSchema)
+      .handler(async ({ input, context: { user, log } }) =>
+        discardCampaignAssetUpload({ uploadId: input.uploadId, userId: user.id, log }),
+      ),
+  },
 
   join: authorized.input(campaignByIdInputSchema).handler(async ({ input, context: { user } }) =>
     prisma.$transaction(async (transaction) => {
@@ -695,13 +759,30 @@ export const campaignRouter = {
 
   saveAccountability: authorized
     .input(campaignAccountabilityInputSchema)
-    .handler(async ({ input, context: { user } }) =>
-      prisma.$transaction((transaction) => saveCampaignAccountability(transaction, user.id, input)),
-    ),
+    .handler(async ({ input, context: { user, log } }) => {
+      const prepared = await prepareCampaignAssetUploads({
+        uploadIds: input.evidenceUploadIds,
+        userId: user.id,
+        campaignId: input.id,
+        kind: 'ACCOUNTABILITY_EVIDENCE',
+        log,
+      });
+      try {
+        const accountability = await prisma.$transaction((transaction) =>
+          saveCampaignAccountability(transaction, user.id, input, prepared),
+        );
+        await finishPreparedCampaignAssets(prepared, log);
+        await cleanupRemovedCampaignAssets(user.id, log);
+        return toPublicCampaignAccountability(accountability);
+      } catch (error) {
+        await compensatePreparedCampaignAssets(prepared, log);
+        throw error;
+      }
+    }),
 
   create: authorized
     .input(campaignCreateInputSchema)
-    .handler(async ({ input, context: { user } }) => {
+    .handler(async ({ input, context: { user, log } }) => {
       const organizerProfile = await prisma.organizerProfile.findUnique({
         where: { userId: user.id },
       });
@@ -713,10 +794,44 @@ export const campaignRouter = {
       }
 
       const { startDate, endDate } = assertCreateInput(input);
+      const campaignId = ulid();
+      const prepared = input.imageUploadId
+        ? await prepareCampaignAssetUploads({
+            uploadIds: [input.imageUploadId],
+            userId: user.id,
+            campaignId,
+            kind: 'IMAGE',
+            log,
+          })
+        : [];
 
-      return prisma.campaign.create({
-        data: toCampaignCreateData(input, organizerProfile.id, { startDate, endDate }),
-        include: campaignInclude,
-      });
+      try {
+        const campaign = await prisma.$transaction(async (transaction) => {
+          await transaction.campaign.create({
+            data: {
+              id: campaignId,
+              ...toCampaignCreateData(input, organizerProfile.id, { startDate, endDate }),
+            },
+          });
+          if (prepared[0]) {
+            await confirmPreparedCampaignAsset({
+              transaction,
+              prepared: prepared[0],
+              campaignId,
+              userId: user.id,
+              position: 0,
+            });
+          }
+          return transaction.campaign.findUniqueOrThrow({
+            where: { id: campaignId },
+            include: campaignInclude,
+          });
+        });
+        await finishPreparedCampaignAssets(prepared, log);
+        return withOwnerCampaignData(campaign);
+      } catch (error) {
+        await compensatePreparedCampaignAssets(prepared, log);
+        throw error;
+      }
     }),
 };

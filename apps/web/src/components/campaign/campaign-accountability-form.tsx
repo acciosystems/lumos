@@ -1,26 +1,39 @@
 import {
   CampaignStatus,
+  CAMPAIGN_EVIDENCE_MAX_COUNT,
   campaignAccountabilityInputSchema,
   formatBrlCents,
   parseBrlAmountToCents,
 } from '@lumos/validation/campaign';
-import { IconDeviceFloppy, IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconDeviceFloppy, IconFile, IconPhoto, IconTrash } from '@tabler/icons-react';
 import { useForm } from '@tanstack/react-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 
+import { CampaignAssetUploadField } from '@/components/campaign/campaign-asset-upload-field';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from '@/components/ui/item';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
+import { useCampaignAssetUploads } from '@/hooks/use-campaign-asset-uploads';
 import { invalidateCampaignManagement } from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 import { isPhysicalCampaign } from '@/utils/campaign-type';
+import { formatFileSize } from '@/utils/file-size';
 
 type OwnerCampaign = Awaited<ReturnType<typeof rpc.campaign.byId.call>>;
 
@@ -32,11 +45,14 @@ export function CampaignAccountabilityForm({ campaign }: { campaign: OwnerCampai
   const deadline = campaign.accountabilityDeadline
     ? new Date(campaign.accountabilityDeadline)
     : null;
-  const evidenceUrls = accountability?.evidenceUrls ?? [];
-  const [evidenceRowKeys, setEvidenceRowKeys] = useState(() =>
-    evidenceUrls.map((_, index) => `${campaign.id}-evidence-${index}`),
+  const [retainedEvidenceAssetIds, setRetainedEvidenceAssetIds] = useState(
+    () => accountability?.evidenceAssets.map((asset) => asset.id) ?? [],
   );
-  const nextEvidenceKey = useRef(evidenceUrls.length);
+  const evidenceUpload = useCampaignAssetUploads({
+    kind: 'ACCOUNTABILITY_EVIDENCE',
+    campaignId: campaign.id,
+    maxCount: CAMPAIGN_EVIDENCE_MAX_COUNT - retainedEvidenceAssetIds.length,
+  });
   const form = useForm({
     defaultValues: {
       totalItems: accountability?.totalItems ?? 0,
@@ -45,7 +61,8 @@ export function CampaignAccountabilityForm({ campaign }: { campaign: OwnerCampai
           ? ''
           : formatBrlCents(accountability.totalAmountCents),
       outcomeSummary: accountability?.outcomeSummary ?? '',
-      evidenceUrls,
+      retainedEvidenceAssetIds,
+      evidenceUploadIds: [] as string[],
     },
     onSubmit: ({ value }) => {
       const totalAmountCents = parseBrlAmountToCents(value.totalAmountBrl);
@@ -55,14 +72,16 @@ export function CampaignAccountabilityForm({ campaign }: { campaign: OwnerCampai
             type: 'PHYSICAL' as const,
             totalItems: value.totalItems,
             outcomeSummary: value.outcomeSummary,
-            evidenceUrls: value.evidenceUrls,
+            retainedEvidenceAssetIds,
+            evidenceUploadIds: evidenceUpload.readyUploadIds,
           }
         : {
             id: campaign.id,
             type: 'VIRTUAL' as const,
             totalAmountCents: totalAmountCents ?? Number.NaN,
             outcomeSummary: value.outcomeSummary,
-            evidenceUrls: value.evidenceUrls,
+            retainedEvidenceAssetIds,
+            evidenceUploadIds: evidenceUpload.readyUploadIds,
           };
       const result = v.safeParse(campaignAccountabilityInputSchema, draft);
 
@@ -78,6 +97,7 @@ export function CampaignAccountabilityForm({ campaign }: { campaign: OwnerCampai
   const mutation = useMutation(
     rpc.campaign.saveAccountability.mutationOptions({
       onSuccess: async () => {
+        evidenceUpload.releaseAssets();
         await invalidateCampaignManagement(queryClient, campaign.id);
         toast.success(
           isCorrection
@@ -85,10 +105,14 @@ export function CampaignAccountabilityForm({ campaign }: { campaign: OwnerCampai
             : 'Prestação de contas enviada com sucesso.',
         );
       },
-      onError: (error) =>
+      onError: (error) => {
+        evidenceUpload.markReadyAssetsFailed(
+          'Verifique o arquivo e tente enviá-lo novamente antes de salvar.',
+        );
         toast.error('Não foi possível salvar a prestação de contas.', {
           description: error.message,
-        }),
+        });
+      },
     }),
   );
 
@@ -176,66 +200,66 @@ export function CampaignAccountabilityForm({ campaign }: { campaign: OwnerCampai
             )}
           </form.Field>
 
-          <form.Field name="evidenceUrls" mode="array">
-            {(field) => (
-              <Field>
-                <FieldLabel>Evidências públicas</FieldLabel>
-                <div className="flex flex-col gap-3">
-                  {field.state.value.map((url, index) => (
-                    <div key={evidenceRowKeys[index]} className="flex items-end gap-2">
-                      <Input
-                        type="url"
-                        placeholder="https://exemplo.com/evidencia"
-                        value={url}
-                        disabled={mutation.isPending}
-                        aria-label={`URL de evidência ${index + 1}`}
-                        onChange={(event) => {
-                          const next = [...field.state.value];
-                          next[index] = event.target.value;
-                          field.setValue(next);
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="icon"
-                        aria-label={`Remover URL de evidência ${index + 1}`}
-                        disabled={mutation.isPending}
-                        onClick={() => {
-                          field.removeValue(index);
-                          setEvidenceRowKeys((keys) =>
-                            keys.filter((_, keyIndex) => keyIndex !== index),
-                          );
-                        }}
-                      >
-                        <IconTrash />
-                      </Button>
-                    </div>
+          {accountability?.evidenceAssets.length ? (
+            <Field>
+              <FieldLabel>Evidências publicadas</FieldLabel>
+              <ItemGroup>
+                {accountability.evidenceAssets
+                  .filter((asset) => retainedEvidenceAssetIds.includes(asset.id))
+                  .map((asset) => (
+                    <Item key={asset.id} variant="outline" size="sm">
+                      <ItemMedia variant="icon">
+                        {asset.contentType.startsWith('image/') ? <IconPhoto /> : <IconFile />}
+                      </ItemMedia>
+                      <ItemContent>
+                        <ItemTitle>{asset.name}</ItemTitle>
+                        <ItemDescription>
+                          {formatFileSize(asset.contentLength)} · Publicada
+                        </ItemDescription>
+                      </ItemContent>
+                      <ItemActions>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon-sm"
+                          aria-label={`Remover ${asset.name}`}
+                          disabled={mutation.isPending}
+                          onClick={() =>
+                            setRetainedEvidenceAssetIds((current) =>
+                              current.filter((assetId) => assetId !== asset.id),
+                            )
+                          }
+                        >
+                          <IconTrash />
+                        </Button>
+                      </ItemActions>
+                    </Item>
                   ))}
-                </div>
-                <FieldDescription>
-                  Opcional. Adicione links públicos que comprovem o resultado.
-                </FieldDescription>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="self-start"
-                  disabled={mutation.isPending}
-                  onClick={() => {
-                    const key = `${campaign.id}-evidence-${nextEvidenceKey.current}`;
-                    nextEvidenceKey.current += 1;
-                    field.pushValue('');
-                    setEvidenceRowKeys((keys) => [...keys, key]);
-                  }}
-                >
-                  <IconPlus /> Adicionar evidência
-                </Button>
-              </Field>
-            )}
-          </form.Field>
+              </ItemGroup>
+              <FieldDescription>
+                Arquivos removidos deixarão de ser exibidos depois que a correção for salva.
+              </FieldDescription>
+            </Field>
+          ) : null}
 
-          <Button type="submit" className="self-start" disabled={mutation.isPending}>
+          <CampaignAssetUploadField
+            id="accountability-evidence"
+            label="Novas evidências"
+            description="Opcional. Envie até 10 imagens ou PDFs de no máximo 10 MB cada."
+            kind="ACCOUNTABILITY_EVIDENCE"
+            assets={evidenceUpload.assets}
+            maxCount={CAMPAIGN_EVIDENCE_MAX_COUNT - retainedEvidenceAssetIds.length}
+            disabled={mutation.isPending}
+            onFiles={evidenceUpload.addFiles}
+            onRemove={(key) => void evidenceUpload.removeAsset(key)}
+            onRetry={(key) => void evidenceUpload.retryAsset(key)}
+          />
+
+          <Button
+            type="submit"
+            className="self-start"
+            disabled={mutation.isPending || evidenceUpload.isBusy || evidenceUpload.hasErrors}
+          >
             {mutation.isPending ? <Spinner /> : <IconDeviceFloppy />}
             {mutation.isPending
               ? 'Salvando...'

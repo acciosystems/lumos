@@ -40,11 +40,11 @@ export const Route = createFileRoute('/(public)/campaigns/$id')({
         { property: 'og:title', content: title },
         { property: 'og:description', content: description },
         { property: 'og:type', content: 'article' },
-        ...(loaderData.imageUrl
+        ...(loaderData.image
           ? [
-              { property: 'og:image', content: loaderData.imageUrl },
+              { property: 'og:image', content: loaderData.image.url },
               { name: 'twitter:card', content: 'summary_large_image' },
-              { name: 'twitter:image', content: loaderData.imageUrl },
+              { name: 'twitter:image', content: loaderData.image.url },
             ]
           : [{ name: 'twitter:card', content: 'summary' }]),
       ],

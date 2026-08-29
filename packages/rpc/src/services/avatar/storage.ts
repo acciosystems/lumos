@@ -1,14 +1,14 @@
-import {
-  CopyObjectCommand,
-  DeleteObjectCommand,
-  HeadObjectCommand,
-  PutObjectCommand,
-} from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '@lumos/env/rpc';
 import { AVATAR_CONTENT_TYPE, AVATAR_UPLOAD_EXPIRES_IN_SECONDS } from '@lumos/validation/user';
 
-import { s3Client } from '../s3';
+import {
+  createSingleWriteUploadUrl,
+  deleteUploadObject,
+  getPublicObjectUrl,
+  headUploadObject,
+  isUploadObjectNotFound,
+  publishUploadObject,
+} from '../upload/storage';
 
 export const AVATAR_STAGING_PREFIX = 'avatar-staging';
 export const AVATAR_PUBLISHED_PREFIX = 'avatars';
@@ -22,12 +22,7 @@ export function getAvatarPublishedKey(userId: string, uploadId: string) {
 }
 
 export function getAvatarPublicUrl(key: string) {
-  const baseUrl = env.S3_PUBLIC_URL.replace(/\/+$/, '');
-  const encodedKey = key
-    .split('/')
-    .map((part) => encodeURIComponent(part))
-    .join('/');
-  return `${baseUrl}/${encodedKey}`;
+  return getPublicObjectUrl(key);
 }
 
 /**
@@ -61,29 +56,15 @@ export function getManagedAvatarKey(imageUrl: string | null | undefined, userId:
 }
 
 export async function createAvatarUploadUrl(stagingKey: string) {
-  const command = new PutObjectCommand({
-    Bucket: env.S3_BUCKET,
-    Key: stagingKey,
-    ContentType: AVATAR_CONTENT_TYPE,
-    // R2 supports conditional PutObject. This makes the bearer URL single-write.
-    IfNoneMatch: '*',
-  });
-
-  return getSignedUrl(s3Client, command, {
+  return createSingleWriteUploadUrl({
+    key: stagingKey,
+    contentType: AVATAR_CONTENT_TYPE,
     expiresIn: AVATAR_UPLOAD_EXPIRES_IN_SECONDS,
-    // The S3 presigner treats Content-Type as unsignable by default. R2's
-    // browser upload must enforce it, so explicitly opt it into the signature.
-    signableHeaders: new Set(['content-type', 'if-none-match']),
   });
 }
 
 export async function headAvatarObject(key: string) {
-  return s3Client.send(
-    new HeadObjectCommand({
-      Bucket: env.S3_BUCKET,
-      Key: key,
-    }),
-  );
+  return headUploadObject(key);
 }
 
 export async function publishAvatarObject({
@@ -95,52 +76,22 @@ export async function publishAvatarObject({
   destinationKey: string;
   sourceEtag: string;
 }) {
-  const copySource = `${env.S3_BUCKET}/${sourceKey
-    .split('/')
-    .map((part) => encodeURIComponent(part))
-    .join('/')}`;
-
-  return s3Client.send(
-    new CopyObjectCommand({
-      Bucket: env.S3_BUCKET,
-      Key: destinationKey,
-      CopySource: copySource,
-      CopySourceIfMatch: sourceEtag,
-      MetadataDirective: 'REPLACE',
-      ContentType: AVATAR_CONTENT_TYPE,
-      // Versioned keys prevent replacement races; a bounded TTL also limits
-      // how long a deleted profile photo can remain in a custom-domain cache.
-      CacheControl: 'public, max-age=300, must-revalidate',
-    }),
-  );
+  return publishUploadObject({
+    sourceKey,
+    destinationKey,
+    sourceEtag,
+    contentType: AVATAR_CONTENT_TYPE,
+    // Versioned keys prevent replacement races; a bounded TTL also limits
+    // how long a deleted profile photo can remain in a custom-domain cache.
+    cacheControl: 'public, max-age=300, must-revalidate',
+  });
 }
 
 export async function deleteAvatarObject(key: string) {
-  return s3Client.send(
-    new DeleteObjectCommand({
-      Bucket: env.S3_BUCKET,
-      Key: key,
-    }),
-  );
+  return deleteUploadObject(key);
 }
 
-export function isObjectNotFound(error: unknown) {
-  if (typeof error !== 'object' || error === null) return false;
-
-  const candidate = error as {
-    name?: unknown;
-    code?: unknown;
-    $metadata?: { httpStatusCode?: unknown };
-  };
-
-  return (
-    candidate.$metadata?.httpStatusCode === 404 ||
-    candidate.name === 'NotFound' ||
-    candidate.name === 'NoSuchKey' ||
-    candidate.code === 'NotFound' ||
-    candidate.code === 'NoSuchKey'
-  );
-}
+export const isObjectNotFound = isUploadObjectNotFound;
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

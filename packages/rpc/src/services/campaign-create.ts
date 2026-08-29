@@ -19,7 +19,6 @@ export function toCampaignCreateData(
     category: input.category,
     region: input.region,
     ...dates,
-    imageUrl: input.imageUrl || null,
   };
 
   switch (input.type) {

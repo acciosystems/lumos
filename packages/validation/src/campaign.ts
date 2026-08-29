@@ -14,21 +14,59 @@ const requiredDate = (message: string) =>
     requiredString(message),
     v.check((value) => !value || isIsoDate(value), 'Informe uma data válida.'),
   );
-const optionalHttpUrl = v.optional(
-  v.pipe(
-    v.string(),
-    v.trim(),
-    v.check(
-      (value) => !value || isHttpUrl(value),
-      'Informe uma URL válida com http:// ou https://.',
-    ),
-  ),
+const uploadIdSchema = v.pipe(v.string(), v.ulid('Upload inválido.'));
+
+export const CAMPAIGN_IMAGE_CONTENT_TYPE = 'image/webp';
+export const CAMPAIGN_IMAGE_MAX_SIZE_BYTES = 5 * 1024 * 1024;
+export const CAMPAIGN_EVIDENCE_MAX_SIZE_BYTES = 10 * 1024 * 1024;
+export const CAMPAIGN_EVIDENCE_MAX_COUNT = 10;
+export const CAMPAIGN_ASSET_UPLOAD_EXPIRES_IN_SECONDS = 5 * 60;
+export const CAMPAIGN_EVIDENCE_CONTENT_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+] as const;
+
+const fileNameSchema = v.pipe(
+  requiredString('Nome do arquivo é obrigatório.'),
+  v.maxLength(255, 'O nome do arquivo deve ter no máximo 255 caracteres.'),
 );
 
-const publicHttpUrl = v.pipe(
-  requiredString('Informe uma URL de evidência válida.'),
-  v.check(isHttpUrl, 'Informe uma URL válida com http:// ou https://.'),
-);
+const contentLengthSchema = (maxSize: number, message: string) =>
+  v.pipe(
+    v.number('Tamanho do arquivo deve ser um número.'),
+    v.integer('Tamanho do arquivo deve ser um número inteiro.'),
+    v.minValue(1, 'O arquivo não pode estar vazio.'),
+    v.maxValue(maxSize, message),
+  );
+
+export const campaignAssetUploadInputSchema = v.variant('kind', [
+  v.object({
+    kind: v.literal('IMAGE'),
+    originalFileName: fileNameSchema,
+    contentType: v.literal(CAMPAIGN_IMAGE_CONTENT_TYPE),
+    contentLength: contentLengthSchema(
+      CAMPAIGN_IMAGE_MAX_SIZE_BYTES,
+      'A imagem deve ter no máximo 5 MB.',
+    ),
+  }),
+  v.object({
+    kind: v.literal('ACCOUNTABILITY_EVIDENCE'),
+    campaignId: requiredString('Campanha é obrigatória.'),
+    originalFileName: fileNameSchema,
+    contentType: v.picklist(
+      CAMPAIGN_EVIDENCE_CONTENT_TYPES,
+      'Envie uma imagem JPEG, PNG ou WebP, ou um documento PDF.',
+    ),
+    contentLength: contentLengthSchema(
+      CAMPAIGN_EVIDENCE_MAX_SIZE_BYTES,
+      'Cada evidência deve ter no máximo 10 MB.',
+    ),
+  }),
+]);
+
+export const campaignAssetUploadIdInputSchema = v.object({ uploadId: uploadIdSchema });
 
 // eslint-disable-next-line no-underscore-dangle -- Valibot intentionally names this API enum_.
 export const campaignTypeSchema = v.enum_(CampaignType);
@@ -80,9 +118,13 @@ const campaignIdInputEntry = {
 const accountabilityCommonInputEntries = {
   ...campaignIdInputEntry,
   outcomeSummary: requiredString('O resumo do resultado é obrigatório.'),
-  evidenceUrls: v.pipe(
-    v.array(publicHttpUrl),
-    v.transform((urls) => [...urls]),
+  retainedEvidenceAssetIds: v.pipe(
+    v.array(uploadIdSchema),
+    v.maxLength(CAMPAIGN_EVIDENCE_MAX_COUNT, 'Mantenha no máximo 10 evidências.'),
+  ),
+  evidenceUploadIds: v.pipe(
+    v.array(uploadIdSchema),
+    v.maxLength(CAMPAIGN_EVIDENCE_MAX_COUNT, 'Envie no máximo 10 evidências.'),
   ),
 };
 
@@ -108,10 +150,24 @@ const virtualCampaignAccountabilityInputSchema = v.object({
   ),
 });
 
-export const campaignAccountabilityInputSchema = v.variant('type', [
-  physicalCampaignAccountabilityInputSchema,
-  virtualCampaignAccountabilityInputSchema,
-]);
+export const campaignAccountabilityInputSchema = v.pipe(
+  v.variant('type', [
+    physicalCampaignAccountabilityInputSchema,
+    virtualCampaignAccountabilityInputSchema,
+  ]),
+  v.check(
+    (input) =>
+      new Set([...input.retainedEvidenceAssetIds, ...input.evidenceUploadIds]).size ===
+      input.retainedEvidenceAssetIds.length + input.evidenceUploadIds.length,
+    'A mesma evidência não pode ser informada mais de uma vez.',
+  ),
+  v.check(
+    (input) =>
+      input.retainedEvidenceAssetIds.length + input.evidenceUploadIds.length <=
+      CAMPAIGN_EVIDENCE_MAX_COUNT,
+    'A prestação de contas deve ter no máximo 10 evidências.',
+  ),
+);
 
 export const campaignCollectionPointInputSchema = v.object({
   name: requiredString('Nome do ponto de coleta é obrigatório'),
@@ -139,7 +195,7 @@ const campaignCommonInputEntries = {
   region: requiredString('Região é obrigatória'),
   startDate: requiredDate('Data inicial é obrigatória'),
   endDate: requiredDate('Data final é obrigatória'),
-  imageUrl: optionalHttpUrl,
+  imageUploadId: v.optional(uploadIdSchema),
 };
 
 const campaignEditableCommonInputEntries = {
@@ -257,6 +313,7 @@ export type CampaignLifecycleTransitionInput = v.InferOutput<
   typeof campaignLifecycleTransitionInputSchema
 >;
 export type CampaignAccountabilityInput = v.InferOutput<typeof campaignAccountabilityInputSchema>;
+export type CampaignAssetUploadInput = v.InferOutput<typeof campaignAssetUploadInputSchema>;
 
 export function parseBrlAmountToCents(value: string): number | null {
   const normalized = value.trim().replace(',', '.');
@@ -269,15 +326,6 @@ export function parseBrlAmountToCents(value: string): number | null {
 
 export function formatBrlCents(cents: number): string {
   return (cents / 100).toFixed(2);
-}
-
-function isHttpUrl(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch {
-    return false;
-  }
 }
 
 function isIsoDate(value: string): boolean {

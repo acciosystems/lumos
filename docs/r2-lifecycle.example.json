@@ -12,6 +12,19 @@
           "maxAge": 86400
         }
       }
+    },
+    {
+      "id": "expire-campaign-asset-staging",
+      "enabled": true,
+      "conditions": {
+        "prefix": "campaign-assets/staging/"
+      },
+      "deleteObjectsTransition": {
+        "condition": {
+          "type": "Age",
+          "maxAge": 86400
+        }
+      }
     }
   ]
 }

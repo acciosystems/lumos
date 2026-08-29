@@ -1,10 +1,11 @@
 # R2 browser uploads
 
-Avatar uploads use a presigned `PUT` URL, so the R2 bucket must allow the web
+Browser uploads use presigned `PUT` URLs, so the R2 bucket must allow the web
 application's origin. Without a bucket CORS policy, browsers reject the
 preflight request even when the presigned URL is valid.
 
-`r2-cors.example.json` is a Wrangler-compatible policy for local development:
+`r2-cors.example.json` is a Wrangler-compatible policy for local development.
+It covers avatar, campaign-image, and accountability-evidence uploads:
 
 ```sh
 bunx wrangler r2 bucket cors set lumos --file docs/r2-cors.example.json
@@ -22,7 +23,7 @@ bunx wrangler r2 bucket lifecycle list lumos
 ```
 
 `lifecycle set` replaces the bucket's lifecycle configuration. Merge the
-`expire-avatar-staging` rule into the exported configuration first when the
+staging expiration rules into the exported configuration first when the
 bucket already has other lifecycle rules.
 
 Before applying it outside local development, replace

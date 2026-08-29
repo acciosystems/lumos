@@ -1,0 +1,748 @@
+import { prisma } from '@lumos/database';
+import {
+  CampaignAssetKind,
+  Prisma,
+  UploadIntentPurpose,
+  UploadIntentStatus,
+} from '@lumos/database/generated/prisma/client';
+import type { UploadIntent } from '@lumos/database/generated/prisma/client';
+import {
+  CAMPAIGN_ASSET_UPLOAD_EXPIRES_IN_SECONDS,
+  CAMPAIGN_EVIDENCE_MAX_COUNT,
+  CAMPAIGN_EVIDENCE_MAX_SIZE_BYTES,
+  CAMPAIGN_IMAGE_MAX_SIZE_BYTES,
+  type CampaignAssetUploadInput,
+} from '@lumos/validation/campaign';
+import { ORPCError } from '@orpc/client';
+import { ulid } from 'ulid';
+
+import { isLeaseStale } from '../upload/policy';
+import { isOwnedCampaignAssetIntent, isValidCampaignAssetObject } from './policy';
+import {
+  createCampaignAssetUploadUrl,
+  deleteCampaignAssetObject,
+  getAssetPublicUrl,
+  getCampaignAssetPublishedKey,
+  getCampaignAssetStagingKey,
+  headCampaignAssetObject,
+  isCampaignAssetObjectNotFound,
+  publishCampaignAssetObject,
+} from './storage';
+
+export type AssetLog = { set: (fields: Record<string, unknown>) => void };
+export type CampaignAssetKindValue = 'IMAGE' | 'ACCOUNTABILITY_EVIDENCE';
+
+export type PreparedCampaignAsset = {
+  intent: UploadIntent;
+  kind: CampaignAssetKindValue;
+  publishedKey: string;
+  processingToken: string | null;
+  existing: boolean;
+};
+
+const CAMPAIGN_ASSET_PURPOSES = [
+  UploadIntentPurpose.CAMPAIGN_IMAGE,
+  UploadIntentPurpose.ACCOUNTABILITY_EVIDENCE,
+] as const;
+const ACTIVE_UPLOAD_SLOTS = Array.from(
+  { length: CAMPAIGN_EVIDENCE_MAX_COUNT },
+  (_, index) => index + 1,
+);
+const MAX_UPLOADS_PER_HOUR = 40;
+const PROCESSING_LEASE_MS = 60_000;
+const INTENT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+
+class CampaignAssetIntentOwnershipLost extends Error {}
+
+export async function createCampaignAssetUploadIntent({
+  input,
+  userId,
+  log,
+}: {
+  input: CampaignAssetUploadInput;
+  userId: string;
+  log: AssetLog;
+}) {
+  await maintainCampaignAssetUploads(userId, log);
+
+  if (input.kind === 'IMAGE') {
+    const organizer = await prisma.organizerProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
+    if (!organizer) {
+      throw new ORPCError('FORBIDDEN', {
+        message: 'Configure um perfil organizador antes de enviar uma imagem de campanha.',
+      });
+    }
+  } else {
+    const campaign = await prisma.campaign.findFirst({
+      where: { id: input.campaignId, organizerProfile: { userId } },
+      select: { status: true },
+    });
+    if (!campaign) throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
+    if (campaign.status !== 'COMPLETED') {
+      throw new ORPCError('BAD_REQUEST', {
+        message: 'Evidências só podem ser enviadas para campanhas concluídas.',
+      });
+    }
+  }
+
+  const purpose = purposeFor(input.kind);
+  const recentUploads = await prisma.uploadIntent.count({
+    where: {
+      userId,
+      purpose,
+      createdAt: { gte: new Date(Date.now() - 60 * 60 * 1000) },
+    },
+  });
+  if (recentUploads >= MAX_UPLOADS_PER_HOUR) throwUploadRateLimit();
+
+  const uploadId = ulid();
+  const stagingKey = getCampaignAssetStagingKey(userId, uploadId, input.contentType);
+  const expiresAt = new Date(Date.now() + CAMPAIGN_ASSET_UPLOAD_EXPIRES_IN_SECONDS * 1000);
+  const signedUrl = await createCampaignAssetUploadUrl(stagingKey, input.contentType);
+  const reserved = await persistIntentInAvailableSlot({
+    uploadId,
+    userId,
+    purpose,
+    stagingKey,
+    originalFileName: input.originalFileName,
+    targetCampaignId: input.kind === 'ACCOUNTABILITY_EVIDENCE' ? input.campaignId : null,
+    contentType: input.contentType,
+    contentLength: input.contentLength,
+    maxSize:
+      input.kind === 'IMAGE' ? CAMPAIGN_IMAGE_MAX_SIZE_BYTES : CAMPAIGN_EVIDENCE_MAX_SIZE_BYTES,
+    expiresAt,
+  });
+  if (!reserved) throwUploadRateLimit();
+
+  log.set({ eventId: uploadId, assetUploadId: uploadId, assetUploadStage: 'intent_created' });
+  return { signedUrl, uploadId, expiresAt };
+}
+
+export async function verifyCampaignAssetUpload({
+  uploadId,
+  userId,
+  log,
+}: {
+  uploadId: string;
+  userId: string;
+  log: AssetLog;
+}) {
+  const intent = await getOwnedCampaignAssetIntent(uploadId, userId);
+  if (intent.status !== UploadIntentStatus.PENDING) {
+    throw new ORPCError('BAD_REQUEST', {
+      message: 'Este upload não está disponível para verificação.',
+    });
+  }
+  if (intent.expiresAt <= new Date()) {
+    await expirePendingIntent(intent.id);
+    await safelyCleanupUploadIntent(intent.id, log);
+    throwExpiredUpload();
+  }
+
+  const object = await requireValidUploadedObject(intent, kindFor(intent.purpose), log);
+  return {
+    uploadId: intent.id,
+    contentLength: object.ContentLength,
+    contentType: object.ContentType,
+  };
+}
+
+export async function discardCampaignAssetUpload({
+  uploadId,
+  userId,
+  log,
+}: {
+  uploadId: string;
+  userId: string;
+  log: AssetLog;
+}) {
+  const intent = await getOwnedCampaignAssetIntent(uploadId, userId);
+  const discarded = await prisma.uploadIntent.updateMany({
+    where: { id: intent.id, userId, status: UploadIntentStatus.PENDING },
+    data: terminalIntentData(UploadIntentStatus.REJECTED, 'discarded'),
+  });
+  if (!discarded.count) {
+    throw new ORPCError('CONFLICT', { message: 'Este upload já está sendo processado.' });
+  }
+  await safelyCleanupUploadIntent(intent.id, log);
+}
+
+export async function prepareCampaignAssetUploads({
+  uploadIds,
+  userId,
+  campaignId,
+  kind,
+  log,
+}: {
+  uploadIds: string[];
+  userId: string;
+  campaignId: string;
+  kind: CampaignAssetKindValue;
+  log: AssetLog;
+}) {
+  if (new Set(uploadIds).size !== uploadIds.length) {
+    throw new ORPCError('BAD_REQUEST', { message: 'Um upload foi informado mais de uma vez.' });
+  }
+
+  const prepared: PreparedCampaignAsset[] = [];
+  try {
+    // oxlint-disable no-await-in-loop -- Each published object must be recorded before a later failure can compensate it.
+    for (const uploadId of uploadIds) {
+      const intent = await getOwnedCampaignAssetIntent(uploadId, userId, kind);
+      if (kind === 'ACCOUNTABILITY_EVIDENCE' && intent.targetCampaignId !== campaignId) {
+        throw new ORPCError('NOT_FOUND', { message: 'Upload não encontrado.' });
+      }
+
+      if (intent.status === UploadIntentStatus.CONFIRMED && intent.publishedKey) {
+        const asset = await prisma.campaignAsset.findUnique({ where: { id: intent.id } });
+        if (!asset || asset.campaignId !== campaignId || asset.kind !== kind || asset.removedAt) {
+          throw new ORPCError('BAD_REQUEST', { message: 'Este upload já foi utilizado.' });
+        }
+        prepared.push({
+          intent,
+          kind,
+          publishedKey: intent.publishedKey,
+          processingToken: null,
+          existing: true,
+        });
+        continue;
+      }
+
+      const claimed = await claimIntent(intent, userId, log);
+      const object = await requireValidUploadedObject(claimed.intent, kind, log, claimed.token);
+      if (!object.ETag) {
+        await rejectIntent(claimed.intent.id, claimed.token, 'missing_etag');
+        await safelyCleanupUploadIntent(claimed.intent.id, log);
+        throw new ORPCError('BAD_REQUEST', { message: 'O arquivo enviado não pôde ser validado.' });
+      }
+
+      const publishedKey = getCampaignAssetPublishedKey({
+        campaignId,
+        uploadId: intent.id,
+        contentType: intent.contentType,
+        kind,
+      });
+      await renewIntentLease(intent.id, claimed.token);
+      try {
+        await publishCampaignAssetObject({
+          sourceKey: intent.stagingKey,
+          destinationKey: publishedKey,
+          sourceEtag: object.ETag,
+          contentType: intent.contentType,
+          originalFileName: intent.originalFileName ?? 'arquivo',
+        });
+      } catch (error) {
+        await rejectIntent(intent.id, claimed.token, 'publish_failed', publishedKey);
+        await safelyCleanupUploadIntent(intent.id, log);
+        throw new ORPCError('INTERNAL_SERVER_ERROR', {
+          message: 'Não foi possível publicar o arquivo. Tente novamente.',
+          cause: error,
+        });
+      }
+      const preparedAsset = {
+        intent: claimed.intent,
+        kind,
+        publishedKey,
+        processingToken: claimed.token,
+        existing: false,
+      } satisfies PreparedCampaignAsset;
+      // Record the external side effect before another fallible operation so
+      // compensation can always find the published object.
+      prepared.push(preparedAsset);
+      await renewIntentLease(intent.id, claimed.token);
+    }
+    // oxlint-enable no-await-in-loop
+    return prepared;
+  } catch (error) {
+    await compensatePreparedCampaignAssets(prepared, log);
+    throw error;
+  }
+}
+
+export async function confirmPreparedCampaignAsset({
+  transaction,
+  prepared,
+  campaignId,
+  accountabilityId,
+  userId,
+  position,
+}: {
+  transaction: Prisma.TransactionClient;
+  prepared: PreparedCampaignAsset;
+  campaignId: string;
+  accountabilityId?: string;
+  userId: string;
+  position: number;
+}) {
+  if (prepared.existing) return;
+  if (!prepared.processingToken) throw new CampaignAssetIntentOwnershipLost();
+
+  const confirmed = await transaction.uploadIntent.updateMany({
+    where: {
+      id: prepared.intent.id,
+      userId,
+      purpose: purposeFor(prepared.kind),
+      status: UploadIntentStatus.PROCESSING,
+      processingToken: prepared.processingToken,
+    },
+    data: {
+      status: UploadIntentStatus.CONFIRMED,
+      activeSlot: null,
+      processingToken: null,
+      processingStartedAt: null,
+      publishedKey: prepared.publishedKey,
+      confirmedAt: new Date(),
+      failureReason: null,
+      cleanupPending: true,
+    },
+  });
+  if (!confirmed.count) throw new CampaignAssetIntentOwnershipLost();
+
+  await transaction.campaignAsset.create({
+    data: {
+      id: prepared.intent.id,
+      campaignId,
+      accountabilityId,
+      uploaderId: userId,
+      kind: CampaignAssetKind[prepared.kind],
+      objectKey: prepared.publishedKey,
+      originalFileName: prepared.intent.originalFileName ?? 'arquivo',
+      contentType: prepared.intent.contentType,
+      contentLength: prepared.intent.contentLength,
+      position,
+    },
+  });
+}
+
+export async function finishPreparedCampaignAssets(
+  prepared: PreparedCampaignAsset[],
+  log: AssetLog,
+) {
+  await Promise.all(
+    prepared
+      .filter((asset) => !asset.existing)
+      .map((asset) => safelyCleanupUploadIntent(asset.intent.id, log)),
+  );
+}
+
+export async function compensatePreparedCampaignAssets(
+  prepared: PreparedCampaignAsset[],
+  log: AssetLog,
+) {
+  await Promise.all(
+    prepared.map(async (asset) => {
+      if (asset.existing || !asset.processingToken) return;
+      await rejectIntent(
+        asset.intent.id,
+        asset.processingToken,
+        'database_failed',
+        asset.publishedKey,
+      );
+      await safelyCleanupUploadIntent(asset.intent.id, log);
+    }),
+  );
+}
+
+export async function cleanupRemovedCampaignAssets(userId: string, log: AssetLog) {
+  try {
+    const assets = await prisma.campaignAsset.findMany({
+      where: { uploaderId: userId, removedAt: { not: null } },
+      select: { id: true },
+    });
+    await Promise.all(assets.map(({ id }) => safelyCleanupRemovedAsset(id, log)));
+  } catch {
+    log.set({ assetUploadStage: 'removed_asset_cleanup_failed' });
+  }
+}
+
+export function toPublicCampaignAsset(asset: {
+  id: string;
+  objectKey: string;
+  originalFileName: string;
+  contentType: string;
+  contentLength: number;
+}) {
+  return {
+    id: asset.id,
+    url: getAssetPublicUrl(asset.objectKey),
+    name: asset.originalFileName,
+    contentType: asset.contentType,
+    contentLength: asset.contentLength,
+  };
+}
+
+async function getOwnedCampaignAssetIntent(
+  uploadId: string,
+  userId: string,
+  expectedKind?: CampaignAssetKindValue,
+) {
+  const intent = await prisma.uploadIntent.findUnique({ where: { id: uploadId } });
+  if (!intent || !isOwnedCampaignAssetIntent({ intent, userId, kind: expectedKind })) {
+    throw new ORPCError('NOT_FOUND', { message: 'Upload não encontrado.' });
+  }
+  return intent;
+}
+
+async function claimIntent(intent: UploadIntent, userId: string, log: AssetLog) {
+  const now = new Date();
+  const token = ulid();
+  if (intent.status === UploadIntentStatus.PROCESSING) {
+    if (!isLeaseStale(intent.processingStartedAt, now, PROCESSING_LEASE_MS)) {
+      throw new ORPCError('CONFLICT', { message: 'Este upload já está sendo processado.' });
+    }
+    if (intent.expiresAt <= now) {
+      const expired = await expireStaleProcessingIntent(intent, now);
+      if (!expired.count) {
+        throw new ORPCError('CONFLICT', {
+          message: 'Este upload foi retomado por outra solicitação.',
+        });
+      }
+      await safelyCleanupUploadIntent(intent.id, log);
+      throwExpiredUpload();
+    }
+    const reclaimed = await prisma.uploadIntent.updateMany({
+      where: {
+        id: intent.id,
+        userId,
+        status: UploadIntentStatus.PROCESSING,
+        processingToken: intent.processingToken,
+        processingStartedAt: intent.processingStartedAt,
+      },
+      data: { processingToken: token, processingStartedAt: now, failureReason: null },
+    });
+    if (!reclaimed.count) {
+      throw new ORPCError('CONFLICT', {
+        message: 'Este upload foi retomado por outra solicitação.',
+      });
+    }
+    return {
+      intent: { ...intent, processingToken: token, processingStartedAt: now },
+      token,
+    };
+  }
+  if (intent.status !== UploadIntentStatus.PENDING) {
+    throw new ORPCError('BAD_REQUEST', { message: 'Este upload não está mais disponível.' });
+  }
+  if (intent.expiresAt <= now) {
+    await expirePendingIntent(intent.id, now);
+    await safelyCleanupUploadIntent(intent.id, log);
+    throwExpiredUpload();
+  }
+  const claimed = await prisma.uploadIntent.updateMany({
+    where: {
+      id: intent.id,
+      userId,
+      status: UploadIntentStatus.PENDING,
+      expiresAt: { gt: now },
+    },
+    data: {
+      status: UploadIntentStatus.PROCESSING,
+      processingToken: token,
+      processingStartedAt: now,
+      failureReason: null,
+    },
+  });
+  if (!claimed.count) {
+    throw new ORPCError('CONFLICT', { message: 'Este upload já está sendo processado.' });
+  }
+  return {
+    intent: {
+      ...intent,
+      status: UploadIntentStatus.PROCESSING,
+      processingToken: token,
+      processingStartedAt: now,
+    },
+    token,
+  };
+}
+
+async function renewIntentLease(intentId: string, processingToken: string) {
+  const renewed = await prisma.uploadIntent.updateMany({
+    where: {
+      id: intentId,
+      status: UploadIntentStatus.PROCESSING,
+      processingToken,
+    },
+    data: { processingStartedAt: new Date() },
+  });
+  if (!renewed.count) {
+    throw new ORPCError('CONFLICT', {
+      message: 'A confirmação deste upload foi retomada por outra solicitação.',
+      cause: new CampaignAssetIntentOwnershipLost(),
+    });
+  }
+}
+
+async function requireValidUploadedObject(
+  intent: UploadIntent,
+  kind: CampaignAssetKindValue,
+  log: AssetLog,
+  processingToken?: string,
+) {
+  let object: Awaited<ReturnType<typeof headCampaignAssetObject>>;
+  try {
+    object = await headCampaignAssetObject(intent.stagingKey);
+  } catch (error) {
+    if (isCampaignAssetObjectNotFound(error)) {
+      if (processingToken) await rejectIntent(intent.id, processingToken, 'missing_object');
+      throw new ORPCError('NOT_FOUND', {
+        message: 'O arquivo não foi encontrado no armazenamento. Envie novamente.',
+      });
+    }
+    if (processingToken) await resetIntent(intent.id, processingToken, 'head_failed');
+    log.set({ assetUploadStage: 'head_failed', assetUploadId: intent.id });
+    throw new ORPCError('INTERNAL_SERVER_ERROR', {
+      message: 'Não foi possível verificar o arquivo. Tente novamente.',
+      cause: error,
+    });
+  }
+
+  if (
+    !isValidCampaignAssetObject({
+      kind,
+      contentLength: object.ContentLength,
+      contentType: object.ContentType,
+      expectedLength: intent.contentLength,
+      expectedType: intent.contentType,
+      maxSize: intent.maxSize,
+    })
+  ) {
+    if (processingToken) {
+      await rejectIntent(intent.id, processingToken, 'object_constraints_failed');
+      await safelyCleanupUploadIntent(intent.id, log);
+    }
+    throw new ORPCError('BAD_REQUEST', {
+      message: 'O arquivo enviado não atende aos requisitos de formato ou tamanho.',
+    });
+  }
+  return object;
+}
+
+async function expirePendingIntent(intentId: string, now = new Date()) {
+  return prisma.uploadIntent.updateMany({
+    where: {
+      id: intentId,
+      status: UploadIntentStatus.PENDING,
+      expiresAt: { lte: now },
+    },
+    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'expired'),
+  });
+}
+
+async function expireStaleProcessingIntent(intent: UploadIntent, now: Date) {
+  return prisma.uploadIntent.updateMany({
+    where: {
+      id: intent.id,
+      status: UploadIntentStatus.PROCESSING,
+      processingToken: intent.processingToken,
+      processingStartedAt: intent.processingStartedAt,
+      expiresAt: { lte: now },
+    },
+    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'processing_lease_expired'),
+  });
+}
+
+async function rejectIntent(
+  intentId: string,
+  processingToken: string,
+  reason: string,
+  publishedKey?: string,
+) {
+  return prisma.uploadIntent.updateMany({
+    where: { id: intentId, status: UploadIntentStatus.PROCESSING, processingToken },
+    data: {
+      ...terminalIntentData(UploadIntentStatus.REJECTED, reason),
+      ...(publishedKey ? { publishedKey } : {}),
+    },
+  });
+}
+
+async function resetIntent(intentId: string, processingToken: string, reason: string) {
+  await prisma.uploadIntent.updateMany({
+    where: { id: intentId, status: UploadIntentStatus.PROCESSING, processingToken },
+    data: {
+      status: UploadIntentStatus.PENDING,
+      processingToken: null,
+      processingStartedAt: null,
+      failureReason: reason,
+    },
+  });
+}
+
+function terminalIntentData(status: 'REJECTED' | 'EXPIRED', failureReason: string) {
+  return {
+    status,
+    activeSlot: null,
+    processingToken: null,
+    processingStartedAt: null,
+    failureReason,
+    cleanupPending: true,
+  };
+}
+
+async function maintainCampaignAssetUploads(userId: string, log: AssetLog) {
+  const now = new Date();
+  const staleProcessing = new Date(now.getTime() - PROCESSING_LEASE_MS);
+  await prisma.uploadIntent.updateMany({
+    where: {
+      userId,
+      purpose: { in: [...CAMPAIGN_ASSET_PURPOSES] },
+      status: UploadIntentStatus.PENDING,
+      expiresAt: { lte: now },
+    },
+    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'expired'),
+  });
+  await prisma.uploadIntent.updateMany({
+    where: {
+      userId,
+      purpose: { in: [...CAMPAIGN_ASSET_PURPOSES] },
+      status: UploadIntentStatus.PROCESSING,
+      expiresAt: { lte: now },
+      OR: [{ processingStartedAt: null }, { processingStartedAt: { lte: staleProcessing } }],
+    },
+    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'processing_lease_expired'),
+  });
+  const intents = await prisma.uploadIntent.findMany({
+    where: {
+      userId,
+      purpose: { in: [...CAMPAIGN_ASSET_PURPOSES] },
+      cleanupPending: true,
+      status: {
+        in: [UploadIntentStatus.CONFIRMED, UploadIntentStatus.REJECTED, UploadIntentStatus.EXPIRED],
+      },
+    },
+    orderBy: { updatedAt: 'asc' },
+    take: 25,
+    select: { id: true },
+  });
+  await Promise.all(intents.map(({ id }) => safelyCleanupUploadIntent(id, log)));
+  await cleanupRemovedCampaignAssets(userId, log);
+  await prisma.uploadIntent.deleteMany({
+    where: {
+      userId,
+      purpose: { in: [...CAMPAIGN_ASSET_PURPOSES] },
+      cleanupPending: false,
+      status: {
+        in: [UploadIntentStatus.CONFIRMED, UploadIntentStatus.REJECTED, UploadIntentStatus.EXPIRED],
+      },
+      updatedAt: { lt: new Date(now.getTime() - INTENT_RETENTION_MS) },
+    },
+  });
+}
+
+async function safelyCleanupUploadIntent(intentId: string, log: AssetLog) {
+  try {
+    const intent = await prisma.uploadIntent.findUnique({ where: { id: intentId } });
+    if (!intent?.cleanupPending) return;
+    const keys = [intent.stagingKey];
+    if (intent.status !== UploadIntentStatus.CONFIRMED && intent.publishedKey) {
+      keys.push(intent.publishedKey);
+    }
+    const results = await Promise.all(
+      [...new Set(keys)].map(async (key) => {
+        try {
+          await deleteCampaignAssetObject(key);
+          return true;
+        } catch {
+          return false;
+        }
+      }),
+    );
+    await prisma.uploadIntent.updateMany({
+      where: { id: intent.id, status: intent.status },
+      data: { cleanupPending: results.some((result) => !result) },
+    });
+  } catch (error) {
+    log.set({ assetUploadStage: 'cleanup_failed', cleanupIntentId: intentId });
+    void error;
+  }
+}
+
+async function safelyCleanupRemovedAsset(assetId: string, log: AssetLog) {
+  try {
+    const asset = await prisma.campaignAsset.findUnique({ where: { id: assetId } });
+    if (!asset?.removedAt) return;
+    await deleteCampaignAssetObject(asset.objectKey);
+    await prisma.campaignAsset.deleteMany({
+      where: { id: asset.id, removedAt: { not: null } },
+    });
+  } catch (error) {
+    log.set({ assetUploadStage: 'asset_cleanup_failed', cleanupAssetId: assetId });
+    void error;
+  }
+}
+
+async function persistIntentInAvailableSlot({
+  slotIndex = 0,
+  ...data
+}: {
+  uploadId: string;
+  userId: string;
+  purpose: 'CAMPAIGN_IMAGE' | 'ACCOUNTABILITY_EVIDENCE';
+  stagingKey: string;
+  originalFileName: string;
+  targetCampaignId: string | null;
+  contentType: string;
+  contentLength: number;
+  maxSize: number;
+  expiresAt: Date;
+  slotIndex?: number;
+}): Promise<boolean> {
+  const activeSlot = ACTIVE_UPLOAD_SLOTS[slotIndex];
+  if (!activeSlot) return false;
+  try {
+    await prisma.uploadIntent.create({
+      data: {
+        id: data.uploadId,
+        userId: data.userId,
+        purpose: data.purpose,
+        activeSlot,
+        stagingKey: data.stagingKey,
+        originalFileName: data.originalFileName,
+        targetCampaignId: data.targetCampaignId,
+        contentType: data.contentType,
+        contentLength: data.contentLength,
+        maxSize: data.maxSize,
+        expiresAt: data.expiresAt,
+      },
+    });
+    return true;
+  } catch (error) {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
+      throw error;
+    }
+    const occupied = await prisma.uploadIntent.findFirst({
+      where: { userId: data.userId, purpose: data.purpose, activeSlot },
+      select: { id: true },
+    });
+    if (!occupied) throw error;
+    return persistIntentInAvailableSlot({ ...data, slotIndex: slotIndex + 1 });
+  }
+}
+
+function purposeFor(kind: CampaignAssetKindValue) {
+  return kind === 'IMAGE'
+    ? UploadIntentPurpose.CAMPAIGN_IMAGE
+    : UploadIntentPurpose.ACCOUNTABILITY_EVIDENCE;
+}
+
+function kindFor(purpose: string): CampaignAssetKindValue {
+  if (purpose === UploadIntentPurpose.CAMPAIGN_IMAGE) return 'IMAGE';
+  if (purpose === UploadIntentPurpose.ACCOUNTABILITY_EVIDENCE) return 'ACCOUNTABILITY_EVIDENCE';
+  throw new ORPCError('NOT_FOUND', { message: 'Upload não encontrado.' });
+}
+
+function throwExpiredUpload(): never {
+  throw new ORPCError('BAD_REQUEST', {
+    message: 'O upload expirou. Selecione o arquivo novamente.',
+  });
+}
+
+function throwUploadRateLimit(): never {
+  throw new ORPCError('TOO_MANY_REQUESTS', {
+    message: 'Muitas tentativas de upload. Aguarde alguns minutos e tente novamente.',
+  });
+}

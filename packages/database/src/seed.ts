@@ -83,7 +83,6 @@ const paginationCampaigns = Array.from({ length: 12 }, (_, index) => {
     region,
     startDate: daysFromNow(3 + index),
     endDate: daysFromNow(33 + index),
-    imageUrl: null,
     location: isPhysical ? `Centro comunitario ${number}` : null,
     targetItems: isPhysical ? 100 + number * 25 : null,
     currentItems: isPhysical ? number * 7 : null,
@@ -710,14 +709,12 @@ async function seed() {
       submittedOnTime: true,
       outcomeSummary:
         'Os materiais foram separados em 57 kits e entregues a duas escolas publicas.',
-      evidenceUrls: ['https://example.com/prestacao-de-contas/material-escolar'],
     },
     create: {
       campaignId: ids.campaigns.school,
       totalItems: 342,
       outcomeSummary:
         'Os materiais foram separados em 57 kits e entregues a duas escolas publicas.',
-      evidenceUrls: ['https://example.com/prestacao-de-contas/material-escolar'],
       submittedOnTime: true,
       submittedAt: daysFromNow(-25),
     },
@@ -732,7 +729,6 @@ async function seed() {
       submittedOnTime: false,
       outcomeSummary:
         'A arrecadação financiou 125 livros e a reforma das estantes da biblioteca comunitária.',
-      evidenceUrls: ['https://example.com/prestacao-de-contas/biblioteca-comunitaria'],
     },
     create: {
       campaignId: ids.campaigns.virtualCompleted,
@@ -740,7 +736,6 @@ async function seed() {
       totalAmountCents: 18_750,
       outcomeSummary:
         'A arrecadação financiou 125 livros e a reforma das estantes da biblioteca comunitária.',
-      evidenceUrls: ['https://example.com/prestacao-de-contas/biblioteca-comunitaria'],
       submittedOnTime: false,
       submittedAt: daysFromNow(-40),
     },

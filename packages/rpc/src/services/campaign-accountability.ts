@@ -6,6 +6,12 @@ import {
 } from '@lumos/validation/campaign';
 import { ORPCError } from '@orpc/client';
 
+import {
+  confirmPreparedCampaignAsset,
+  toPublicCampaignAsset,
+  type PreparedCampaignAsset,
+} from './campaign-assets';
+
 export const CAMPAIGN_ACCOUNTABILITY_TIME_ZONE = 'America/Sao_Paulo';
 
 export type CampaignAccountabilityStatus =
@@ -60,7 +66,13 @@ export function toPublicCampaignAccountability(
     totalItems: number | null;
     totalAmountCents: number | null;
     outcomeSummary: string;
-    evidenceUrls: string[] | null;
+    evidenceAssets: Array<{
+      id: string;
+      objectKey: string;
+      originalFileName: string;
+      contentType: string;
+      contentLength: number;
+    }>;
   } | null,
 ) {
   if (!accountability) return null;
@@ -69,7 +81,7 @@ export function toPublicCampaignAccountability(
     totalItems: accountability.totalItems,
     totalAmountCents: accountability.totalAmountCents,
     outcomeSummary: accountability.outcomeSummary,
-    evidenceUrls: accountability.evidenceUrls ?? [],
+    evidenceAssets: accountability.evidenceAssets.map(toPublicCampaignAsset),
   };
 }
 
@@ -77,6 +89,7 @@ export async function saveCampaignAccountability(
   transaction: Prisma.TransactionClient,
   userId: string,
   input: CampaignAccountabilityInput,
+  preparedAssets: PreparedCampaignAsset[],
   now = new Date(),
 ) {
   await transaction.$queryRaw(Prisma.sql`
@@ -93,6 +106,15 @@ export async function saveCampaignAccountability(
       status: true,
       type: true,
       endDate: true,
+      accountability: {
+        select: {
+          id: true,
+          evidenceAssets: {
+            where: { removedAt: null },
+            select: { id: true },
+          },
+        },
+      },
     },
   });
 
@@ -119,20 +141,86 @@ export async function saveCampaignAccountability(
       ? { totalItems: input.totalItems, totalAmountCents: null }
       : { totalItems: null, totalAmountCents: input.totalAmountCents };
 
-  return transaction.campaignAccountability.upsert({
+  const currentAssetIds = new Set(
+    campaign.accountability?.evidenceAssets.map((asset) => asset.id) ?? [],
+  );
+  if (input.retainedEvidenceAssetIds.some((assetId) => !currentAssetIds.has(assetId))) {
+    throw new ORPCError('BAD_REQUEST', {
+      message: 'Uma das evidências mantidas não pertence a esta prestação de contas.',
+    });
+  }
+
+  const accountability = await transaction.campaignAccountability.upsert({
     where: { campaignId: campaign.id },
     create: {
       campaignId: campaign.id,
       ...result,
       outcomeSummary: input.outcomeSummary,
-      evidenceUrls: input.evidenceUrls,
       submittedAt: now,
       submittedOnTime,
     },
     update: {
       ...result,
       outcomeSummary: input.outcomeSummary,
-      evidenceUrls: input.evidenceUrls,
+    },
+  });
+
+  const confirmedPreparedAssetIds = preparedAssets
+    .filter((asset) => asset.existing)
+    .map((asset) => asset.intent.id);
+  const effectiveRetainedAssetIds = [
+    ...input.retainedEvidenceAssetIds,
+    ...confirmedPreparedAssetIds,
+  ];
+  const effectiveRetainedAssetIdSet = new Set(effectiveRetainedAssetIds);
+  const removedAssetIds = [...currentAssetIds].filter(
+    (assetId) => !effectiveRetainedAssetIdSet.has(assetId),
+  );
+  if (removedAssetIds.length) {
+    await transaction.campaignAsset.updateMany({
+      where: { id: { in: removedAssetIds }, accountabilityId: accountability.id, removedAt: null },
+      data: { removedAt: now },
+    });
+  }
+
+  await Promise.all(
+    input.retainedEvidenceAssetIds.map((assetId, position) =>
+      transaction.campaignAsset.updateMany({
+        where: { id: assetId, accountabilityId: accountability.id, removedAt: null },
+        data: { position },
+      }),
+    ),
+  );
+  await Promise.all(
+    preparedAssets.map((prepared, index) => {
+      const position = input.retainedEvidenceAssetIds.length + index;
+      return prepared.existing
+        ? transaction.campaignAsset.updateMany({
+            where: {
+              id: prepared.intent.id,
+              accountabilityId: accountability.id,
+              removedAt: null,
+            },
+            data: { position },
+          })
+        : confirmPreparedCampaignAsset({
+            transaction,
+            prepared,
+            campaignId: campaign.id,
+            accountabilityId: accountability.id,
+            userId,
+            position,
+          });
+    }),
+  );
+
+  return transaction.campaignAccountability.findUniqueOrThrow({
+    where: { id: accountability.id },
+    include: {
+      evidenceAssets: {
+        where: { removedAt: null },
+        orderBy: [{ position: 'asc' }, { createdAt: 'asc' }],
+      },
     },
   });
 }

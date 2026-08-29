@@ -1,0 +1,48 @@
+enum UploadIntentPurpose {
+  USER_AVATAR
+  CAMPAIGN_IMAGE
+  ACCOUNTABILITY_EVIDENCE
+}
+
+enum UploadIntentStatus {
+  PENDING
+  PROCESSING
+  CONFIRMED
+  REJECTED
+  EXPIRED
+}
+
+model UploadIntent {
+  id                  String             @id
+  userId              String
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose             UploadIntentPurpose
+  status              UploadIntentStatus @default(PENDING)
+  activeSlot          Int?
+  processingToken     String?
+  processingStartedAt DateTime?
+  cleanupToken        String?
+  cleanupStartedAt    DateTime?
+  stagingKey          String             @unique
+  publishedKey        String?            @unique
+  previousKey         String?
+  originalFileName    String?
+  targetCampaignId    String?
+  targetCampaign      Campaign?          @relation(fields: [targetCampaignId], references: [id], onDelete: SetNull)
+  contentType         String
+  contentLength       Int
+  maxSize             Int
+  expiresAt           DateTime
+  confirmedAt         DateTime?
+  failureReason       String?
+  cleanupPending      Boolean            @default(false)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@unique([userId, purpose, activeSlot])
+  @@index([userId, purpose, status])
+  @@index([status, expiresAt])
+  @@index([cleanupPending, cleanupStartedAt])
+  @@index([targetCampaignId, purpose, status])
+  @@map("upload_intents")
+}
