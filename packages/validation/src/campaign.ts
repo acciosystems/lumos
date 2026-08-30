@@ -15,6 +15,7 @@ const requiredDate = (message: string) =>
     v.check((value) => !value || isIsoDate(value), 'Informe uma data válida.'),
   );
 const uploadIdSchema = v.pipe(v.string(), v.ulid('Upload inválido.'));
+const operationKeySchema = v.pipe(v.string(), v.uuid('Chave de operação inválida.'));
 
 export const CAMPAIGN_IMAGE_CONTENT_TYPE = 'image/webp';
 export const CAMPAIGN_IMAGE_MAX_SIZE_BYTES = 5 * 1024 * 1024;
@@ -229,7 +230,7 @@ const virtualCampaignCreateInputSchema = v.object({
   bankAccountInfo: optionalString,
 });
 
-export const campaignCreateInputSchema = v.pipe(
+const campaignCreatePayloadInputSchema = v.pipe(
   v.variant('type', [physicalCampaignCreateInputSchema, virtualCampaignCreateInputSchema]),
   v.forward(
     v.check(
@@ -248,6 +249,13 @@ export const campaignCreateInputSchema = v.pipe(
     ['pixKey'],
   ),
 );
+
+export const campaignCreateInputSchema = v.intersect([
+  campaignCreatePayloadInputSchema,
+  v.object({ operationKey: operationKeySchema }),
+]);
+
+export const campaignCreateFormInputSchema = campaignCreatePayloadInputSchema;
 
 const physicalCampaignDetailsUpdateInputSchema = v.object({
   ...campaignIdInputEntry,
@@ -296,13 +304,22 @@ export const campaignDetailsUpdateInputSchema = v.pipe(
   ),
 );
 
-export const campaignPublishUpdateInputSchema = v.object({
+const campaignPublishUpdateInputEntries = {
   id: requiredString('Campanha é obrigatória'),
   message: v.pipe(
     requiredString('A mensagem da atualização é obrigatória'),
     v.maxLength(2_000, 'A mensagem deve ter no máximo 2.000 caracteres.'),
   ),
+};
+
+const campaignPublishUpdatePayloadInputSchema = v.object(campaignPublishUpdateInputEntries);
+
+export const campaignPublishUpdateInputSchema = v.object({
+  ...campaignPublishUpdateInputEntries,
+  operationKey: operationKeySchema,
 });
+
+export const campaignPublishUpdateFormInputSchema = campaignPublishUpdatePayloadInputSchema;
 
 export type CampaignListInput = v.InferOutput<typeof campaignListInputSchema>;
 export type CampaignCreateInput = v.InferOutput<typeof campaignCreateInputSchema>;

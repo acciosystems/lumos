@@ -30,6 +30,7 @@ import { Progress, ProgressLabel } from '@/components/ui/progress';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useCampaignEffectiveStatus } from '@/hooks/use-campaign-effective-status';
+import { useOperationKey } from '@/hooks/use-operation-key';
 import { invalidateCampaignManagement } from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 import { campaignStatusMetadata } from '@/utils/campaign-status';
@@ -241,11 +242,13 @@ function CampaignProgressDescription({ status }: { status: CampaignStatus }) {
 function CampaignUpdateComposer({ campaignId }: { campaignId: string }) {
   const queryClient = useQueryClient();
   const [message, setMessage] = useState('');
+  const operationKey = useOperationKey();
   const mutation = useMutation(
     rpc.campaign.publishUpdate.mutationOptions({
       onSuccess: async () => {
         await invalidateCampaignManagement(queryClient, campaignId);
         setMessage('');
+        operationKey.reset();
         toast.success('Atualização publicada.');
       },
       onError: (error) =>
@@ -255,8 +258,13 @@ function CampaignUpdateComposer({ campaignId }: { campaignId: string }) {
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const input = { id: campaignId, message: message.trim() } satisfies CampaignPublishUpdateInput;
-    if (input.message) mutation.mutate(input);
+    const payload = { id: campaignId, message: message.trim() };
+    if (payload.message) {
+      mutation.mutate({
+        ...payload,
+        operationKey: operationKey.getKey(payload),
+      } satisfies CampaignPublishUpdateInput);
+    }
   };
 
   return (

@@ -1,6 +1,6 @@
 import {
   CampaignType,
-  campaignCreateInputSchema,
+  campaignCreateFormInputSchema,
   campaignTypeSchema,
 } from '@lumos/validation/campaign';
 import { IconAlertCircle, IconDeviceFloppy } from '@tabler/icons-react';
@@ -44,6 +44,7 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useCampaignAssetUploads } from '@/hooks/use-campaign-asset-uploads';
+import { useOperationKey } from '@/hooks/use-operation-key';
 import { invalidateCampaignLists } from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 import {
@@ -126,6 +127,7 @@ function NewCampaignPage() {
   const queryClient = useQueryClient();
   const formId = useId();
   const imageUpload = useCampaignAssetUploads({ kind: 'IMAGE' });
+  const operationKey = useOperationKey();
 
   const organizerProfileQuery = useQuery(rpc.campaign.canCreate.queryOptions());
 
@@ -136,9 +138,9 @@ function NewCampaignPage() {
         await invalidateCampaignLists(queryClient);
         toast.success('Campanha criada com sucesso.');
         await navigate({ to: '/campaigns/my/$id', params: { id: campaign.id } });
+        operationKey.reset();
       },
       onError: (error) => {
-        imageUpload.markReadyAssetsFailed('Verifique a imagem e tente enviá-la novamente.');
         toast.error('Não foi possível criar a campanha.', { description: error.message });
       },
     }),
@@ -146,14 +148,19 @@ function NewCampaignPage() {
 
   const form = useForm({
     defaultValues,
-    validators: { onDynamic: campaignCreateInputSchema },
+    validators: { onDynamic: campaignCreateFormInputSchema },
     validationLogic: revalidateLogic({ mode: 'submit', modeAfterSubmission: 'change' }),
     onSubmit: ({ value }) => {
-      const result = v.safeParse(campaignCreateInputSchema, {
+      const result = v.safeParse(campaignCreateFormInputSchema, {
         ...value,
         imageUploadId: imageUpload.readyUploadIds[0],
       });
-      if (result.success) mutation.mutate(result.output);
+      if (result.success) {
+        mutation.mutate({
+          ...result.output,
+          operationKey: operationKey.getKey(result.output),
+        });
+      }
     },
   });
 

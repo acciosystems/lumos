@@ -15,6 +15,7 @@ model User {
   organizerProfiles      OrganizerProfile[]
   campaignParticipations CampaignParticipant[]
   campaignUpdates        CampaignUpdate[]
+  campaignIdempotencyRecords CampaignIdempotencyRecord[]
   donations              Donation[]
   uploadIntents          UploadIntent[]
   campaignAssets         CampaignAsset[]

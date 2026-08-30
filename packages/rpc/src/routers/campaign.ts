@@ -1,5 +1,5 @@
 import { prisma } from '@lumos/database';
-import { Prisma } from '@lumos/database/generated/prisma/client';
+import { CampaignOperationKind, Prisma } from '@lumos/database/generated/prisma/client';
 import type { CampaignInclude, CampaignSelect } from '@lumos/database/generated/prisma/models';
 import {
   CampaignStatus,
@@ -17,7 +17,6 @@ import {
   type CampaignCreateInput,
 } from '@lumos/validation/campaign';
 import { ORPCError } from '@orpc/client';
-import { ulid } from 'ulid';
 import * as v from 'valibot';
 
 import { authorized, publicProcedure } from '../procedures';
@@ -35,10 +34,12 @@ import {
   discardCampaignAssetUpload,
   finishPreparedCampaignAssets,
   prepareCampaignAssetUploads,
+  type PreparedCampaignAsset,
   toPublicCampaignAsset,
   verifyCampaignAssetUpload,
 } from '../services/campaign-assets';
 import { toCampaignCreateData } from '../services/campaign-create';
+import { reserveCampaignOperation } from '../services/campaign-idempotency';
 import {
   assertCampaignDatesNotEnded,
   getEffectiveCampaignStatus,
@@ -810,38 +811,70 @@ export const campaignRouter = {
 
   publishUpdate: authorized
     .input(campaignPublishUpdateInputSchema)
-    .handler(async ({ input, context: { user } }) =>
-      prisma.$transaction(async (transaction) => {
-        await lockAndReconcileCampaign(transaction, input.id);
+    .handler(async ({ input, context: { user, log } }) => {
+      const { operationKey, ...payload } = input;
+      const reservation = await reserveCampaignOperation({
+        actorId: user.id,
+        kind: CampaignOperationKind.PUBLISH_UPDATE,
+        operationKey,
+        payload,
+        log,
+      });
 
-        const campaign = await transaction.campaign.findFirst({
-          where: {
-            id: input.id,
-            organizerProfile: { userId: user.id },
-          },
-          select: { status: true, startDate: true, endDate: true },
+      if (reservation.replay) {
+        const existingUpdate = await prisma.campaignUpdate.findFirst({
+          where: { id: reservation.resourceId, authorId: user.id },
+          select: { id: true, message: true, publishedAt: true },
         });
+        if (existingUpdate) return existingUpdate;
+      }
 
-        if (!campaign) {
-          throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
+      try {
+        const update = await prisma.$transaction(async (transaction) => {
+          await lockAndReconcileCampaign(transaction, input.id);
+
+          const campaign = await transaction.campaign.findFirst({
+            where: {
+              id: input.id,
+              organizerProfile: { userId: user.id },
+            },
+            select: { status: true, startDate: true, endDate: true },
+          });
+
+          if (!campaign) {
+            throw new ORPCError('NOT_FOUND', { message: 'Campanha não encontrada.' });
+          }
+
+          assertCampaignIsActive(campaign);
+
+          return transaction.campaignUpdate.create({
+            data: {
+              id: reservation.resourceId,
+              campaignId: input.id,
+              authorId: user.id,
+              message: input.message,
+            },
+            select: {
+              id: true,
+              message: true,
+              publishedAt: true,
+            },
+          });
+        });
+        log?.set({ idempotencyOutcome: 'committed' });
+        return update;
+      } catch (error) {
+        const committedUpdate = await prisma.campaignUpdate.findFirst({
+          where: { id: reservation.resourceId, authorId: user.id },
+          select: { id: true, message: true, publishedAt: true },
+        });
+        if (committedUpdate) {
+          log?.set({ idempotencyOutcome: 'committed' });
+          return committedUpdate;
         }
-
-        assertCampaignIsActive(campaign);
-
-        return transaction.campaignUpdate.create({
-          data: {
-            campaignId: input.id,
-            authorId: user.id,
-            message: input.message,
-          },
-          select: {
-            id: true,
-            message: true,
-            publishedAt: true,
-          },
-        });
-      }),
-    ),
+        throw error;
+      }
+    }),
 
   transitionLifecycle: authorized
     .input(campaignLifecycleTransitionInputSchema)
@@ -936,19 +969,41 @@ export const campaignRouter = {
         });
       }
 
+      const { operationKey, ...payload } = input;
+      const reservation = await reserveCampaignOperation({
+        actorId: user.id,
+        kind: CampaignOperationKind.CREATE,
+        operationKey,
+        payload,
+        log,
+      });
+
+      if (reservation.replay) {
+        const existingCampaign = await prisma.campaign.findFirst({
+          where: {
+            id: reservation.resourceId,
+            organizerProfile: { userId: user.id },
+          },
+          include: campaignInclude,
+        });
+        if (existingCampaign) return withOwnerCampaignData(existingCampaign);
+      }
+
       const { startDate, endDate, status } = assertCreateInput(input);
-      const campaignId = ulid();
-      const prepared = input.imageUploadId
-        ? await prepareCampaignAssetUploads({
-            uploadIds: [input.imageUploadId],
-            userId: user.id,
-            campaignId,
-            kind: 'IMAGE',
-            log,
-          })
-        : [];
+      const campaignId = reservation.resourceId;
+      let prepared: PreparedCampaignAsset[] = [];
 
       try {
+        prepared = input.imageUploadId
+          ? await prepareCampaignAssetUploads({
+              uploadIds: [input.imageUploadId],
+              userId: user.id,
+              campaignId,
+              kind: 'IMAGE',
+              log,
+            })
+          : [];
+
         const campaign = await prisma.$transaction(async (transaction) => {
           await transaction.campaign.create({
             data: {
@@ -971,8 +1026,21 @@ export const campaignRouter = {
           });
         });
         await finishPreparedCampaignAssets(prepared, log);
+        log.set({ idempotencyOutcome: 'committed' });
         return withOwnerCampaignData(campaign);
       } catch (error) {
+        const committedCampaign = await prisma.campaign.findFirst({
+          where: {
+            id: campaignId,
+            organizerProfile: { userId: user.id },
+          },
+          include: campaignInclude,
+        });
+        if (committedCampaign) {
+          await finishPreparedCampaignAssets(prepared, log);
+          log.set({ idempotencyOutcome: 'committed' });
+          return withOwnerCampaignData(committedCampaign);
+        }
         await compensatePreparedCampaignAssets(prepared, log);
         throw error;
       }

@@ -15,6 +15,11 @@ enum CampaignAssetKind {
   ACCOUNTABILITY_EVIDENCE
 }
 
+enum CampaignOperationKind {
+  CREATE
+  PUBLISH_UPDATE
+}
+
 model Campaign {
   id                 String @id @default(ulid())
   organizerProfileId String
@@ -125,6 +130,26 @@ model CampaignUpdate {
 
   @@index([campaignId])
   @@map("campaign_updates")
+}
+
+// Durable reservations for the state-creating campaign mutations. The result
+// ID is allocated before the mutation so an interrupted request can be retried
+// without creating a second resource.
+model CampaignIdempotencyRecord {
+  id                 String               @id @default(ulid())
+  operationKey       String               @unique
+  requestFingerprint String
+  kind               CampaignOperationKind
+  actorId            String
+  resourceId         String
+  expiresAt          DateTime
+  createdAt          DateTime             @default(now())
+
+  actor User @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@index([actorId, kind])
+  @@map("campaign_idempotency_records")
 }
 
 // Transparency (P0)
