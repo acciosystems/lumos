@@ -1,19 +1,45 @@
 import { env } from '@lumos/env/database';
-import { PrismaPg } from '@prisma/adapter-pg';
 
 import { PrismaClient } from './generated/prisma/client';
+import {
+  SERVERLESS_TRANSACTION_OPTIONS,
+  createServerlessAdapter,
+  createServerlessPool,
+} from './pool';
+import { attachPoolTelemetry, classifyDatabaseError, emitTimeoutTelemetry } from './telemetry';
 
-const prismaSingleton = () => {
-  const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
-  return new PrismaClient({ adapter });
+const createDatabase = () => {
+  const pool = createServerlessPool(env.DATABASE_URL);
+  attachPoolTelemetry(pool);
+
+  const adapter = createServerlessAdapter(pool);
+  const client = new PrismaClient({
+    adapter,
+    log: [{ emit: 'event', level: 'error' }],
+    transactionOptions: SERVERLESS_TRANSACTION_OPTIONS,
+  });
+
+  client.$on('error', (event) => {
+    const timeoutKind = classifyDatabaseError({ message: event.message });
+    if (!timeoutKind) return;
+
+    emitTimeoutTelemetry(pool, {
+      operation: 'query',
+      outcome: 'error',
+      timeoutKind,
+    });
+  });
+
+  return { client, pool };
 };
 
-type PrismaSingleton = ReturnType<typeof prismaSingleton>;
+type DatabaseResources = ReturnType<typeof createDatabase>;
 
 const globalForPrisma = globalThis as typeof globalThis & {
-  prisma?: PrismaSingleton;
+  lumosDatabase?: DatabaseResources;
 };
 
-export const prisma = globalForPrisma.prisma ?? prismaSingleton();
+const database = globalForPrisma.lumosDatabase ?? createDatabase();
+globalForPrisma.lumosDatabase = database;
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+export const prisma = database.client;
