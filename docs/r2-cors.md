@@ -26,6 +26,16 @@ bunx wrangler r2 bucket lifecycle list lumos
 staging expiration rules into the exported configuration first when the
 bucket already has other lifecycle rules.
 
+Published avatar objects under `avatars/` must not receive a blanket expiry,
+because active profile images use the same prefix. Avatar deletion clears the
+database reference and records managed object cleanup in the database before
+attempting the R2 delete. Failed cleanup records are retained until a retry
+succeeds; avatar requests drain a bounded batch of pending records, and the
+same cleanup routine can be invoked by a future scheduled worker. This keeps
+known orphaned published avatars recoverable without deleting active objects.
+Objects orphaned before the cleanup ledger existed require a one-off
+database-to-bucket reconciliation; do not delete the entire `avatars/` prefix.
+
 Before applying it outside local development, replace
 `http://localhost:3000` with the exact application origin (scheme, host, and
 optional port; no trailing slash). Keep `PUT` and both request headers because

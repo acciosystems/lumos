@@ -38,9 +38,13 @@ const PROCESSING_LEASE_MS = 60_000;
 const CLEANUP_LEASE_MS = 60_000;
 const INTENT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 const MAINTENANCE_BATCH_SIZE = 25;
+const AVATAR_CLEANUP_BATCH_SIZE = 25;
 
 class AvatarConfirmationConflict extends Error {}
 class AvatarIntentOwnershipLost extends Error {}
+class AvatarDeletionConflict extends Error {}
+
+type AvatarCleanupResult = 'cleaned' | 'failed' | 'missing';
 
 export async function createAvatarUploadIntent({
   userId,
@@ -73,7 +77,6 @@ export async function createAvatarUploadIntent({
     eventId: uploadId,
     uploadId,
     avatarUploadStage: 'intent_created',
-    avatarObjectKey: stagingKey,
   });
 
   // Signing is local. Persisting afterwards ensures a failed signing attempt
@@ -102,12 +105,13 @@ export async function confirmAvatarUpload({
   userId: string;
   log: AvatarLog;
 }) {
+  await safelyMaintainAvatarObjectCleanups(log);
+
   let intent = await getOwnedAvatarIntent(uploadId, userId);
 
   log.set({
     eventId: intent.id,
     uploadId: intent.id,
-    avatarObjectKey: intent.stagingKey,
     avatarUploadStage: 'confirmation_started',
   });
 
@@ -233,43 +237,76 @@ export async function confirmAvatarUpload({
 }
 
 export async function deleteAvatar({ userId, log }: { userId: string; log: AvatarLog }) {
+  const eventId = ulid();
+
   const current = await prisma.user.findUnique({
     where: { id: userId },
     select: { image: true },
   });
 
-  if (!current?.image) return;
-
-  const eventId = ulid();
-  const managedKey = getManagedAvatarKey(current.image, userId);
-  log.set({ eventId, avatarUploadStage: 'deletion_started', avatarObjectKey: managedKey });
-
-  // OAuth-hosted images are references we do not own.
-  if (managedKey) {
-    try {
-      await deleteAvatarObject(managedKey);
-    } catch (error) {
-      log.set({
-        avatarUploadStage: 'deletion_failed',
-        avatarUploadError: 'storage_unavailable',
-      });
-      throw new ORPCError('INTERNAL_SERVER_ERROR', {
-        message: 'Não foi possível excluir a foto de perfil. Tente novamente.',
-        cause: error,
-      });
-    }
+  if (!current?.image) {
+    await safelyMaintainAvatarObjectCleanups(log);
+    log.set({ eventId, avatarUploadStage: 'deletion_noop' });
+    return;
   }
 
-  const cleared = await prisma.user.updateMany({
-    where: { id: userId, image: current.image },
-    data: { image: null },
+  const managedKey = getManagedAvatarKey(current.image, userId);
+  log.set({
+    eventId,
+    avatarUploadStage: 'deletion_started',
+    avatarCleanupManaged: Boolean(managedKey),
   });
 
-  if (cleared.count !== 1) {
-    throw new ORPCError('CONFLICT', {
-      message: 'A foto de perfil foi alterada em outra solicitação. Tente novamente.',
+  let cleanupId: string | null = null;
+  try {
+    const result = await prisma.$transaction(async (transaction) => {
+      const cleared = await transaction.user.updateMany({
+        where: { id: userId, image: current.image },
+        data: { image: null },
+      });
+
+      if (cleared.count !== 1) throw new AvatarDeletionConflict();
+
+      if (!managedKey) return { cleanupId: null };
+
+      const cleanup = await transaction.avatarObjectCleanup.upsert({
+        where: { objectKey: managedKey },
+        update: {},
+        create: { id: ulid(), objectKey: managedKey },
+        select: { id: true },
+      });
+
+      return { cleanupId: cleanup.id };
+    });
+    cleanupId = result.cleanupId;
+  } catch (error) {
+    if (error instanceof AvatarDeletionConflict) {
+      throw new ORPCError('CONFLICT', {
+        message: 'A foto de perfil foi alterada em outra solicitação. Tente novamente.',
+      });
+    }
+
+    log.set({
+      eventId,
+      avatarUploadStage: 'deletion_database_failed',
+      avatarUploadError: 'database_unavailable',
+    });
+    throw new ORPCError('INTERNAL_SERVER_ERROR', {
+      message: 'Não foi possível excluir a foto de perfil. Tente novamente.',
+      cause: error,
     });
   }
+
+  log.set({
+    eventId,
+    avatarUploadStage: 'deletion_committed',
+    avatarCleanupScheduled: Boolean(cleanupId),
+  });
+
+  // The database transition is authoritative. A storage failure leaves the
+  // durable cleanup record for a later retry instead of failing the deletion.
+  if (cleanupId) await safelyCleanupAvatarObject(cleanupId, log);
+  else await safelyMaintainAvatarObjectCleanups(log);
 }
 
 async function getOwnedAvatarIntent(uploadId: string, userId: string) {
@@ -475,7 +512,7 @@ async function compensateFailedPublication(
   // Move to an immutable terminal state before deleting. Cleanup must never
   // act on a candidate that a reclaimed processing lease may now own.
   if (await rejectOwnedIntent(intentId, processingToken, reason)) {
-    log.set({ avatarUploadStage: 'publication_compensation', avatarObjectKey: publishedKey });
+    log.set({ avatarUploadStage: 'publication_compensation', cleanupIntentId: intentId });
     await safelyCleanupAvatarIntent(intentId, log);
   }
 }
@@ -533,7 +570,84 @@ function terminalIntentData(status: UploadIntentStatus, failureReason: string) {
   };
 }
 
+async function safelyMaintainAvatarObjectCleanups(log: AvatarLog) {
+  try {
+    await maintainAvatarObjectCleanups(log);
+  } catch (error) {
+    log.set({
+      avatarCleanupStage: 'maintenance',
+      avatarCleanupOutcome: 'database_failed',
+    });
+    void error;
+  }
+}
+
+export async function maintainAvatarObjectCleanups(log: AvatarLog) {
+  const cleanups = await prisma.avatarObjectCleanup.findMany({
+    orderBy: { updatedAt: 'asc' },
+    take: AVATAR_CLEANUP_BATCH_SIZE,
+    select: { id: true },
+  });
+
+  const results = await Promise.all(cleanups.map(({ id }) => safelyCleanupAvatarObject(id, log)));
+
+  log.set({
+    avatarCleanupStage: 'maintenance',
+    avatarCleanupAttempted: results.length,
+    avatarCleanupSucceeded: results.filter((result) => result === 'cleaned').length,
+    avatarCleanupFailed: results.filter((result) => result === 'failed').length,
+  });
+}
+
+async function safelyCleanupAvatarObject(
+  cleanupId: string,
+  log: AvatarLog,
+): Promise<AvatarCleanupResult> {
+  try {
+    const cleanup = await prisma.avatarObjectCleanup.findUnique({ where: { id: cleanupId } });
+    if (!cleanup) return 'missing';
+
+    const attempt = cleanup.attemptCount + 1;
+    try {
+      await deleteAvatarObject(cleanup.objectKey);
+    } catch (error) {
+      if (!isObjectNotFound(error)) {
+        await prisma.avatarObjectCleanup.updateMany({
+          where: { id: cleanup.id },
+          data: { attemptCount: { increment: 1 } },
+        });
+        log.set({
+          avatarCleanupStage: 'object_delete',
+          avatarCleanupId: cleanup.id,
+          avatarCleanupOutcome: 'storage_failed',
+          avatarCleanupAttempt: attempt,
+        });
+        return 'failed';
+      }
+    }
+
+    await prisma.avatarObjectCleanup.deleteMany({ where: { id: cleanup.id } });
+    log.set({
+      avatarCleanupStage: 'object_delete',
+      avatarCleanupId: cleanup.id,
+      avatarCleanupOutcome: 'cleaned',
+      avatarCleanupAttempt: attempt,
+    });
+    return 'cleaned';
+  } catch (error) {
+    log.set({
+      avatarCleanupStage: 'object_delete',
+      avatarCleanupId: cleanupId,
+      avatarCleanupOutcome: 'database_failed',
+    });
+    void error;
+    return 'failed';
+  }
+}
+
 async function maintainAvatarUploadIntents(userId: string, log: AvatarLog) {
+  await safelyMaintainAvatarObjectCleanups(log);
+
   const now = new Date();
   const staleProcessing = new Date(now.getTime() - PROCESSING_LEASE_MS);
 
@@ -643,7 +757,7 @@ async function tryDeleteObject(key: string, log: AvatarLog, stage: string) {
     await deleteAvatarObject(key);
     return true;
   } catch (error) {
-    log.set({ avatarUploadStage: stage, cleanupKey: key, cleanupFailed: true });
+    log.set({ avatarUploadStage: stage, cleanupFailed: true });
     void error;
     return false;
   }

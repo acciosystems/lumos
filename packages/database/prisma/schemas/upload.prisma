@@ -46,3 +46,17 @@ model UploadIntent {
   @@index([targetCampaignId, purpose, status])
   @@map("upload_intents")
 }
+
+// Durable outbox for managed avatar objects that must be removed from storage.
+// This intentionally has no User relation so account deletion cannot discard
+// cleanup work that still needs to run.
+model AvatarObjectCleanup {
+  id           String   @id
+  objectKey    String   @unique
+  attemptCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([updatedAt])
+  @@map("avatar_object_cleanups")
+}
