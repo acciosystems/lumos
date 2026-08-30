@@ -13,9 +13,12 @@
     "@lumos/database": "workspace:*",
     "@lumos/email": "workspace:*",
     "@lumos/env": "workspace:*",
+    "@lumos/logging": "workspace:*",
     "@lumos/validation": "workspace:*",
+    "@vercel/functions": "^3.9.5",
     "better-auth": "^1.6.25",
     "better-auth-localization": "^3.0.0",
+    "evlog": "catalog:",
     "ulid": "catalog:",
     "valibot": "catalog:"
   }

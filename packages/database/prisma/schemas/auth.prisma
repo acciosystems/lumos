@@ -73,6 +73,16 @@ model Verification {
   @@map("verifications")
 }
 
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+
+  @@index([lastRequest])
+  @@map("rate_limits")
+}
+
 model Passkey {
   id           String    @id
   name         String?
