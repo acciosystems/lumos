@@ -1,3 +1,4 @@
+import { scheduleAxiomDelivery } from '@lumos/logging/delivery';
 import { createLogger } from 'evlog';
 import type { Pool } from 'pg';
 
@@ -87,7 +88,7 @@ export function classifyDatabaseError(error: unknown): DatabaseTimeoutKind | und
 function emitMetric(payload: PoolMetric | QueryMetric) {
   // Observability must never turn a successful database operation into a failed request.
   try {
-    createLogger({ service: 'lumos/database', database: payload }).emit();
+    scheduleAxiomDelivery(createLogger({ service: 'lumos/database', database: payload }).emit());
   } catch {
     // The request and pool remain authoritative if the logger is unavailable.
   }

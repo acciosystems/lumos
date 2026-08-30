@@ -5,10 +5,12 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
+    "test": "bun test",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@lumos/env": "workspace:*",
+    "@vercel/functions": "^3.9.5",
     "evlog": "catalog:"
   }
 }

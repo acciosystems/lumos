@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { env } from '@lumos/env/email';
+import { scheduleAxiomDelivery } from '@lumos/logging/delivery';
 import { createLogger } from 'evlog';
 import { Resend } from 'resend';
 
@@ -55,15 +56,17 @@ export async function sendEmail(options: SendEmailOptions) {
     throw new Error('Email provider rejected the message.');
   }
 
-  createLogger({
-    service: 'lumos/email',
-    emailDelivery: {
-      deliveryId,
-      kind: options.kind,
-      stage: 'accepted',
-      durationMs: Date.now() - startedAt,
-    },
-  }).emit();
+  scheduleAxiomDelivery(
+    createLogger({
+      service: 'lumos/email',
+      emailDelivery: {
+        deliveryId,
+        kind: options.kind,
+        stage: 'accepted',
+        durationMs: Date.now() - startedAt,
+      },
+    }).emit(),
+  );
 
   return { providerMessageId: response.data.id };
 }
@@ -93,7 +96,7 @@ function emitHandoffFailure({
     },
   });
   logger.setLevel('error');
-  logger.emit({ _forceKeep: true });
+  scheduleAxiomDelivery(logger.emit({ _forceKeep: true }));
 }
 
 function normalizeFailureCode(value?: string) {

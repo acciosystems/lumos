@@ -5,6 +5,7 @@ export const env = createEnv({
   server: {
     AXIOM_DATASET: v.string(),
     AXIOM_TOKEN: v.string(),
+    AXIOM_URL: v.optional(v.pipe(v.string(), v.url())),
   },
 
   runtimeEnv: process.env,
