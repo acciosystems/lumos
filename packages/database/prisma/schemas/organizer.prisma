@@ -8,13 +8,13 @@ model OrganizerProfile {
   userId String @unique
 
   type        OrganizerType
-  displayName String
-  bio         String?
-  websiteUrl  String?
+  displayName String        @db.Text
+  bio         String?       @db.Text
+  websiteUrl  String?       @db.Text
 
   // Transparency (P0). The `organizer_profiles_type_cnpj_check` SQL
   // constraint keeps CNPJ presence and verification aligned with type.
-  cnpj         String? @unique
+  cnpj         String? @unique @db.Text
   cnpjVerified Boolean @default(false)
 
   createdAt DateTime @default(now())

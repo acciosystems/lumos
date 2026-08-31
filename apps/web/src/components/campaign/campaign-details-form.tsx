@@ -1,4 +1,8 @@
-import { CampaignType, campaignDetailsUpdateInputSchema } from '@lumos/validation/campaign';
+import {
+  CAMPAIGN_COLLECTION_POINT_MAX_COUNT,
+  CampaignType,
+  campaignDetailsUpdateInputSchema,
+} from '@lumos/validation/campaign';
 import { IconDeviceFloppy, IconPlus, IconTrash } from '@tabler/icons-react';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -238,13 +242,15 @@ function PhysicalFields({ form }: { form: ReturnType<typeof useCampaignDetailsFo
                 <div>
                   <FieldLegend>Pontos de coleta</FieldLegend>
                   <FieldDescription>
-                    Informe pelo menos um endereço público para entrega.
+                    Informe entre um e {CAMPAIGN_COLLECTION_POINT_MAX_COUNT} endereços públicos para
+                    entrega.
                   </FieldDescription>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
+                  disabled={collectionPoints.length >= CAMPAIGN_COLLECTION_POINT_MAX_COUNT}
                   onClick={() =>
                     form.setFieldValue('collectionPoints', [
                       ...collectionPoints,

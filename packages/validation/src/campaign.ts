@@ -8,7 +8,10 @@ import * as v from 'valibot';
 export { CampaignStatus, CampaignType };
 
 const requiredString = (message: string) => v.pipe(v.string(), v.trim(), v.nonEmpty(message));
-const optionalString = v.optional(v.pipe(v.string(), v.trim()));
+const limitedRequiredString = (requiredMessage: string, maxLength: number, maxMessage: string) =>
+  v.pipe(requiredString(requiredMessage), v.maxLength(maxLength, maxMessage));
+const limitedOptionalString = (maxLength: number, maxMessage: string) =>
+  v.optional(v.pipe(v.string(), v.trim(), v.maxLength(maxLength, maxMessage)));
 const requiredDate = (message: string) =>
   v.pipe(
     requiredString(message),
@@ -22,6 +25,22 @@ export const CAMPAIGN_IMAGE_MAX_SIZE_BYTES = 5 * 1024 * 1024;
 export const CAMPAIGN_EVIDENCE_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 export const CAMPAIGN_EVIDENCE_MAX_COUNT = 10;
 export const CAMPAIGN_ASSET_UPLOAD_EXPIRES_IN_SECONDS = 5 * 60;
+export const CAMPAIGN_TITLE_MAX_LENGTH = 120;
+export const CAMPAIGN_DESCRIPTION_MAX_LENGTH = 4_000;
+export const CAMPAIGN_CATEGORY_MAX_LENGTH = 80;
+export const CAMPAIGN_REGION_MAX_LENGTH = 120;
+export const CAMPAIGN_LOCATION_MAX_LENGTH = 200;
+export const CAMPAIGN_PIX_KEY_MAX_LENGTH = 100;
+export const CAMPAIGN_BANK_ACCOUNT_INFO_MAX_LENGTH = 1_000;
+export const CAMPAIGN_COLLECTION_POINT_MAX_COUNT = 10;
+export const CAMPAIGN_COLLECTION_POINT_NAME_MAX_LENGTH = 120;
+export const CAMPAIGN_COLLECTION_POINT_ADDRESS_MAX_LENGTH = 255;
+export const CAMPAIGN_COLLECTION_POINT_CITY_MAX_LENGTH = 120;
+export const CAMPAIGN_COLLECTION_POINT_STATE_MAX_LENGTH = 60;
+export const CAMPAIGN_COLLECTION_POINT_ZIP_CODE_MAX_LENGTH = 20;
+export const CAMPAIGN_COLLECTION_POINT_INSTRUCTIONS_MAX_LENGTH = 500;
+export const CAMPAIGN_ACCOUNTABILITY_OUTCOME_SUMMARY_MAX_LENGTH = 4_000;
+export const CAMPAIGN_UPDATE_MESSAGE_MAX_LENGTH = 2_000;
 export const CAMPAIGN_EVIDENCE_CONTENT_TYPES = [
   'image/jpeg',
   'image/png',
@@ -85,12 +104,24 @@ const campaignListPageSizeSchema = v.pipe(
   ),
 );
 
-export const campaignListInputSchema = v.object({
-  category: optionalString,
-  region: optionalString,
-  type: v.optional(campaignTypeSchema),
-  cursor: v.optional(requiredString('Cursor inválido.')),
+const campaignPageInputEntries = {
+  cursor: v.optional(v.pipe(v.string(), v.ulid('Cursor inválido.'))),
   limit: v.optional(campaignListPageSizeSchema, CAMPAIGN_LIST_DEFAULT_PAGE_SIZE),
+};
+
+export const campaignPageInputSchema = v.object(campaignPageInputEntries);
+
+export const campaignListInputSchema = v.object({
+  category: limitedOptionalString(
+    CAMPAIGN_CATEGORY_MAX_LENGTH,
+    'A categoria deve ter no máximo 80 caracteres.',
+  ),
+  region: limitedOptionalString(
+    CAMPAIGN_REGION_MAX_LENGTH,
+    'A região deve ter no máximo 120 caracteres.',
+  ),
+  type: v.optional(campaignTypeSchema),
+  ...campaignPageInputEntries,
 });
 
 export const campaignByIdInputSchema = v.object({
@@ -118,7 +149,11 @@ const campaignIdInputEntry = {
 
 const accountabilityCommonInputEntries = {
   ...campaignIdInputEntry,
-  outcomeSummary: requiredString('O resumo do resultado é obrigatório.'),
+  outcomeSummary: limitedRequiredString(
+    'O resumo do resultado é obrigatório.',
+    CAMPAIGN_ACCOUNTABILITY_OUTCOME_SUMMARY_MAX_LENGTH,
+    'O resumo do resultado deve ter no máximo 4.000 caracteres.',
+  ),
   retainedEvidenceAssetIds: v.pipe(
     v.array(uploadIdSchema),
     v.maxLength(CAMPAIGN_EVIDENCE_MAX_COUNT, 'Mantenha no máximo 10 evidências.'),
@@ -171,47 +206,113 @@ export const campaignAccountabilityInputSchema = v.pipe(
 );
 
 export const campaignCollectionPointInputSchema = v.object({
-  name: requiredString('Nome do ponto de coleta é obrigatório'),
-  address: requiredString('Endereço é obrigatório'),
-  city: requiredString('Cidade é obrigatória'),
-  state: requiredString('Estado é obrigatório'),
-  zipCode: requiredString('CEP é obrigatório'),
-  instructions: optionalString,
+  name: limitedRequiredString(
+    'Nome do ponto de coleta é obrigatório',
+    CAMPAIGN_COLLECTION_POINT_NAME_MAX_LENGTH,
+    'O nome do ponto de coleta deve ter no máximo 120 caracteres.',
+  ),
+  address: limitedRequiredString(
+    'Endereço é obrigatório',
+    CAMPAIGN_COLLECTION_POINT_ADDRESS_MAX_LENGTH,
+    'O endereço deve ter no máximo 255 caracteres.',
+  ),
+  city: limitedRequiredString(
+    'Cidade é obrigatória',
+    CAMPAIGN_COLLECTION_POINT_CITY_MAX_LENGTH,
+    'A cidade deve ter no máximo 120 caracteres.',
+  ),
+  state: limitedRequiredString(
+    'Estado é obrigatório',
+    CAMPAIGN_COLLECTION_POINT_STATE_MAX_LENGTH,
+    'O estado deve ter no máximo 60 caracteres.',
+  ),
+  zipCode: limitedRequiredString(
+    'CEP é obrigatório',
+    CAMPAIGN_COLLECTION_POINT_ZIP_CODE_MAX_LENGTH,
+    'O CEP deve ter no máximo 20 caracteres.',
+  ),
+  instructions: limitedOptionalString(
+    CAMPAIGN_COLLECTION_POINT_INSTRUCTIONS_MAX_LENGTH,
+    'As instruções devem ter no máximo 500 caracteres.',
+  ),
 });
 
 const campaignCollectionPointUpdateInputSchema = v.object({
   id: v.optional(requiredString('Identificador do ponto de coleta inválido.')),
-  name: requiredString('Nome do ponto de coleta é obrigatório'),
-  address: requiredString('Endereço é obrigatório'),
-  city: requiredString('Cidade é obrigatória'),
-  state: requiredString('Estado é obrigatório'),
-  zipCode: requiredString('CEP é obrigatório'),
-  instructions: optionalString,
+  name: limitedRequiredString(
+    'Nome do ponto de coleta é obrigatório',
+    CAMPAIGN_COLLECTION_POINT_NAME_MAX_LENGTH,
+    'O nome do ponto de coleta deve ter no máximo 120 caracteres.',
+  ),
+  address: limitedRequiredString(
+    'Endereço é obrigatório',
+    CAMPAIGN_COLLECTION_POINT_ADDRESS_MAX_LENGTH,
+    'O endereço deve ter no máximo 255 caracteres.',
+  ),
+  city: limitedRequiredString(
+    'Cidade é obrigatória',
+    CAMPAIGN_COLLECTION_POINT_CITY_MAX_LENGTH,
+    'A cidade deve ter no máximo 120 caracteres.',
+  ),
+  state: limitedRequiredString(
+    'Estado é obrigatório',
+    CAMPAIGN_COLLECTION_POINT_STATE_MAX_LENGTH,
+    'O estado deve ter no máximo 60 caracteres.',
+  ),
+  zipCode: limitedRequiredString(
+    'CEP é obrigatório',
+    CAMPAIGN_COLLECTION_POINT_ZIP_CODE_MAX_LENGTH,
+    'O CEP deve ter no máximo 20 caracteres.',
+  ),
+  instructions: limitedOptionalString(
+    CAMPAIGN_COLLECTION_POINT_INSTRUCTIONS_MAX_LENGTH,
+    'As instruções devem ter no máximo 500 caracteres.',
+  ),
 });
 
 const campaignCommonInputEntries = {
-  title: requiredString('Título é obrigatório'),
-  description: requiredString('Descrição é obrigatória'),
-  category: requiredString('Categoria é obrigatória'),
-  region: requiredString('Região é obrigatória'),
+  title: limitedRequiredString(
+    'Título é obrigatório',
+    CAMPAIGN_TITLE_MAX_LENGTH,
+    'O título deve ter no máximo 120 caracteres.',
+  ),
+  description: limitedRequiredString(
+    'Descrição é obrigatória',
+    CAMPAIGN_DESCRIPTION_MAX_LENGTH,
+    'A descrição deve ter no máximo 4.000 caracteres.',
+  ),
+  category: limitedRequiredString(
+    'Categoria é obrigatória',
+    CAMPAIGN_CATEGORY_MAX_LENGTH,
+    'A categoria deve ter no máximo 80 caracteres.',
+  ),
+  region: limitedRequiredString(
+    'Região é obrigatória',
+    CAMPAIGN_REGION_MAX_LENGTH,
+    'A região deve ter no máximo 120 caracteres.',
+  ),
   startDate: requiredDate('Data inicial é obrigatória'),
   endDate: requiredDate('Data final é obrigatória'),
   imageUploadId: v.optional(uploadIdSchema),
 };
 
 const campaignEditableCommonInputEntries = {
-  title: requiredString('Título é obrigatório'),
-  description: requiredString('Descrição é obrigatória'),
-  category: requiredString('Categoria é obrigatória'),
-  region: requiredString('Região é obrigatória'),
-  startDate: requiredDate('Data inicial é obrigatória'),
-  endDate: requiredDate('Data final é obrigatória'),
+  title: campaignCommonInputEntries.title,
+  description: campaignCommonInputEntries.description,
+  category: campaignCommonInputEntries.category,
+  region: campaignCommonInputEntries.region,
+  startDate: campaignCommonInputEntries.startDate,
+  endDate: campaignCommonInputEntries.endDate,
 };
 
 const physicalCampaignCreateInputSchema = v.object({
   ...campaignCommonInputEntries,
   type: v.literal(CampaignType.PHYSICAL),
-  location: requiredString('Local principal é obrigatório'),
+  location: limitedRequiredString(
+    'Local principal é obrigatório',
+    CAMPAIGN_LOCATION_MAX_LENGTH,
+    'O local principal deve ter no máximo 200 caracteres.',
+  ),
   targetItems: v.pipe(
     v.number('Meta de itens é obrigatória'),
     v.integer('Meta de itens deve ser um número inteiro.'),
@@ -220,14 +321,21 @@ const physicalCampaignCreateInputSchema = v.object({
   collectionPoints: v.pipe(
     v.array(campaignCollectionPointInputSchema),
     v.minLength(1, 'Informe pelo menos um ponto de coleta.'),
+    v.maxLength(CAMPAIGN_COLLECTION_POINT_MAX_COUNT, 'Informe no máximo 10 pontos de coleta.'),
   ),
 });
 
 const virtualCampaignCreateInputSchema = v.object({
   ...campaignCommonInputEntries,
   type: v.literal(CampaignType.VIRTUAL),
-  pixKey: optionalString,
-  bankAccountInfo: optionalString,
+  pixKey: limitedOptionalString(
+    CAMPAIGN_PIX_KEY_MAX_LENGTH,
+    'A chave PIX deve ter no máximo 100 caracteres.',
+  ),
+  bankAccountInfo: limitedOptionalString(
+    CAMPAIGN_BANK_ACCOUNT_INFO_MAX_LENGTH,
+    'Os dados bancários devem ter no máximo 1.000 caracteres.',
+  ),
 });
 
 const campaignCreatePayloadInputSchema = v.pipe(
@@ -261,7 +369,11 @@ const physicalCampaignDetailsUpdateInputSchema = v.object({
   ...campaignIdInputEntry,
   ...campaignEditableCommonInputEntries,
   type: v.literal(CampaignType.PHYSICAL),
-  location: requiredString('Local principal é obrigatório'),
+  location: limitedRequiredString(
+    'Local principal é obrigatório',
+    CAMPAIGN_LOCATION_MAX_LENGTH,
+    'O local principal deve ter no máximo 200 caracteres.',
+  ),
   targetItems: v.pipe(
     v.number('Meta de itens é obrigatória'),
     v.integer('Meta de itens deve ser um número inteiro.'),
@@ -270,6 +382,7 @@ const physicalCampaignDetailsUpdateInputSchema = v.object({
   collectionPoints: v.pipe(
     v.array(campaignCollectionPointUpdateInputSchema),
     v.minLength(1, 'Informe pelo menos um ponto de coleta.'),
+    v.maxLength(CAMPAIGN_COLLECTION_POINT_MAX_COUNT, 'Informe no máximo 10 pontos de coleta.'),
   ),
 });
 
@@ -277,8 +390,14 @@ const virtualCampaignDetailsUpdateInputSchema = v.object({
   ...campaignIdInputEntry,
   ...campaignEditableCommonInputEntries,
   type: v.literal(CampaignType.VIRTUAL),
-  pixKey: optionalString,
-  bankAccountInfo: optionalString,
+  pixKey: limitedOptionalString(
+    CAMPAIGN_PIX_KEY_MAX_LENGTH,
+    'A chave PIX deve ter no máximo 100 caracteres.',
+  ),
+  bankAccountInfo: limitedOptionalString(
+    CAMPAIGN_BANK_ACCOUNT_INFO_MAX_LENGTH,
+    'Os dados bancários devem ter no máximo 1.000 caracteres.',
+  ),
 });
 
 export const campaignDetailsUpdateInputSchema = v.pipe(
@@ -308,7 +427,10 @@ const campaignPublishUpdateInputEntries = {
   id: requiredString('Campanha é obrigatória'),
   message: v.pipe(
     requiredString('A mensagem da atualização é obrigatória'),
-    v.maxLength(2_000, 'A mensagem deve ter no máximo 2.000 caracteres.'),
+    v.maxLength(
+      CAMPAIGN_UPDATE_MESSAGE_MAX_LENGTH,
+      'A mensagem deve ter no máximo 2.000 caracteres.',
+    ),
   ),
 };
 
@@ -322,6 +444,7 @@ export const campaignPublishUpdateInputSchema = v.object({
 export const campaignPublishUpdateFormInputSchema = campaignPublishUpdatePayloadInputSchema;
 
 export type CampaignListInput = v.InferOutput<typeof campaignListInputSchema>;
+export type CampaignPageInput = v.InferOutput<typeof campaignPageInputSchema>;
 export type CampaignCreateInput = v.InferOutput<typeof campaignCreateInputSchema>;
 export type CampaignDetailsUpdateInput = v.InferOutput<typeof campaignDetailsUpdateInputSchema>;
 export type CampaignPublishUpdateInput = v.InferOutput<typeof campaignPublishUpdateInputSchema>;

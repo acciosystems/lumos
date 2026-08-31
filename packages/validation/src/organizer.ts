@@ -2,15 +2,33 @@ import * as v from 'valibot';
 
 const requiredString = (message: string) => v.pipe(v.string(), v.trim(), v.nonEmpty(message));
 const optionalString = v.optional(v.pipe(v.string(), v.trim()));
+const limitedRequiredString = (requiredMessage: string, maxLength: number, maxMessage: string) =>
+  v.pipe(requiredString(requiredMessage), v.maxLength(maxLength, maxMessage));
+const limitedOptionalString = (maxLength: number, maxMessage: string) =>
+  v.optional(v.pipe(v.string(), v.trim(), v.maxLength(maxLength, maxMessage)));
+
+export const ORGANIZER_DISPLAY_NAME_MAX_LENGTH = 120;
+export const ORGANIZER_BIO_MAX_LENGTH = 1_000;
+export const ORGANIZER_WEBSITE_URL_MAX_LENGTH = 2_048;
 
 export const organizerTypeSchema = v.picklist(['INDIVIDUAL', 'ORGANIZATION']);
 
 export const organizerProfileUpsertInputSchema = v.pipe(
   v.object({
     type: organizerTypeSchema,
-    displayName: requiredString('Nome de exibição é obrigatório'),
-    bio: optionalString,
-    websiteUrl: optionalString,
+    displayName: limitedRequiredString(
+      'Nome de exibição é obrigatório',
+      ORGANIZER_DISPLAY_NAME_MAX_LENGTH,
+      'O nome de exibição deve ter no máximo 120 caracteres.',
+    ),
+    bio: limitedOptionalString(
+      ORGANIZER_BIO_MAX_LENGTH,
+      'A apresentação deve ter no máximo 1.000 caracteres.',
+    ),
+    websiteUrl: limitedOptionalString(
+      ORGANIZER_WEBSITE_URL_MAX_LENGTH,
+      'O site deve ter no máximo 2.048 caracteres.',
+    ),
     cnpj: optionalString,
   }),
   v.check(

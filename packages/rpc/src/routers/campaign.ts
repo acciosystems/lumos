@@ -4,12 +4,15 @@ import type { CampaignInclude, CampaignSelect } from '@lumos/database/generated/
 import {
   CampaignStatus,
   CampaignType,
+  CAMPAIGN_COLLECTION_POINT_MAX_COUNT,
+  CAMPAIGN_EVIDENCE_MAX_COUNT,
   campaignAssetUploadIdInputSchema,
   campaignAssetUploadInputSchema,
   campaignByIdInputSchema,
   campaignCreateInputSchema,
   campaignLifecycleTransitionInputSchema,
   campaignListInputSchema,
+  campaignPageInputSchema,
   campaignAccountabilityInputSchema,
   campaignDetailsUpdateInputSchema,
   campaignPublishUpdateInputSchema,
@@ -67,6 +70,7 @@ const campaignInclude = {
   },
   collectionPoints: {
     orderBy: { createdAt: 'asc' as const },
+    take: CAMPAIGN_COLLECTION_POINT_MAX_COUNT,
   },
   updates: {
     select: {
@@ -82,6 +86,7 @@ const campaignInclude = {
       evidenceAssets: {
         where: { removedAt: null },
         orderBy: [{ position: 'asc' as const }, { createdAt: 'asc' as const }],
+        take: CAMPAIGN_EVIDENCE_MAX_COUNT,
       },
     },
   },
@@ -162,6 +167,7 @@ const publicCampaignDetailSelect = {
       instructions: true,
     },
     orderBy: { createdAt: 'asc' as const },
+    take: CAMPAIGN_COLLECTION_POINT_MAX_COUNT,
   },
   updates: {
     select: {
@@ -187,6 +193,51 @@ const publicCampaignDetailSelect = {
           contentType: true,
           contentLength: true,
         },
+        take: CAMPAIGN_EVIDENCE_MAX_COUNT,
+      },
+    },
+  },
+} as const satisfies CampaignSelect;
+
+const ownerCampaignListSelect = {
+  id: true,
+  title: true,
+  status: true,
+  type: true,
+  category: true,
+  region: true,
+  startDate: true,
+  endDate: true,
+  targetItems: true,
+  currentItems: true,
+  _count: {
+    select: {
+      participants: {
+        where: activeParticipantWhere,
+      },
+    },
+  },
+} as const satisfies CampaignSelect;
+
+const participatingCampaignListSelect = {
+  id: true,
+  title: true,
+  description: true,
+  status: true,
+  type: true,
+  category: true,
+  region: true,
+  startDate: true,
+  endDate: true,
+  organizerProfile: {
+    select: {
+      displayName: true,
+    },
+  },
+  _count: {
+    select: {
+      participants: {
+        where: activeParticipantWhere,
       },
     },
   },
@@ -213,6 +264,13 @@ function withEffectiveCampaignStatus<
     ...campaign,
     status: getEffectiveCampaignStatus({ ...campaign, now }),
   };
+}
+
+function withCampaignParticipantCount<Campaign extends { _count: { participants: number } }>(
+  campaign: Campaign,
+) {
+  const { _count, ...campaignData } = campaign;
+  return { ...campaignData, participantCount: _count.participants };
 }
 
 function withOwnerCampaignData(
@@ -421,67 +479,76 @@ export const campaignRouter = {
     return withOwnerCampaignData(campaign);
   }),
 
-  myCampaigns: authorized.handler(async ({ context: { user } }) => {
-    const organizerProfile = await prisma.organizerProfile.findUnique({
-      where: { userId: user.id },
-      select: { id: true },
-    });
+  myCampaigns: authorized
+    .input(campaignPageInputSchema)
+    .handler(async ({ input, context: { user } }) => {
+      const organizerProfile = await prisma.organizerProfile.findUnique({
+        where: { userId: user.id },
+        select: { id: true },
+      });
 
-    if (!organizerProfile) return [];
+      if (!organizerProfile) return { items: [], nextCursor: null };
 
-    const campaigns = await prisma.campaign.findMany({
-      where: {
-        organizerProfileId: organizerProfile.id,
-      },
-      include: {
-        organizerProfile: {
-          select: {
-            displayName: true,
+      const campaigns = await prisma.campaign.findMany({
+        where: {
+          organizerProfileId: organizerProfile.id,
+        },
+        select: ownerCampaignListSelect,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+        take: input.limit + 1,
+      });
+
+      const hasNextPage = campaigns.length > input.limit;
+      const items = campaigns
+        .slice(0, input.limit)
+        .map((campaign) => withEffectiveCampaignStatus(withCampaignParticipantCount(campaign)));
+
+      return {
+        items,
+        nextCursor: hasNextPage ? (items.at(-1)?.id ?? null) : null,
+      };
+    }),
+
+  myParticipations: authorized
+    .input(campaignPageInputSchema)
+    .handler(async ({ input, context: { user } }) => {
+      const now = new Date();
+      const today = todayAsDate(now);
+      const participations = await prisma.campaignParticipant.findMany({
+        where: {
+          userId: user.id,
+          ...activeParticipantWhere,
+          campaign: {
+            status: { in: [CampaignStatus.ACTIVE, CampaignStatus.PENDING] },
+            type: 'PHYSICAL',
+            startDate: { lte: today },
+            endDate: { gte: today },
           },
         },
-        assets: {
-          where: { kind: 'IMAGE', removedAt: null },
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-        },
-        _count: {
-          select: {
-            participants: {
-              where: activeParticipantWhere,
-            },
+        select: {
+          id: true,
+          campaign: {
+            select: participatingCampaignListSelect,
           },
         },
-      },
-      orderBy: [{ createdAt: 'desc' }],
-    });
+        orderBy: [{ confirmedAt: 'desc' }, { id: 'desc' }],
+        ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
+        take: input.limit + 1,
+      });
 
-    return campaigns.map((campaign) => withEffectiveCampaignStatus(withParticipantCount(campaign)));
-  }),
+      const hasNextPage = participations.length > input.limit;
+      const items = participations
+        .slice(0, input.limit)
+        .map(({ campaign }) =>
+          withEffectiveCampaignStatus(withCampaignParticipantCount(campaign), now),
+        );
 
-  myParticipations: authorized.handler(async ({ context: { user } }) => {
-    const now = new Date();
-    const today = todayAsDate(now);
-    const campaigns = await prisma.campaign.findMany({
-      where: {
-        status: { in: [CampaignStatus.ACTIVE, CampaignStatus.PENDING] },
-        type: 'PHYSICAL',
-        startDate: { lte: today },
-        endDate: { gte: today },
-        participants: {
-          some: {
-            userId: user.id,
-            ...activeParticipantWhere,
-          },
-        },
-      },
-      select: publicCampaignListSelect,
-      orderBy: [{ startDate: 'asc' }, { createdAt: 'desc' }],
-    });
-
-    return campaigns.map((campaign) =>
-      withParticipantCount(withEffectiveCampaignStatus(campaign, now)),
-    );
-  }),
+      return {
+        items,
+        nextCursor: hasNextPage ? (participations.at(input.limit - 1)?.id ?? null) : null,
+      };
+    }),
 
   participationState: authorized
     .input(campaignByIdInputSchema)
@@ -742,6 +809,17 @@ export const campaignRouter = {
         }
 
         if (input.type === CampaignType.PHYSICAL) {
+          const collectionPointCount = await transaction.campaignCollectionPoint.count({
+            where: { campaignId: input.id },
+          });
+
+          if (collectionPointCount > CAMPAIGN_COLLECTION_POINT_MAX_COUNT) {
+            throw new ORPCError('BAD_REQUEST', {
+              message:
+                'Esta campanha excede o limite atual de pontos de coleta e não pode ser editada.',
+            });
+          }
+
           const existingPoints = await transaction.campaignCollectionPoint.findMany({
             where: { campaignId: input.id },
             select: { id: true },

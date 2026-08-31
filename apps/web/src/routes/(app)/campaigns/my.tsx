@@ -1,5 +1,5 @@
 import { IconAlertCircle, IconPlus } from '@tabler/icons-react';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ptBR } from 'date-fns/locale';
 
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
 import { useCampaignEffectiveStatus } from '@/hooks/use-campaign-effective-status';
+import { myCampaignsInfiniteOptions } from '@/lib/queries/campaign';
 import { rpc } from '@/lib/rpc';
 import { formatCampaignDate } from '@/utils/campaign-date';
 import { campaignStatusMetadata } from '@/utils/campaign-status';
@@ -24,7 +25,17 @@ export const Route = createFileRoute('/(app)/campaigns/my')({
 });
 
 function MyCampaignsPage() {
-  const { data, isPending, isError, error } = useQuery(rpc.campaign.myCampaigns.queryOptions());
+  const {
+    data,
+    isPending,
+    isError,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchNextPageError,
+    isFetchingNextPage,
+  } = useInfiniteQuery(myCampaignsInfiniteOptions());
+  const campaigns = data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
     <AppInset
@@ -54,9 +65,9 @@ function MyCampaignsPage() {
         )}
 
         {data &&
-          (data.length ? (
+          (campaigns.length ? (
             <div className="grid auto-rows-fr gap-3">
-              {data.map((campaign) => (
+              {campaigns.map((campaign) => (
                 <MyCampaignCard key={campaign.id} campaign={campaign} />
               ))}
             </div>
@@ -70,12 +81,32 @@ function MyCampaignsPage() {
               </EmptyHeader>
             </Empty>
           ))}
+
+        {isFetchNextPageError ? (
+          <Alert variant="destructive">
+            <IconAlertCircle />
+            <AlertTitle>Falha ao carregar mais campanhas</AlertTitle>
+            <AlertDescription>Tente novamente para continuar a lista.</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {hasNextPage ? (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              disabled={isFetchingNextPage}
+              onClick={() => void fetchNextPage()}
+            >
+              {isFetchingNextPage ? 'Carregando campanhas...' : 'Carregar mais campanhas'}
+            </Button>
+          </div>
+        ) : null}
       </div>
     </AppInset>
   );
 }
 
-type MyCampaign = Awaited<ReturnType<typeof rpc.campaign.myCampaigns.call>>[number];
+type MyCampaign = Awaited<ReturnType<typeof rpc.campaign.myCampaigns.call>>['items'][number];
 
 function MyCampaignCard({ campaign }: { campaign: MyCampaign }) {
   const status = useCampaignEffectiveStatus(campaign);

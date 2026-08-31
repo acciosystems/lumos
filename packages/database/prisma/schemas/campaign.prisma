@@ -24,14 +24,14 @@ model Campaign {
   id                 String @id @default(ulid())
   organizerProfileId String
 
-  title       String
-  description String
+  title       String         @db.Text
+  description String         @db.Text
   status      CampaignStatus @default(PENDING)
   type        CampaignType
 
   // Filters (P0)
-  category String
-  region   String
+  category String @db.Text
+  region   String @db.Text
 
   /// Calendar dates interpreted in `America/Sao_Paulo`; no time-of-day is stored.
   startDate DateTime @db.Date
@@ -39,14 +39,14 @@ model Campaign {
 
   // PHYSICAL only. Nullability is required for VIRTUAL campaigns; the
   // subtype-specific CHECK constraints are maintained in SQL migrations.
-  location     String?
+  location     String? @db.Text
   targetItems  Int?
   currentItems Int?
 
   // VIRTUAL only
   // No amounts are being tracked, since the platform doesn't process payments (that's P3)
-  pixKey          String?
-  bankAccountInfo String?
+  pixKey          String? @db.Text
+  bankAccountInfo String? @db.Text
 
   organizerProfile OrganizerProfile @relation(fields: [organizerProfileId], references: [id], onDelete: Cascade)
 
@@ -67,7 +67,7 @@ model Campaign {
   @@index([status])
   @@index([status, endDate])
   @@index([type])
-  @@index([organizerProfileId])
+  @@index([organizerProfileId, createdAt(sort: Desc), id(sort: Desc)])
   @@index([status, startDate(sort: Asc), createdAt(sort: Desc), id(sort: Desc)])
   @@index([status, type, startDate(sort: Asc), createdAt(sort: Desc), id(sort: Desc)])
   @@index([category(ops: raw("gin_trgm_ops"))], type: Gin)
@@ -79,14 +79,14 @@ model CampaignCollectionPoint {
   id         String @id @default(ulid())
   campaignId String
 
-  name         String
-  address      String
-  city         String
-  state        String
-  zipCode      String
+  name         String  @db.Text
+  address      String  @db.Text
+  city         String  @db.Text
+  state        String  @db.Text
+  zipCode      String  @db.Text
   lat          Float?
   lon          Float?
-  instructions String?
+  instructions String? @db.Text
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
@@ -113,7 +113,7 @@ model CampaignParticipant {
 
   @@unique([campaignId, userId])
   @@index([campaignId])
-  @@index([userId])
+  @@index([userId, cancelledAt, confirmedAt(sort: Desc), id(sort: Desc)])
   @@map("campaign_participants")
 }
 
@@ -122,7 +122,7 @@ model CampaignUpdate {
   campaignId String
   authorId   String
 
-  message     String
+  message     String   @db.Text
   publishedAt DateTime @default(now())
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -161,7 +161,7 @@ model CampaignAccountability {
   // cents keep virtual totals exact across database and JSON boundaries.
   totalItems      Int?
   totalAmountCents Int?
-  outcomeSummary  String
+  outcomeSummary  String @db.Text
   evidenceAssets  CampaignAsset[]
 
   submittedAt     DateTime @default(now())
@@ -182,7 +182,7 @@ model CampaignAsset {
   uploaderId       String
   kind             CampaignAssetKind
   objectKey        String            @unique
-  originalFileName String
+  originalFileName String            @db.Text
   contentType      String
   contentLength    Int
   position         Int               @default(0)

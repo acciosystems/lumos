@@ -21,6 +21,22 @@ export function campaignListInfiniteOptions(filters: CampaignListFilters) {
   });
 }
 
+export function myCampaignsInfiniteOptions() {
+  return rpc.campaign.myCampaigns.infiniteOptions({
+    input: (cursor: string | null) => ({ cursor: cursor ?? undefined }),
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
+}
+
+export function myParticipationsInfiniteOptions() {
+  return rpc.campaign.myParticipations.infiniteOptions({
+    input: (cursor: string | null) => ({ cursor: cursor ?? undefined }),
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+  });
+}
+
 export function campaignParticipationQueryOptions({
   campaignId,
   viewerId,
@@ -37,7 +53,7 @@ export async function invalidateCampaignLists(queryClient: QueryClient) {
       queryKey: rpc.campaign.list.key(),
     }),
     queryClient.invalidateQueries({
-      queryKey: rpc.campaign.myCampaigns.queryKey(),
+      queryKey: rpc.campaign.myCampaigns.key(),
     }),
   ]);
 }
@@ -59,10 +75,10 @@ export async function invalidateCampaignParticipation(
       queryKey: rpc.campaign.byId.queryKey({ input: { id: campaignId } }),
     }),
     queryClient.invalidateQueries({
-      queryKey: rpc.campaign.myCampaigns.queryKey(),
+      queryKey: rpc.campaign.myCampaigns.key(),
     }),
     queryClient.invalidateQueries({
-      queryKey: rpc.campaign.myParticipations.queryKey(),
+      queryKey: rpc.campaign.myParticipations.key(),
     }),
     queryClient.invalidateQueries({
       queryKey: campaignParticipationQueryOptions({ campaignId, viewerId }).queryKey,
@@ -82,10 +98,10 @@ export async function invalidateCampaignManagement(queryClient: QueryClient, cam
       queryKey: rpc.campaign.byId.queryKey({ input: { id: campaignId } }),
     }),
     queryClient.invalidateQueries({
-      queryKey: rpc.campaign.myCampaigns.queryKey(),
+      queryKey: rpc.campaign.myCampaigns.key(),
     }),
     queryClient.invalidateQueries({
-      queryKey: rpc.campaign.myParticipations.queryKey(),
+      queryKey: rpc.campaign.myParticipations.key(),
     }),
     queryClient.invalidateQueries({
       queryKey: rpc.campaign.participationState.key(),

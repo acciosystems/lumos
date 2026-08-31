@@ -1,9 +1,11 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { IconAlertCircle } from '@tabler/icons-react';
+import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ptBR } from 'date-fns/locale';
 
 import { Loading } from '@/components/misc/loading';
 import { AppInset } from '@/components/sidebar/inset';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,13 +23,13 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@/components/ui/empty';
-import { rpc } from '@/lib/rpc';
+import { myParticipationsInfiniteOptions } from '@/lib/queries/campaign';
 import { formatCampaignDate } from '@/utils/campaign-date';
 import { getMillisecondsUntilNextCampaignDay } from '@/utils/campaign-status';
 
 export const Route = createFileRoute('/(app)/campaigns/participating')({
   loader: ({ context }) =>
-    context.queryClient.ensureQueryData(rpc.campaign.myParticipations.queryOptions()),
+    context.queryClient.ensureInfiniteQueryData(myParticipationsInfiniteOptions()),
   head: () => ({
     meta: [{ title: 'Minhas participações | Nossa Causa' }],
   }),
@@ -42,11 +44,13 @@ export const Route = createFileRoute('/(app)/campaigns/participating')({
 });
 
 function ParticipatingCampaignsPage() {
-  const { data } = useSuspenseQuery({
-    ...rpc.campaign.myParticipations.queryOptions(),
-    refetchInterval: () => getMillisecondsUntilNextCampaignDay(),
-    refetchOnWindowFocus: 'always',
-  });
+  const { data, fetchNextPage, hasNextPage, isFetchNextPageError, isFetchingNextPage } =
+    useSuspenseInfiniteQuery({
+      ...myParticipationsInfiniteOptions(),
+      refetchInterval: () => getMillisecondsUntilNextCampaignDay(),
+      refetchOnWindowFocus: 'always',
+    });
+  const campaigns = data.pages.flatMap((page) => page.items);
 
   return (
     <AppInset
@@ -60,9 +64,9 @@ function ParticipatingCampaignsPage() {
           </p>
         </div>
 
-        {data.length ? (
+        {campaigns.length ? (
           <div className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {data.map((campaign) => (
+            {campaigns.map((campaign) => (
               <Card key={campaign.id} className="h-full">
                 <CardHeader>
                   <CardTitle className="line-clamp-2">{campaign.title}</CardTitle>
@@ -114,6 +118,26 @@ function ParticipatingCampaignsPage() {
             </EmptyContent>
           </Empty>
         )}
+
+        {isFetchNextPageError ? (
+          <Alert variant="destructive">
+            <IconAlertCircle />
+            <AlertTitle>Falha ao carregar mais participações</AlertTitle>
+            <AlertDescription>Tente novamente para continuar a lista.</AlertDescription>
+          </Alert>
+        ) : null}
+
+        {hasNextPage ? (
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              disabled={isFetchingNextPage}
+              onClick={() => void fetchNextPage()}
+            >
+              {isFetchingNextPage ? 'Carregando participações...' : 'Carregar mais participações'}
+            </Button>
+          </div>
+        ) : null}
       </div>
     </AppInset>
   );
