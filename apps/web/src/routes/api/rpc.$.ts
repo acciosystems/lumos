@@ -1,3 +1,4 @@
+import { createRequestDeadline } from '@lumos/rpc/deadline';
 import { handler } from '@lumos/rpc/handler';
 import { createFileRoute } from '@tanstack/react-router';
 
@@ -8,7 +9,7 @@ export const Route = createFileRoute('/api/rpc/$')({
         const { response } = await handler.handle(request, {
           prefix: '/api/rpc',
           // @ts-expect-error needed because of evlog context
-          context: { headers: request.headers },
+          context: { headers: request.headers, deadline: createRequestDeadline(request.signal) },
         });
 
         return response ?? new Response('Not Found', { status: 404 });

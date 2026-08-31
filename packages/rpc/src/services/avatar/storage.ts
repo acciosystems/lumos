@@ -63,32 +63,38 @@ export async function createAvatarUploadUrl(stagingKey: string) {
   });
 }
 
-export async function headAvatarObject(key: string) {
-  return headUploadObject(key);
+export async function headAvatarObject(key: string, signal?: AbortSignal) {
+  return headUploadObject(key, signal);
 }
 
-export async function publishAvatarObject({
-  sourceKey,
-  destinationKey,
-  sourceEtag,
-}: {
-  sourceKey: string;
-  destinationKey: string;
-  sourceEtag: string;
-}) {
-  return publishUploadObject({
+export async function publishAvatarObject(
+  {
     sourceKey,
     destinationKey,
     sourceEtag,
-    contentType: AVATAR_CONTENT_TYPE,
-    // Versioned keys prevent replacement races; a bounded TTL also limits
-    // how long a deleted profile photo can remain in a custom-domain cache.
-    cacheControl: 'public, max-age=300, must-revalidate',
-  });
+  }: {
+    sourceKey: string;
+    destinationKey: string;
+    sourceEtag: string;
+  },
+  signal?: AbortSignal,
+) {
+  return publishUploadObject(
+    {
+      sourceKey,
+      destinationKey,
+      sourceEtag,
+      contentType: AVATAR_CONTENT_TYPE,
+      // Versioned keys prevent replacement races; a bounded TTL also limits
+      // how long a deleted profile photo can remain in a custom-domain cache.
+      cacheControl: 'public, max-age=300, must-revalidate',
+    },
+    signal,
+  );
 }
 
-export async function deleteAvatarObject(key: string) {
-  return deleteUploadObject(key);
+export async function deleteAvatarObject(key: string, signal?: AbortSignal) {
+  return deleteUploadObject(key, signal);
 }
 
 export const isObjectNotFound = isUploadObjectNotFound;

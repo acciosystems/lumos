@@ -17,6 +17,9 @@ Each event is sent immediately in a one-element JSON array. Delivery has a two-s
 and no application retry. There is no in-process batch, flush interval, retry backoff, or
 shutdown flush. Consequently, instance termination cannot strand a partial batch or timer.
 
+See [request deadlines](./request-deadlines.md) for the complete dependency budget and timeout
+response contract.
+
 The transport uses these server-only environment variables:
 
 - `AXIOM_TOKEN`: API token with ingest permission for the target dataset.

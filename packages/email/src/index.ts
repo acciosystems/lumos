@@ -6,6 +6,7 @@ import { createLogger } from 'evlog';
 import { Resend } from 'resend';
 
 const resend = new Resend(env.RESEND_API_KEY);
+const RESEND_HANDOFF_TIMEOUT_MS = 5_000;
 
 export interface SendEmailOptions {
   to: string;
@@ -15,9 +16,12 @@ export interface SendEmailOptions {
   idempotencyKey: string;
 }
 
-export async function sendEmail(options: SendEmailOptions) {
+export async function sendEmail(options: SendEmailOptions, signal?: AbortSignal) {
   const deliveryId = randomUUID();
   const startedAt = Date.now();
+  const handoffSignal = signal
+    ? AbortSignal.any([signal, AbortSignal.timeout(RESEND_HANDOFF_TIMEOUT_MS)])
+    : AbortSignal.timeout(RESEND_HANDOFF_TIMEOUT_MS);
   let response: Awaited<ReturnType<typeof resend.emails.send>>;
 
   try {
@@ -32,26 +36,30 @@ export async function sendEmail(options: SendEmailOptions) {
           { name: 'kind', value: options.kind },
         ],
       },
-      { idempotencyKey: options.idempotencyKey },
+      // Resend forwards untyped RequestInit fields to fetch. Its public type
+      // does not expose signal yet, so keep the cast localized here.
+      { idempotencyKey: options.idempotencyKey, signal: handoffSignal } as Parameters<
+        typeof resend.emails.send
+      >[1] & { signal: AbortSignal },
     );
   } catch {
     emitHandoffFailure({
       deliveryId,
       kind: options.kind,
       startedAt,
-      failureCode: 'transport_error',
+      failureCode: handoffSignal.aborted ? 'timeout' : 'transport_error',
       providerStatusCode: null,
     });
     throw new Error('Email provider could not be reached.');
   }
 
-  if (response.error || !response.data?.id) {
+  if (handoffSignal.aborted || response.error || !response.data?.id) {
     emitHandoffFailure({
       deliveryId,
       kind: options.kind,
       startedAt,
       providerStatusCode: response.error?.statusCode ?? null,
-      failureCode: normalizeFailureCode(response.error?.name),
+      failureCode: handoffSignal.aborted ? 'timeout' : normalizeFailureCode(response.error?.name),
     });
     throw new Error('Email provider rejected the message.');
   }

@@ -4,6 +4,11 @@ import { defineConfig } from 'nitro';
 export default defineConfig({
   preset: 'vercel',
   compatibilityDate: '2026-08-24',
+  vercel: {
+    functions: {
+      maxDuration: 60,
+    },
+  },
   serverDir: 'server',
   experimental: {
     asyncContext: true,

@@ -40,36 +40,42 @@ export async function createCampaignAssetUploadUrl(stagingKey: string, contentTy
   });
 }
 
-export async function headCampaignAssetObject(key: string) {
-  return headUploadObject(key);
+export async function headCampaignAssetObject(key: string, signal?: AbortSignal) {
+  return headUploadObject(key, signal);
 }
 
-export async function publishCampaignAssetObject({
-  sourceKey,
-  destinationKey,
-  sourceEtag,
-  contentType,
-  originalFileName,
-}: {
-  sourceKey: string;
-  destinationKey: string;
-  sourceEtag: string;
-  contentType: string;
-  originalFileName: string;
-}) {
-  const disposition = contentType === 'application/pdf' ? 'attachment' : 'inline';
-  return publishUploadObject({
+export async function publishCampaignAssetObject(
+  {
     sourceKey,
     destinationKey,
     sourceEtag,
     contentType,
-    contentDisposition: `${disposition}; filename="download"; filename*=UTF-8''${encodeURIComponent(originalFileName)}`,
-    cacheControl: 'public, max-age=31536000, immutable',
-  });
+    originalFileName,
+  }: {
+    sourceKey: string;
+    destinationKey: string;
+    sourceEtag: string;
+    contentType: string;
+    originalFileName: string;
+  },
+  signal?: AbortSignal,
+) {
+  const disposition = contentType === 'application/pdf' ? 'attachment' : 'inline';
+  return publishUploadObject(
+    {
+      sourceKey,
+      destinationKey,
+      sourceEtag,
+      contentType,
+      contentDisposition: `${disposition}; filename="download"; filename*=UTF-8''${encodeURIComponent(originalFileName)}`,
+      cacheControl: 'public, max-age=31536000, immutable',
+    },
+    signal,
+  );
 }
 
-export async function deleteCampaignAssetObject(key: string) {
-  await deleteUploadObject(key);
+export async function deleteCampaignAssetObject(key: string, signal?: AbortSignal) {
+  await deleteUploadObject(key, signal);
 }
 
 export const isCampaignAssetObjectNotFound = isUploadObjectNotFound;

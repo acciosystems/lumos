@@ -18,6 +18,7 @@ import { ulid } from 'ulid';
 
 import { reconcileCampaignLifecycle } from '../campaign-lifecycle';
 import { isLeaseStale } from '../upload/policy';
+import { prepareInParallel } from './parallel-publication';
 import { isOwnedCampaignAssetIntent, isValidCampaignAssetObject } from './policy';
 import {
   createCampaignAssetUploadUrl,
@@ -183,21 +184,24 @@ export async function prepareCampaignAssetUploads({
   campaignId,
   kind,
   log,
+  signal,
+  compensationSignal,
 }: {
   uploadIds: string[];
   userId: string;
   campaignId: string;
   kind: CampaignAssetKindValue;
   log: AssetLog;
+  signal?: AbortSignal;
+  compensationSignal?: AbortSignal;
 }) {
   if (new Set(uploadIds).size !== uploadIds.length) {
     throw new ORPCError('BAD_REQUEST', { message: 'Um upload foi informado mais de uma vez.' });
   }
 
-  const prepared: PreparedCampaignAsset[] = [];
-  try {
-    // oxlint-disable no-await-in-loop -- Each published object must be recorded before a later failure can compensate it.
-    for (const uploadId of uploadIds) {
+  return prepareInParallel<string, PreparedCampaignAsset>({
+    items: uploadIds,
+    prepare: async (uploadId, index, record) => {
       const intent = await getOwnedCampaignAssetIntent(uploadId, userId, kind);
       if (kind === 'ACCOUNTABILITY_EVIDENCE' && intent.targetCampaignId !== campaignId) {
         throw new ORPCError('NOT_FOUND', { message: 'Upload não encontrado.' });
@@ -208,21 +212,27 @@ export async function prepareCampaignAssetUploads({
         if (!asset || asset.campaignId !== campaignId || asset.kind !== kind || asset.removedAt) {
           throw new ORPCError('BAD_REQUEST', { message: 'Este upload já foi utilizado.' });
         }
-        prepared.push({
+        record({
           intent,
           kind,
           publishedKey: intent.publishedKey,
           processingToken: null,
           existing: true,
         });
-        continue;
+        return;
       }
 
       const claimed = await claimIntent(intent, userId, log);
-      const object = await requireValidUploadedObject(claimed.intent, kind, log, claimed.token);
+      const object = await requireValidUploadedObject(
+        claimed.intent,
+        kind,
+        log,
+        claimed.token,
+        signal,
+      );
       if (!object.ETag) {
         await rejectIntent(claimed.intent.id, claimed.token, 'missing_etag');
-        await safelyCleanupUploadIntent(claimed.intent.id, log);
+        await safelyCleanupUploadIntent(claimed.intent.id, log, compensationSignal);
         throw new ORPCError('BAD_REQUEST', { message: 'O arquivo enviado não pôde ser validado.' });
       }
 
@@ -234,39 +244,37 @@ export async function prepareCampaignAssetUploads({
       });
       await renewIntentLease(intent.id, claimed.token);
       try {
-        await publishCampaignAssetObject({
-          sourceKey: intent.stagingKey,
-          destinationKey: publishedKey,
-          sourceEtag: object.ETag,
-          contentType: intent.contentType,
-          originalFileName: intent.originalFileName ?? 'arquivo',
-        });
+        await publishCampaignAssetObject(
+          {
+            sourceKey: intent.stagingKey,
+            destinationKey: publishedKey,
+            sourceEtag: object.ETag,
+            contentType: intent.contentType,
+            originalFileName: intent.originalFileName ?? 'arquivo',
+          },
+          signal,
+        );
       } catch (error) {
         await rejectIntent(intent.id, claimed.token, 'publish_failed', publishedKey);
-        await safelyCleanupUploadIntent(intent.id, log);
+        await safelyCleanupUploadIntent(intent.id, log, compensationSignal);
         throw new ORPCError('INTERNAL_SERVER_ERROR', {
           message: 'Não foi possível publicar o arquivo. Tente novamente.',
           cause: error,
         });
       }
-      const preparedAsset = {
+      // Record the external side effect before another fallible operation so
+      // compensation can always find it, even if lease renewal fails.
+      record({
         intent: claimed.intent,
         kind,
         publishedKey,
         processingToken: claimed.token,
         existing: false,
-      } satisfies PreparedCampaignAsset;
-      // Record the external side effect before another fallible operation so
-      // compensation can always find the published object.
-      prepared.push(preparedAsset);
+      });
       await renewIntentLease(intent.id, claimed.token);
-    }
-    // oxlint-enable no-await-in-loop
-    return prepared;
-  } catch (error) {
-    await compensatePreparedCampaignAssets(prepared, log);
-    throw error;
-  }
+    },
+    compensate: (prepared) => compensatePreparedCampaignAssets(prepared, log, compensationSignal),
+  });
 }
 
 export async function confirmPreparedCampaignAsset({
@@ -327,17 +335,19 @@ export async function confirmPreparedCampaignAsset({
 export async function finishPreparedCampaignAssets(
   prepared: PreparedCampaignAsset[],
   log: AssetLog,
+  signal?: AbortSignal,
 ) {
   await Promise.all(
     prepared
       .filter((asset) => !asset.existing)
-      .map((asset) => safelyCleanupUploadIntent(asset.intent.id, log)),
+      .map((asset) => safelyCleanupUploadIntent(asset.intent.id, log, signal)),
   );
 }
 
 export async function compensatePreparedCampaignAssets(
   prepared: PreparedCampaignAsset[],
   log: AssetLog,
+  signal?: AbortSignal,
 ) {
   await Promise.all(
     prepared.map(async (asset) => {
@@ -348,18 +358,22 @@ export async function compensatePreparedCampaignAssets(
         'database_failed',
         asset.publishedKey,
       );
-      await safelyCleanupUploadIntent(asset.intent.id, log);
+      await safelyCleanupUploadIntent(asset.intent.id, log, signal);
     }),
   );
 }
 
-export async function cleanupRemovedCampaignAssets(userId: string, log: AssetLog) {
+export async function cleanupRemovedCampaignAssets(
+  userId: string,
+  log: AssetLog,
+  signal?: AbortSignal,
+) {
   try {
     const assets = await prisma.campaignAsset.findMany({
       where: { uploaderId: userId, removedAt: { not: null } },
       select: { id: true },
     });
-    await Promise.all(assets.map(({ id }) => safelyCleanupRemovedAsset(id, log)));
+    await Promise.all(assets.map(({ id }) => safelyCleanupRemovedAsset(id, log, signal)));
   } catch {
     log.set({ assetUploadStage: 'removed_asset_cleanup_failed' });
   }
@@ -488,10 +502,11 @@ async function requireValidUploadedObject(
   kind: CampaignAssetKindValue,
   log: AssetLog,
   processingToken?: string,
+  signal?: AbortSignal,
 ) {
   let object: Awaited<ReturnType<typeof headCampaignAssetObject>>;
   try {
-    object = await headCampaignAssetObject(intent.stagingKey);
+    object = await headCampaignAssetObject(intent.stagingKey, signal);
   } catch (error) {
     if (isCampaignAssetObjectNotFound(error)) {
       if (processingToken) await rejectIntent(intent.id, processingToken, 'missing_object');
@@ -640,7 +655,7 @@ async function maintainCampaignAssetUploads(userId: string, log: AssetLog) {
   });
 }
 
-async function safelyCleanupUploadIntent(intentId: string, log: AssetLog) {
+async function safelyCleanupUploadIntent(intentId: string, log: AssetLog, signal?: AbortSignal) {
   try {
     const intent = await prisma.uploadIntent.findUnique({ where: { id: intentId } });
     if (!intent?.cleanupPending) return;
@@ -651,7 +666,7 @@ async function safelyCleanupUploadIntent(intentId: string, log: AssetLog) {
     const results = await Promise.all(
       [...new Set(keys)].map(async (key) => {
         try {
-          await deleteCampaignAssetObject(key);
+          await deleteCampaignAssetObject(key, signal);
           return true;
         } catch {
           return false;
@@ -668,11 +683,11 @@ async function safelyCleanupUploadIntent(intentId: string, log: AssetLog) {
   }
 }
 
-async function safelyCleanupRemovedAsset(assetId: string, log: AssetLog) {
+async function safelyCleanupRemovedAsset(assetId: string, log: AssetLog, signal?: AbortSignal) {
   try {
     const asset = await prisma.campaignAsset.findUnique({ where: { id: assetId } });
     if (!asset?.removedAt) return;
-    await deleteCampaignAssetObject(asset.objectKey);
+    await deleteCampaignAssetObject(asset.objectKey, signal);
     await prisma.campaignAsset.deleteMany({
       where: { id: asset.id, removedAt: { not: null } },
     });

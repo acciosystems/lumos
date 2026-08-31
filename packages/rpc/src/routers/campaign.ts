@@ -19,6 +19,7 @@ import {
 import { ORPCError } from '@orpc/client';
 import * as v from 'valibot';
 
+import { assertForegroundDeadline } from '../deadline';
 import { authorized, publicProcedure } from '../procedures';
 import {
   getCampaignAccountabilityDeadline,
@@ -935,23 +936,26 @@ export const campaignRouter = {
 
   saveAccountability: authorized
     .input(campaignAccountabilityInputSchema)
-    .handler(async ({ input, context: { user, log } }) => {
+    .handler(async ({ input, context: { user, log, deadline } }) => {
       const prepared = await prepareCampaignAssetUploads({
         uploadIds: input.evidenceUploadIds,
         userId: user.id,
         campaignId: input.id,
         kind: 'ACCOUNTABILITY_EVIDENCE',
         log,
+        signal: deadline.foregroundSignal,
+        compensationSignal: deadline.compensationSignal,
       });
       try {
+        assertForegroundDeadline(deadline, 'accountability_before_transaction');
         const accountability = await prisma.$transaction((transaction) =>
           saveCampaignAccountability(transaction, user.id, input, prepared),
         );
-        await finishPreparedCampaignAssets(prepared, log);
-        await cleanupRemovedCampaignAssets(user.id, log);
+        await finishPreparedCampaignAssets(prepared, log, deadline.compensationSignal);
+        await cleanupRemovedCampaignAssets(user.id, log, deadline.compensationSignal);
         return toPublicCampaignAccountability(accountability);
       } catch (error) {
-        await compensatePreparedCampaignAssets(prepared, log);
+        await compensatePreparedCampaignAssets(prepared, log, deadline.compensationSignal);
         throw error;
       }
     }),

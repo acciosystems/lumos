@@ -7,6 +7,11 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '@lumos/env/rpc';
 
+import {
+  combineOperationSignal,
+  DependencyTimeoutError,
+  STORAGE_OPERATION_TIMEOUT_MS,
+} from '../../deadline';
 import { s3Client } from '../s3';
 
 export function getPublicObjectUrl(key: string) {
@@ -35,41 +40,60 @@ export async function createSingleWriteUploadUrl({
   });
 }
 
-export async function headUploadObject(key: string) {
-  return s3Client.send(new HeadObjectCommand({ Bucket: env.S3_BUCKET, Key: key }));
-}
-
-export async function publishUploadObject({
-  sourceKey,
-  destinationKey,
-  sourceEtag,
-  contentType,
-  cacheControl,
-  contentDisposition,
-}: {
-  sourceKey: string;
-  destinationKey: string;
-  sourceEtag: string;
-  contentType: string;
-  cacheControl: string;
-  contentDisposition?: string;
-}) {
-  return s3Client.send(
-    new CopyObjectCommand({
-      Bucket: env.S3_BUCKET,
-      Key: destinationKey,
-      CopySource: `${env.S3_BUCKET}/${encodeObjectKey(sourceKey)}`,
-      CopySourceIfMatch: sourceEtag,
-      MetadataDirective: 'REPLACE',
-      ContentType: contentType,
-      CacheControl: cacheControl,
-      ContentDisposition: contentDisposition,
-    }),
+export async function headUploadObject(key: string, signal?: AbortSignal) {
+  return sendStorageCommand(
+    'head',
+    (abortSignal) =>
+      s3Client.send(new HeadObjectCommand({ Bucket: env.S3_BUCKET, Key: key }), { abortSignal }),
+    signal,
   );
 }
 
-export async function deleteUploadObject(key: string) {
-  await s3Client.send(new DeleteObjectCommand({ Bucket: env.S3_BUCKET, Key: key }));
+export async function publishUploadObject(
+  {
+    sourceKey,
+    destinationKey,
+    sourceEtag,
+    contentType,
+    cacheControl,
+    contentDisposition,
+  }: {
+    sourceKey: string;
+    destinationKey: string;
+    sourceEtag: string;
+    contentType: string;
+    cacheControl: string;
+    contentDisposition?: string;
+  },
+  signal?: AbortSignal,
+) {
+  return sendStorageCommand(
+    'copy',
+    (abortSignal) =>
+      s3Client.send(
+        new CopyObjectCommand({
+          Bucket: env.S3_BUCKET,
+          Key: destinationKey,
+          CopySource: `${env.S3_BUCKET}/${encodeObjectKey(sourceKey)}`,
+          CopySourceIfMatch: sourceEtag,
+          MetadataDirective: 'REPLACE',
+          ContentType: contentType,
+          CacheControl: cacheControl,
+          ContentDisposition: contentDisposition,
+        }),
+        { abortSignal },
+      ),
+    signal,
+  );
+}
+
+export async function deleteUploadObject(key: string, signal?: AbortSignal) {
+  await sendStorageCommand(
+    'delete',
+    (abortSignal) =>
+      s3Client.send(new DeleteObjectCommand({ Bucket: env.S3_BUCKET, Key: key }), { abortSignal }),
+    signal,
+  );
 }
 
 export function isUploadObjectNotFound(error: unknown) {
@@ -93,4 +117,33 @@ function encodeObjectKey(key: string) {
     .split('/')
     .map((part) => encodeURIComponent(part))
     .join('/');
+}
+
+async function sendStorageCommand<T>(
+  stage: string,
+  send: (signal: AbortSignal) => Promise<T>,
+  signal?: AbortSignal,
+) {
+  const startedAt = Date.now();
+  const operationSignal = combineOperationSignal(signal, STORAGE_OPERATION_TIMEOUT_MS);
+
+  try {
+    return await send(operationSignal);
+  } catch (error) {
+    if (!operationSignal.aborted && !isTimeoutError(error)) throw error;
+
+    throw new DependencyTimeoutError({
+      dependency: 'r2',
+      stage,
+      durationMs: Date.now() - startedAt,
+      cause: error,
+    });
+  }
+}
+
+function isTimeoutError(error: unknown) {
+  return (
+    error instanceof Error &&
+    (error.name === 'TimeoutError' || error.name === 'AbortError' || /timeout/i.test(error.message))
+  );
 }
