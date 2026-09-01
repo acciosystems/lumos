@@ -2,6 +2,7 @@ import { prisma } from '@lumos/database';
 import { Prisma } from '@lumos/database/generated/prisma/client';
 import { normalizeCnpj, organizerProfileUpsertInputSchema } from '@lumos/validation/organizer';
 
+import { runDatabaseTransaction } from '../deadline';
 import { withUniqueConstraintConflicts } from '../errors/prisma';
 import { authorized } from '../procedures';
 
@@ -37,7 +38,7 @@ export const organizerRouter = {
 
       return withUniqueConstraintConflicts(
         () =>
-          prisma.$transaction(async (transaction) => {
+          runDatabaseTransaction(async (transaction) => {
             // Serialize profile creation and updates for this user, including the no-profile case.
             await transaction.$queryRaw(
               Prisma.sql`SELECT "id" FROM "users" WHERE "id" = ${user.id} FOR UPDATE`,

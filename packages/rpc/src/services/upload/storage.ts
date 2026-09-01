@@ -8,8 +8,10 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '@lumos/env/rpc';
 
 import {
+  assertActiveDeadline,
   combineOperationSignal,
   DependencyTimeoutError,
+  getActiveDeadlineSignal,
   STORAGE_OPERATION_TIMEOUT_MS,
 } from '../../deadline';
 import { s3Client } from '../s3';
@@ -125,11 +127,16 @@ async function sendStorageCommand<T>(
   signal?: AbortSignal,
 ) {
   const startedAt = Date.now();
-  const operationSignal = combineOperationSignal(signal, STORAGE_OPERATION_TIMEOUT_MS);
+  const requestSignal = signal ?? getActiveDeadlineSignal();
+  assertActiveDeadline(`r2_${stage}`);
+  const operationSignal = combineOperationSignal(requestSignal, STORAGE_OPERATION_TIMEOUT_MS);
 
   try {
     return await send(operationSignal);
   } catch (error) {
+    if (requestSignal?.aborted) {
+      assertActiveDeadline(`r2_${stage}`);
+    }
     if (!operationSignal.aborted && !isTimeoutError(error)) throw error;
 
     throw new DependencyTimeoutError({

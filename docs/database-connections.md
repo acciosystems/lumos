@@ -67,7 +67,7 @@ Sources:
 
 ## Runtime safeguards and operations
 
-Each Vercel isolate uses one `pg` connection with a five-second acquisition timeout, 10/12-second
+Each Vercel isolate uses one `pg` connection with a three-second acquisition timeout, 10-second
 statement/query timeouts, a three-second lock timeout, and a three-second transaction wait with a
 10-second transaction timeout. Database saturation and timeout events are emitted with service
 `lumos/database`.

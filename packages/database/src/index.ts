@@ -6,6 +6,7 @@ import {
   createServerlessAdapter,
   createServerlessPool,
 } from './pool';
+import { assertDatabaseRequestAllowed } from './request-deadline';
 import { attachPoolTelemetry, classifyDatabaseError, emitTimeoutTelemetry } from './telemetry';
 
 const createDatabase = () => {
@@ -30,7 +31,28 @@ const createDatabase = () => {
     });
   });
 
-  return { client, pool };
+  const deadlineAwareClient = client.$extends({
+    query: {
+      $allModels: {
+        async $allOperations({ args, query }) {
+          assertDatabaseRequestAllowed();
+          return query(args);
+        },
+      },
+      async $queryRaw({ args, query }) {
+        assertDatabaseRequestAllowed();
+        return query(args);
+      },
+      async $executeRaw({ args, query }) {
+        assertDatabaseRequestAllowed();
+        return query(args);
+      },
+    },
+  });
+
+  // The extension only adds a pre-dispatch guard; retaining PrismaClient's public type keeps
+  // transaction callback types stable for callers.
+  return { client: deadlineAwareClient as typeof client, pool };
 };
 
 type DatabaseResources = ReturnType<typeof createDatabase>;

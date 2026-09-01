@@ -2,13 +2,29 @@ import { classifyDatabaseError } from '@lumos/database/telemetry';
 import { ORPCError } from '@orpc/client';
 
 import { base } from '../base';
-import { findDependencyTimeout } from '../deadline';
+import {
+  assertForegroundDeadline,
+  findDependencyTimeout,
+  withForegroundDeadline,
+} from '../deadline';
 
 export const dependencyTimeoutMiddleware = base.middleware(async ({ context, next }) => {
   try {
-    return await next();
+    return await withForegroundDeadline(context.deadline, async () => {
+      assertForegroundDeadline(context.deadline, 'rpc_before_handler');
+      const result = await next();
+      assertForegroundDeadline(context.deadline, 'rpc_after_handler');
+      return result;
+    });
   } catch (error) {
-    const dependencyTimeout = findDependencyTimeout(error);
+    let dependencyTimeout = findDependencyTimeout(error);
+    if (!dependencyTimeout && context.deadline.foregroundSignal.aborted) {
+      try {
+        assertForegroundDeadline(context.deadline, 'rpc_after_handler');
+      } catch (deadlineError) {
+        dependencyTimeout = findDependencyTimeout(deadlineError);
+      }
+    }
     const databaseTimeout = dependencyTimeout ? undefined : classifyDatabaseError(error);
     if (!dependencyTimeout && !databaseTimeout) throw error;
 

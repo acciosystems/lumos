@@ -11,8 +11,8 @@ operational escalation thresholds.
 | --------------------------------- | -----------------------------------: | -------------------------------------------------- | ------------------------------------------------------------------------- |
 | Foreground RPC work               |                           40 seconds | None                                               | Stop new external work and return a gateway timeout.                      |
 | Compensation                      |        55 seconds from request start | None                                               | Attempt durable intent updates and bounded cleanup.                       |
-| PostgreSQL connection acquisition |                            5 seconds | None                                               | Emit database timeout telemetry and return a gateway timeout.             |
-| PostgreSQL statement/query        |                        10/12 seconds | None                                               | Emit database timeout telemetry and return a gateway timeout.             |
+| PostgreSQL connection acquisition |                            3 seconds | None                                               | Emit database timeout telemetry and return a gateway timeout.             |
+| PostgreSQL statement/query        |                        10/10 seconds | None                                               | Emit database timeout telemetry and return a gateway timeout.             |
 | PostgreSQL transaction            | 3-second wait, 10-second transaction | None                                               | Emit database timeout telemetry and return a gateway timeout.             |
 | R2 HEAD, COPY, and DELETE         |                            5 seconds | One SDK attempt                                    | Return a gateway timeout; copied objects are compensated when applicable. |
 | Resend handoff                    |                            5 seconds | Caller may retry with the existing idempotency key | Return the existing authentication service-unavailable response.          |
@@ -21,11 +21,25 @@ operational escalation thresholds.
 Presigned upload URL generation is local signing work rather than an R2 request. Browser uploads
 occur directly between the browser and R2 and are reconciled by the upload-intent workflow.
 
+## Enforcement
+
+Every RPC procedure runs in a request-local deadline context. It rejects foreground work before
+the 40-second cutoff and before each database transaction, query, or R2 operation. A client
+disconnect aborts foreground work through the same context. Database operations already in flight
+remain bounded by the configured PostgreSQL timeouts.
+
+Cleanup that repairs a durable upload or avatar state runs under the compensation context instead.
+It is awaited before the RPC handler settles. R2 work cannot start after 55 seconds from the
+original request start. Because PostgreSQL queries cannot be aborted by the request signal, new
+compensation database work stops at 42 seconds, reserving the maximum 13-second
+acquisition-and-query budget and the final five seconds for response serialization and logging.
+Serverless execution after a response is not used for required cleanup.
+
 ## Accountability publication
 
 At most ten evidence objects can be submitted. Their R2 validation and copy operations start in
-parallel. Each copied object is recorded in memory before a later database operation can fail, so
-the existing compensation path can delete the published object and preserve durable cleanup state.
+parallel. Each published destination is recorded durably before its copy starts and in memory after
+it succeeds, so immediate compensation and later maintenance can delete the object if needed.
 
 When any task fails, publication waits for all already-started tasks to settle before compensation
 begins. This prevents a late copy from escaping cleanup. The returned evidence order remains the

@@ -22,7 +22,11 @@ import {
 import { ORPCError } from '@orpc/client';
 import * as v from 'valibot';
 
-import { assertForegroundDeadline } from '../deadline';
+import {
+  assertForegroundDeadline,
+  runDatabaseTransaction,
+  withCompensationDeadline,
+} from '../deadline';
 import { authorized, publicProcedure } from '../procedures';
 import {
   getCampaignAccountabilityDeadline,
@@ -432,7 +436,7 @@ export const campaignRouter = {
   publicById: publicProcedure.input(campaignByIdInputSchema).handler(async ({ input }) => {
     const now = new Date();
     const today = todayAsDate(now);
-    const campaign = await prisma.$transaction(async (transaction) => {
+    const campaign = await runDatabaseTransaction(async (transaction) => {
       await reconcileCampaignLifecycle(transaction, input.id, now);
       return transaction.campaign.findFirst({
         where: {
@@ -461,7 +465,7 @@ export const campaignRouter = {
   }),
 
   byId: authorized.input(campaignByIdInputSchema).handler(async ({ input, context: { user } }) => {
-    await prisma.$transaction(async (transaction) => {
+    await runDatabaseTransaction(async (transaction) => {
       await lockAndReconcileCampaign(transaction, input.id);
     });
     const campaign = await prisma.campaign.findFirst({
@@ -554,7 +558,7 @@ export const campaignRouter = {
     .input(campaignByIdInputSchema)
     .handler(async ({ input, context: { user } }) => {
       const now = new Date();
-      const state = await prisma.$transaction(async (transaction) => {
+      const state = await runDatabaseTransaction(async (transaction) => {
         await reconcileCampaignLifecycle(transaction, input.id, now);
         const campaign = await transaction.campaign.findUnique({
           where: { id: input.id },
@@ -604,7 +608,7 @@ export const campaignRouter = {
   },
 
   join: authorized.input(campaignByIdInputSchema).handler(async ({ input, context: { user } }) =>
-    prisma.$transaction(async (transaction) => {
+    runDatabaseTransaction(async (transaction) => {
       await lockAndReconcileCampaign(transaction, input.id);
 
       const campaign = await transaction.campaign.findUnique({
@@ -651,7 +655,7 @@ export const campaignRouter = {
   cancelParticipation: authorized
     .input(campaignByIdInputSchema)
     .handler(async ({ input, context: { user } }) =>
-      prisma.$transaction(async (transaction) => {
+      runDatabaseTransaction(async (transaction) => {
         await lockAndReconcileCampaign(transaction, input.id);
         const campaign = await transaction.campaign.findUnique({
           where: { id: input.id },
@@ -684,7 +688,7 @@ export const campaignRouter = {
   updateProgress: authorized
     .input(campaignProgressUpdateInputSchema)
     .handler(async ({ input, context: { user } }) =>
-      prisma.$transaction(async (transaction) => {
+      runDatabaseTransaction(async (transaction) => {
         await lockAndReconcileCampaign(transaction, input.id);
         const campaign = await transaction.campaign.findFirst({
           where: {
@@ -731,7 +735,7 @@ export const campaignRouter = {
   updateDetails: authorized
     .input(campaignDetailsUpdateInputSchema)
     .handler(async ({ input, context: { user } }) =>
-      prisma.$transaction(async (transaction) => {
+      runDatabaseTransaction(async (transaction) => {
         await lockAndReconcileCampaign(transaction, input.id);
 
         const campaign = await transaction.campaign.findFirst({
@@ -909,7 +913,7 @@ export const campaignRouter = {
       }
 
       try {
-        const update = await prisma.$transaction(async (transaction) => {
+        const update = await runDatabaseTransaction(async (transaction) => {
           await lockAndReconcileCampaign(transaction, input.id);
 
           const campaign = await transaction.campaign.findFirst({
@@ -958,7 +962,7 @@ export const campaignRouter = {
   transitionLifecycle: authorized
     .input(campaignLifecycleTransitionInputSchema)
     .handler(async ({ input, context: { user } }) =>
-      prisma.$transaction(async (transaction) => {
+      runDatabaseTransaction(async (transaction) => {
         await lockAndReconcileCampaign(transaction, input.id);
         const campaign = await transaction.campaign.findFirst({
           where: {
@@ -1021,26 +1025,29 @@ export const campaignRouter = {
         campaignId: input.id,
         kind: 'ACCOUNTABILITY_EVIDENCE',
         log,
-        signal: deadline.foregroundSignal,
-        compensationSignal: deadline.compensationSignal,
+        deadline,
       });
       try {
         assertForegroundDeadline(deadline, 'accountability_before_transaction');
-        const accountability = await prisma.$transaction((transaction) =>
+        const accountability = await runDatabaseTransaction((transaction) =>
           saveCampaignAccountability(transaction, user.id, input, prepared),
         );
-        await finishPreparedCampaignAssets(prepared, log, deadline.compensationSignal);
-        await cleanupRemovedCampaignAssets(user.id, log, deadline.compensationSignal);
+        await withCompensationDeadline(deadline, async () => {
+          await finishPreparedCampaignAssets(prepared, log, deadline.compensationSignal);
+          await cleanupRemovedCampaignAssets(user.id, log, deadline.compensationSignal);
+        });
         return toPublicCampaignAccountability(accountability);
       } catch (error) {
-        await compensatePreparedCampaignAssets(prepared, log, deadline.compensationSignal);
+        await withCompensationDeadline(deadline, () =>
+          compensatePreparedCampaignAssets(prepared, log, deadline.compensationSignal),
+        );
         throw error;
       }
     }),
 
   create: authorized
     .input(campaignCreateInputSchema)
-    .handler(async ({ input, context: { user, log } }) => {
+    .handler(async ({ input, context: { user, log, deadline } }) => {
       const organizerProfile = await prisma.organizerProfile.findUnique({
         where: { userId: user.id },
       });
@@ -1083,10 +1090,11 @@ export const campaignRouter = {
               campaignId,
               kind: 'IMAGE',
               log,
+              deadline,
             })
           : [];
 
-        const campaign = await prisma.$transaction(async (transaction) => {
+        const campaign = await runDatabaseTransaction(async (transaction) => {
           await transaction.campaign.create({
             data: {
               id: campaignId,
@@ -1107,23 +1115,31 @@ export const campaignRouter = {
             include: campaignInclude,
           });
         });
-        await finishPreparedCampaignAssets(prepared, log);
+        await withCompensationDeadline(deadline, () =>
+          finishPreparedCampaignAssets(prepared, log, deadline.compensationSignal),
+        );
         log.set({ idempotencyOutcome: 'committed' });
         return withOwnerCampaignData(campaign);
       } catch (error) {
-        const committedCampaign = await prisma.campaign.findFirst({
-          where: {
-            id: campaignId,
-            organizerProfile: { userId: user.id },
-          },
-          include: campaignInclude,
-        });
+        const committedCampaign = await withCompensationDeadline(deadline, () =>
+          prisma.campaign.findFirst({
+            where: {
+              id: campaignId,
+              organizerProfile: { userId: user.id },
+            },
+            include: campaignInclude,
+          }),
+        );
         if (committedCampaign) {
-          await finishPreparedCampaignAssets(prepared, log);
+          await withCompensationDeadline(deadline, () =>
+            finishPreparedCampaignAssets(prepared, log, deadline.compensationSignal),
+          );
           log.set({ idempotencyOutcome: 'committed' });
           return withOwnerCampaignData(committedCampaign);
         }
-        await compensatePreparedCampaignAssets(prepared, log);
+        await withCompensationDeadline(deadline, () =>
+          compensatePreparedCampaignAssets(prepared, log, deadline.compensationSignal),
+        );
         throw error;
       }
     }),
