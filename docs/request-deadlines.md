@@ -4,6 +4,9 @@ Production requests run on Vercel with a 60-second function duration. Business w
 within 40 seconds. The remaining time is reserved for compensation, response serialization, and
 observability delivery.
 
+See [database connections](./database-connections.md) for the provider connection budget and
+operational escalation thresholds.
+
 | Dependency or stage               |                             Deadline | Retry policy                                       | Failure behavior                                                          |
 | --------------------------------- | -----------------------------------: | -------------------------------------------------- | ------------------------------------------------------------------------- |
 | Foreground RPC work               |                           40 seconds | None                                               | Stop new external work and return a gateway timeout.                      |

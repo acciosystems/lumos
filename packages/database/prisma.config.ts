@@ -1,4 +1,4 @@
-import { env } from '@lumos/env/database';
+import { env } from '@lumos/env/database-admin';
 import { defineConfig } from 'prisma/config';
 
 export default defineConfig({
@@ -7,6 +7,6 @@ export default defineConfig({
     path: 'prisma/migrations',
   },
   datasource: {
-    url: env.DATABASE_URL,
+    url: env.DIRECT_DATABASE_URL,
   },
 });

@@ -6,18 +6,19 @@ function isPostgresUrl(value: string) {
   return protocol === 'postgres:' || protocol === 'postgresql:';
 }
 
-function isPooledNeonUrl(value: string) {
+function isDirectNeonUrl(value: string) {
   const hostname = new URL(value).hostname;
-  return !hostname.endsWith('.neon.tech') || hostname.includes('-pooler.');
+  return !hostname.endsWith('.neon.tech') || !hostname.includes('-pooler.');
 }
 
+/** Environment required only by Prisma migrations and other administrative commands. */
 export const env = createEnv({
   server: {
-    DATABASE_URL: v.pipe(
+    DIRECT_DATABASE_URL: v.pipe(
       v.string(),
       v.url(),
       v.check(isPostgresUrl, 'Expected a PostgreSQL connection URL.'),
-      v.check(isPooledNeonUrl, "Expected Neon's pooled connection URL."),
+      v.check(isDirectNeonUrl, "Expected Neon's direct connection URL."),
     ),
   },
 

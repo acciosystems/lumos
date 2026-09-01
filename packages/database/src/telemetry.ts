@@ -53,11 +53,15 @@ export function classifyDatabaseError(error: unknown): DatabaseTimeoutKind | und
 
   if (
     code === 'P2024' ||
+    code === '53300' ||
     includesAny(message, [
       'acquir',
       'pool timeout',
       'timeout exceeded when trying to connect',
       'connection timeout',
+      'remaining connection slots',
+      'too many clients',
+      'too many connections',
     ])
   ) {
     return 'acquisition';
