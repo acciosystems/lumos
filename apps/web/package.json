@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "vite build && bun run verify:build",
+    "verify:build": "bun run scripts/verify-build.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -14,8 +15,8 @@
     "@lumos/database": "workspace:*",
     "@lumos/env": "workspace:*",
     "@lumos/logging": "workspace:*",
-    "@lumos/rpc": "workspace:*",
     "@lumos/request-deadline": "workspace:*",
+    "@lumos/rpc": "workspace:*",
     "@lumos/validation": "workspace:*",
     "@tabler/icons-react": "^3.46.0",
     "@tanstack/react-form": "^1.33.2",

@@ -4,8 +4,8 @@
 
 Production is planned to use Neon directly, without the Vercel Marketplace integration. Provision
 the production compute in AWS South America East (`sa-east-1`), matching the Vercel `gru1` region
-configured for the web application. Record the actual provider configuration and review date after
-the production Neon project is created.
+configured for the web application. Before release, verify that the deployed database region and
+the selected Vercel plan support this repository-controlled placement.
 
 Vercel recommends running functions in the same region as the database. Neon lists AWS South
 America East (Sao Paulo) as an available region.
@@ -31,33 +31,32 @@ must use the direct endpoint.
 
 Source: https://neon.com/docs/connect/connection-pooling
 
-## Target MVP connection budget
+## Tier-independent connection contract
 
-The initial production compute should use a fixed 0.25 CU. Neon documents the following limits
-for that size:
+The repository does not assume a Neon compute size or Vercel plan tier. It controls the following
+limits independently of those choices:
 
-| Limit                        |                               Value | Use in Lumos                               |
-| ---------------------------- | ----------------------------------: | ------------------------------------------ |
-| Direct Postgres connections  |                                 112 | Provider maximum                           |
-| Neon-reserved connections    |                                   7 | Not available to the application           |
-| Usable direct connections    |                                 105 | Includes migration and administrative work |
-| PgBouncer client connections |                              10,000 | Serverless client sockets                  |
-| PgBouncer server pool        | approximately 100 per role/database | Active runtime transactions                |
-| `pg` pool per Vercel isolate |                                   1 | Application setting                        |
+| Limit                               | Application setting |
+| ----------------------------------- | ------------------: |
+| `pg` connections per Vercel isolate |                   1 |
+| Connection acquisition wait         |           3 seconds |
+| Statement and query duration        |          10 seconds |
+| Lock wait                           |           3 seconds |
+| Interactive transaction wait        |           3 seconds |
+| Interactive transaction duration    |          10 seconds |
 
-The target database-active runtime budget is 100 concurrent transactions. This is a
-conservative `floor(0.9 * 112)` calculation, matching Neon's documented PgBouncer
-`default_pool_size` rule. Do not run a production migration while the runtime pool is saturated;
-the remaining direct capacity is intentionally small.
+Neon PgBouncer queues client work when the role/database server pool is occupied. Vercel can
+autoscale beyond the database's active-connection capacity and does not expose a lower
+repository-level instance cap. The application therefore limits each isolate to one client
+connection and fails requests that cannot acquire or use it within the configured timeouts; it
+does not use a process-local or distributed concurrency limiter.
 
-Vercel can autoscale function invocations beyond this value and does not expose a lower
-repository-level instance cap. The budget applies to active Postgres connections, which Neon
-PgBouncer bounds and queues. Requests that wait too long fail through the application's existing
-query and transaction timeouts; do not add a distributed concurrency limiter for this MVP.
-
-Before production release, verify the configured direct limit in the Neon console or with
-`SHOW max_connections`, record the result in this document, and recalculate the budget if the
-compute size or autoscaling range differs from this target.
+Before production release, verify the selected Neon compute's `max_connections`, PgBouncer server
+pool, and client-connection capacity in the provider configuration. Reserve enough direct capacity
+for administration and do not run a production migration while runtime connections are saturated.
+If the selected provider capacity cannot sustain the intended traffic with these safeguards,
+increase capacity or reduce operational concurrency before release rather than encoding a plan
+tier in the repository.
 
 Sources:
 
