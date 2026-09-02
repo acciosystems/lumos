@@ -63,6 +63,7 @@
     "packages/auth": {
       "name": "@lumos/auth",
       "dependencies": {
+        "@better-auth/core": "^1.6.25",
         "@better-auth/passkey": "^1.6.25",
         "@lumos/database": "workspace:*",
         "@lumos/email": "workspace:*",

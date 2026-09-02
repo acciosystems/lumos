@@ -5,7 +5,7 @@ import { waitUntil } from '@vercel/functions';
 import { betterAuth } from 'better-auth';
 import { localization } from 'better-auth-localization';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { haveIBeenPwned, lastLoginMethod, username } from 'better-auth/plugins';
+import { lastLoginMethod, username } from 'better-auth/plugins';
 import { ulid } from 'ulid';
 
 import { AUTH_RATE_LIMIT_OPTIONS } from './rate-limit';
@@ -14,6 +14,7 @@ import {
   emailIdempotencyKey,
   sendAuthEmail,
 } from './utils/auth-email';
+import { boundedHaveIBeenPwned } from './utils/compromised-password';
 import { addGeneratedUsernameBeforeCreate, usernamePluginOptions } from './utils/username';
 
 type CreateAuthOptions = {
@@ -100,7 +101,7 @@ export function createAuth(options: CreateAuthOptions = {}) {
           requireSession: true,
         },
       }),
-      haveIBeenPwned(),
+      boundedHaveIBeenPwned(),
       localization({
         defaultLocale: 'pt-BR',
         fallbackLocale: 'default',

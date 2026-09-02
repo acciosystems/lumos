@@ -16,6 +16,7 @@ operational escalation thresholds.
 | PostgreSQL transaction            | 3-second wait, 10-second transaction | None                                               | Emit database timeout telemetry and return a gateway timeout.             |
 | R2 HEAD, COPY, and DELETE         |                            5 seconds | One SDK attempt                                    | Return a gateway timeout; copied objects are compensated when applicable. |
 | Resend handoff                    |                            5 seconds | Caller may retry with the existing idempotency key | Return the existing authentication service-unavailable response.          |
+| Pwned Passwords range check       |                            2 seconds | None                                               | Allow the password operation and emit a safe failure event.               |
 | Axiom event delivery              |                            2 seconds | None                                               | Drop the event and write the safe stderr fallback diagnostic.             |
 
 Presigned upload URL generation is local signing work rather than an R2 request. Browser uploads
@@ -51,3 +52,11 @@ R2 timeout errors include only dependency name, safe operation stage, and elapse
 The RPC timeout middleware records those fields on the request event and returns a consistent 504
 response. Database timeout kinds are handled by the same middleware. Neither the timeout event nor
 the response includes object keys, file names, payloads, credentials, or provider response bodies.
+
+The Pwned Passwords check sends only the first five characters of the password's SHA-1 hash. A
+confirmed match rejects the password with a generic validation response. Timeouts, transport and
+HTTP failures, and malformed provider responses fail open: the password operation continues after
+at most two seconds and emits an `auth_password_compromise_check_failed` event. That event contains
+only a failure kind, elapsed duration, and optional HTTP status; it never contains a password, hash
+prefix or suffix, request URL, or provider response body. This availability tradeoff is reviewed as
+part of changes to the authentication security boundary.
