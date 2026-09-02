@@ -24,18 +24,20 @@ import {
   withActiveCompensationDeadline,
   withCompensationDeadline,
 } from '../../../deadline';
-import { isLeaseStale } from '../../upload/policy';
+import { isLeaseStale, terminalUploadIntentData, throwUploadRateLimit } from '../../upload/policy';
+import {
+  deleteUploadObject,
+  getPublicObjectUrl,
+  headUploadObject,
+  isUploadObjectNotFound,
+} from '../../upload/storage';
 import { reconcileCampaignLifecycle } from '../lifecycle';
 import { prepareInParallel } from './parallel-publication';
 import { isOwnedCampaignAssetIntent, isValidCampaignAssetObject } from './policy';
 import {
   createCampaignAssetUploadUrl,
-  deleteCampaignAssetObject,
-  getAssetPublicUrl,
   getCampaignAssetPublishedKey,
   getCampaignAssetStagingKey,
-  headCampaignAssetObject,
-  isCampaignAssetObjectNotFound,
   publishCampaignAssetObject,
 } from './storage';
 
@@ -181,7 +183,7 @@ export async function discardCampaignAssetUpload({
   const intent = await getOwnedCampaignAssetIntent(uploadId, userId);
   const discarded = await prisma.uploadIntent.updateMany({
     where: { id: intent.id, userId, status: UploadIntentStatus.PENDING },
-    data: terminalIntentData(UploadIntentStatus.REJECTED, 'discarded'),
+    data: terminalUploadIntentData(UploadIntentStatus.REJECTED, 'discarded'),
   });
   if (!discarded.count) {
     throw new ORPCError('CONFLICT', { message: 'Este upload já está sendo processado.' });
@@ -416,9 +418,9 @@ export async function cleanupRemovedCampaignAssets(
     }
     // oxlint-enable no-await-in-loop
 
-    const completedCount = countCleanupResults(results, 'cleaned');
-    const failedCount = countCleanupResults(results, 'failed');
-    const skippedCount = countCleanupResults(results, 'skipped');
+    const cleanupCounts = { cleaned: 0, failed: 0, skipped: 0 };
+    for (const result of results) cleanupCounts[result] += 1;
+    const { cleaned: completedCount, failed: failedCount, skipped: skippedCount } = cleanupCounts;
 
     log.set({
       removedAssetCleanupSelectedCount: assets.length,
@@ -450,7 +452,7 @@ export function toPublicCampaignAsset(asset: {
 }) {
   return {
     id: asset.id,
-    url: getAssetPublicUrl(asset.objectKey),
+    url: getPublicObjectUrl(asset.objectKey),
     name: asset.originalFileName,
     contentType: asset.contentType,
     contentLength: asset.contentLength,
@@ -487,7 +489,7 @@ async function claimIntent(intent: UploadIntent, userId: string, log: AssetLog) 
           processingToken: intent.processingToken,
           processingStartedAt: intent.processingStartedAt,
         },
-        data: terminalIntentData(UploadIntentStatus.REJECTED, 'processing_lease_expired'),
+        data: terminalUploadIntentData(UploadIntentStatus.REJECTED, 'processing_lease_expired'),
       });
       if (!abandoned.count) {
         throw new ORPCError('CONFLICT', {
@@ -593,11 +595,11 @@ async function requireValidUploadedObject(
   signal?: AbortSignal,
   deadline?: RequestDeadline,
 ) {
-  let object: Awaited<ReturnType<typeof headCampaignAssetObject>>;
+  let object: Awaited<ReturnType<typeof headUploadObject>>;
   try {
-    object = await headCampaignAssetObject(intent.stagingKey, signal);
+    object = await headUploadObject(intent.stagingKey, signal);
   } catch (error) {
-    if (isCampaignAssetObjectNotFound(error)) {
+    if (isUploadObjectNotFound(error)) {
       if (processingToken) {
         await runIntentRepair(deadline, () =>
           rejectIntent(intent.id, processingToken, 'missing_object'),
@@ -651,7 +653,7 @@ async function expirePendingIntent(intentId: string, now = new Date()) {
       status: UploadIntentStatus.PENDING,
       expiresAt: { lte: now },
     },
-    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'expired'),
+    data: terminalUploadIntentData(UploadIntentStatus.EXPIRED, 'expired'),
   });
 }
 
@@ -664,7 +666,7 @@ async function expireStaleProcessingIntent(intent: UploadIntent, now: Date) {
       processingStartedAt: intent.processingStartedAt,
       expiresAt: { lte: now },
     },
-    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'processing_lease_expired'),
+    data: terminalUploadIntentData(UploadIntentStatus.EXPIRED, 'processing_lease_expired'),
   });
 }
 
@@ -677,7 +679,7 @@ async function rejectIntent(
   return prisma.uploadIntent.updateMany({
     where: { id: intentId, status: UploadIntentStatus.PROCESSING, processingToken },
     data: {
-      ...terminalIntentData(UploadIntentStatus.REJECTED, reason),
+      ...terminalUploadIntentData(UploadIntentStatus.REJECTED, reason),
       ...(publishedKey ? { publishedKey } : {}),
     },
   });
@@ -695,17 +697,6 @@ async function resetIntent(intentId: string, processingToken: string, reason: st
   });
 }
 
-function terminalIntentData(status: 'REJECTED' | 'EXPIRED', failureReason: string) {
-  return {
-    status,
-    activeSlot: null,
-    processingToken: null,
-    processingStartedAt: null,
-    failureReason,
-    cleanupPending: true,
-  };
-}
-
 async function maintainCampaignAssetUploads(userId: string, log: AssetLog) {
   const now = new Date();
   const staleProcessing = new Date(now.getTime() - PROCESSING_LEASE_MS);
@@ -716,7 +707,7 @@ async function maintainCampaignAssetUploads(userId: string, log: AssetLog) {
       status: UploadIntentStatus.PENDING,
       expiresAt: { lte: now },
     },
-    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'expired'),
+    data: terminalUploadIntentData(UploadIntentStatus.EXPIRED, 'expired'),
   });
   await prisma.uploadIntent.updateMany({
     where: {
@@ -726,7 +717,7 @@ async function maintainCampaignAssetUploads(userId: string, log: AssetLog) {
       expiresAt: { lte: now },
       OR: [{ processingStartedAt: null }, { processingStartedAt: { lte: staleProcessing } }],
     },
-    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'processing_lease_expired'),
+    data: terminalUploadIntentData(UploadIntentStatus.EXPIRED, 'processing_lease_expired'),
   });
   const intents = await prisma.uploadIntent.findMany({
     where: {
@@ -768,7 +759,7 @@ async function safelyCleanupUploadIntent(intentId: string, log: AssetLog, signal
       const results = await Promise.all(
         [...new Set(keys)].map(async (key) => {
           try {
-            await deleteCampaignAssetObject(key, signal);
+            await deleteUploadObject(key, signal);
             return true;
           } catch {
             return false;
@@ -788,13 +779,6 @@ async function safelyCleanupUploadIntent(intentId: string, log: AssetLog, signal
 
 type RemovedAssetCleanupResult = 'cleaned' | 'failed' | 'skipped';
 
-function countCleanupResults(
-  results: RemovedAssetCleanupResult[],
-  result: RemovedAssetCleanupResult,
-) {
-  return results.filter((current) => current === result).length;
-}
-
 async function safelyCleanupRemovedAsset(
   assetId: string,
   log: AssetLog,
@@ -807,7 +791,7 @@ async function safelyCleanupRemovedAsset(
       const asset = await prisma.campaignAsset.findUnique({ where: { id: assetId } });
       if (!asset?.removedAt || signal?.aborted) return 'skipped';
 
-      await deleteCampaignAssetObject(asset.objectKey, signal);
+      await deleteUploadObject(asset.objectKey, signal);
       // If the batch ran out of time after R2 accepted the delete, leave the tombstone behind.
       // A later request can repeat the idempotent object delete and remove the row safely.
       if (signal?.aborted) return 'skipped';
@@ -887,11 +871,5 @@ function kindFor(purpose: string): CampaignAssetKindValue {
 function throwExpiredUpload(): never {
   throw new ORPCError('BAD_REQUEST', {
     message: 'O upload expirou. Selecione o arquivo novamente.',
-  });
-}
-
-function throwUploadRateLimit(): never {
-  throw new ORPCError('TOO_MANY_REQUESTS', {
-    message: 'Muitas tentativas de upload. Aguarde alguns minutos e tente novamente.',
   });
 }

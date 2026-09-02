@@ -1,17 +1,18 @@
 import { CampaignStatus, CampaignType } from '@lumos/database/generated/prisma/enums';
 import * as v from 'valibot';
 
+import {
+  limitedOptionalTrimmedString as limitedOptionalString,
+  limitedRequiredTrimmedString as limitedRequiredString,
+  requiredTrimmedString as requiredString,
+} from './string-schemas';
+
 /**
  * Canonical persisted and API values for campaign behavior.
  * PHYSICAL campaigns collect items at collection points; VIRTUAL campaigns receive direct funds.
  */
 export { CampaignStatus, CampaignType };
 
-const requiredString = (message: string) => v.pipe(v.string(), v.trim(), v.nonEmpty(message));
-const limitedRequiredString = (requiredMessage: string, maxLength: number, maxMessage: string) =>
-  v.pipe(requiredString(requiredMessage), v.maxLength(maxLength, maxMessage));
-const limitedOptionalString = (maxLength: number, maxMessage: string) =>
-  v.optional(v.pipe(v.string(), v.trim(), v.maxLength(maxLength, maxMessage)));
 const requiredDate = (message: string) =>
   v.pipe(
     requiredString(message),

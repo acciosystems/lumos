@@ -1,8 +1,6 @@
 import { useRouter } from '@tanstack/react-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { debounce } from '@/utils/debounce';
-
 /**
  * The most recent value handed to the router, paired with the local edit that
  * produced it. TanStack Router supersedes older pending search navigations, so
@@ -132,4 +130,27 @@ export function useDebouncedRouteInput<Name extends string>({
   );
 
   return [value, setInputValue] as const;
+}
+
+function debounce<Args extends unknown[]>(
+  callback: (...args: Args) => void,
+  delay: number,
+): ((...args: Args) => void) & { cancel: () => void } {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  const debounced = (...args: Args) => {
+    if (timeout) clearTimeout(timeout);
+
+    timeout = setTimeout(() => {
+      callback(...args);
+      timeout = undefined;
+    }, delay);
+  };
+
+  debounced.cancel = () => {
+    if (timeout) clearTimeout(timeout);
+    timeout = undefined;
+  };
+
+  return debounced;
 }

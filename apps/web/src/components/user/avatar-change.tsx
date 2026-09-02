@@ -1,6 +1,7 @@
-import { imageSchema } from '@lumos/validation/user';
+import { AVATAR_MAX_SIZE_BYTES, imageSchema } from '@lumos/validation/user';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
+import imageCompression from 'browser-image-compression';
 import ky from 'ky';
 import { useId, useState } from 'react';
 import { toast } from 'sonner';
@@ -21,8 +22,6 @@ import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import { useStrictAuth } from '@/lib/auth/hooks';
 import { rpc } from '@/lib/rpc';
-import { prepareAvatar } from '@/utils/image';
-import { reconcileSingleWriteUpload } from '@/utils/upload';
 
 const formSchema = v.object({
   image: imageSchema,
@@ -35,27 +34,42 @@ export function UserAvatarChange() {
 
   const changeMutation = useMutation({
     mutationFn: async (file: File) => {
-      const image = await prepareAvatar(file);
+      const image = await imageCompression(file, {
+        maxSizeMB: AVATAR_MAX_SIZE_BYTES / 1024 / 1024,
+        maxWidthOrHeight: 1024,
+        fileType: 'image/webp',
+        initialQuality: 0.8,
+        useWebWorker: true,
+      });
 
       const { signedUrl, uploadId } = await rpc.user.avatar.getUploadUrl.call({
         contentType: image.type,
         contentLength: image.size,
       });
 
-      await reconcileSingleWriteUpload(
-        () =>
-          ky.put(signedUrl, {
-            body: image,
-            headers: {
-              'Content-Type': image.type,
-              'If-None-Match': '*',
-            },
-            // This URL is single-write. A retry after a lost success response
-            // would receive 412 even though R2 already stored the object.
-            retry: 0,
-          }),
-        () => rpc.user.avatar.confirmUpload.call({ uploadId }),
-      );
+      let uploadError: unknown;
+      try {
+        await ky.put(signedUrl, {
+          body: image,
+          headers: {
+            'Content-Type': image.type,
+            'If-None-Match': '*',
+          },
+          // This URL is single-write. A retry after a lost success response
+          // would receive 412 even though R2 already stored the object.
+          retry: 0,
+        });
+      } catch (error) {
+        uploadError = error;
+      }
+
+      try {
+        // Confirmation performs the authoritative storage check and reconciles
+        // a browser response that was lost after a successful upload.
+        await rpc.user.avatar.confirmUpload.call({ uploadId });
+      } catch (confirmationError) {
+        throw uploadError ?? confirmationError;
+      }
     },
     onSuccess: async () => {
       await refreshSession();

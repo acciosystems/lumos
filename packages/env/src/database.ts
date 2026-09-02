@@ -1,24 +1,10 @@
 import { createEnv } from '@t3-oss/env-core';
-import * as v from 'valibot';
 
-function isPostgresUrl(value: string) {
-  const protocol = new URL(value).protocol;
-  return protocol === 'postgres:' || protocol === 'postgresql:';
-}
-
-function isPooledNeonUrl(value: string) {
-  const hostname = new URL(value).hostname;
-  return !hostname.endsWith('.neon.tech') || hostname.includes('-pooler.');
-}
+import { databaseUrlSchema } from './database-url';
 
 export const env = createEnv({
   server: {
-    DATABASE_URL: v.pipe(
-      v.string(),
-      v.url(),
-      v.check(isPostgresUrl, 'Expected a PostgreSQL connection URL.'),
-      v.check(isPooledNeonUrl, "Expected Neon's pooled connection URL."),
-    ),
+    DATABASE_URL: databaseUrlSchema('pooled'),
   },
 
   runtimeEnv: process.env,

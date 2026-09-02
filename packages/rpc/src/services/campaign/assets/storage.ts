@@ -1,12 +1,12 @@
 import { CAMPAIGN_ASSET_UPLOAD_EXPIRES_IN_SECONDS } from '@lumos/validation/campaign';
 
-import {
-  createSingleWriteUploadUrl,
-  deleteUploadObject,
-  getPublicObjectUrl,
-  headUploadObject,
-  isUploadObjectNotFound,
-  publishUploadObject,
+import { createSingleWriteUploadUrl, publishUploadObject } from '../../upload/storage';
+
+export {
+  deleteUploadObject as deleteCampaignAssetObject,
+  getPublicObjectUrl as getAssetPublicUrl,
+  headUploadObject as headCampaignAssetObject,
+  isUploadObjectNotFound as isCampaignAssetObjectNotFound,
 } from '../../upload/storage';
 
 export function getCampaignAssetStagingKey(userId: string, uploadId: string, contentType: string) {
@@ -28,20 +28,12 @@ export function getCampaignAssetPublishedKey({
   return `campaigns/${campaignId}/${namespace}/${uploadId}.${extensionFor(contentType)}`;
 }
 
-export function getAssetPublicUrl(key: string) {
-  return getPublicObjectUrl(key);
-}
-
 export async function createCampaignAssetUploadUrl(stagingKey: string, contentType: string) {
   return createSingleWriteUploadUrl({
     key: stagingKey,
     contentType,
     expiresIn: CAMPAIGN_ASSET_UPLOAD_EXPIRES_IN_SECONDS,
   });
-}
-
-export async function headCampaignAssetObject(key: string, signal?: AbortSignal) {
-  return headUploadObject(key, signal);
 }
 
 export async function publishCampaignAssetObject(
@@ -73,12 +65,6 @@ export async function publishCampaignAssetObject(
     signal,
   );
 }
-
-export async function deleteCampaignAssetObject(key: string, signal?: AbortSignal) {
-  await deleteUploadObject(key, signal);
-}
-
-export const isCampaignAssetObjectNotFound = isUploadObjectNotFound;
 
 function extensionFor(contentType: string) {
   const extensions: Record<string, string> = {

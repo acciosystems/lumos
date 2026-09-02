@@ -27,11 +27,9 @@ export function isPhysicalCampaign(type: CampaignType): boolean {
       return true;
     case CampaignType.VIRTUAL:
       return false;
-    default:
-      return assertNever(type);
+    default: {
+      const unsupportedType: never = type;
+      throw new Error(`Unsupported campaign type: ${String(unsupportedType)}`);
+    }
   }
-}
-
-function assertNever(value: never): never {
-  throw new Error(`Unsupported campaign type: ${String(value)}`);
 }

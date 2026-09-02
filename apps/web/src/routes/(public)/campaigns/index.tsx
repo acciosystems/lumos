@@ -6,6 +6,7 @@ import { ptBR } from 'date-fns/locale';
 import { useCallback } from 'react';
 import * as v from 'valibot';
 
+import { CampaignMetadataRow } from '@/components/campaign/campaign-metadata-row';
 import { Loading } from '@/components/misc/loading';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -269,9 +270,9 @@ function CampaignCard({
       <CardContent className="flex flex-1 flex-col gap-4">
         <p className="line-clamp-3 text-sm text-muted-foreground">{campaign.description}</p>
         <div className="grid gap-2 text-sm">
-          <Metadata label="Tema" value={campaign.category} />
-          <Metadata label="Região" value={campaign.region} />
-          <Metadata
+          <CampaignMetadataRow label="Tema" value={campaign.category} />
+          <CampaignMetadataRow label="Região" value={campaign.region} />
+          <CampaignMetadataRow
             label="Período"
             value={`${formatCampaignDate(campaign.startDate, 'dd MMM', { locale: ptBR })} - ${formatCampaignDate(
               campaign.endDate,
@@ -279,7 +280,7 @@ function CampaignCard({
               { locale: ptBR },
             )}`}
           />
-          <Metadata
+          <CampaignMetadataRow
             label="Participantes"
             value={isPhysicalCampaign(campaign.type) ? String(campaign.participantCount) : 'N/A'}
           />
@@ -294,14 +295,5 @@ function CampaignCard({
         </Button>
       </CardContent>
     </Card>
-  );
-}
-
-function Metadata({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="truncate font-medium">{value}</span>
-    </div>
   );
 }

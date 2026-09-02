@@ -3,6 +3,7 @@ import { useSuspenseInfiniteQuery } from '@tanstack/react-query';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { ptBR } from 'date-fns/locale';
 
+import { CampaignMetadataRow } from '@/components/campaign/campaign-metadata-row';
 import { Loading } from '@/components/misc/loading';
 import { AppInset } from '@/components/sidebar/inset';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -80,8 +81,8 @@ function ParticipatingCampaignsPage() {
                     {campaign.description}
                   </p>
                   <div className="grid gap-2 text-sm">
-                    <Metadata label="Região" value={campaign.region} />
-                    <Metadata
+                    <CampaignMetadataRow label="Região" value={campaign.region} />
+                    <CampaignMetadataRow
                       label="Período"
                       value={`${formatCampaignDate(campaign.startDate, 'dd MMM', { locale: ptBR })} - ${formatCampaignDate(
                         campaign.endDate,
@@ -89,7 +90,10 @@ function ParticipatingCampaignsPage() {
                         { locale: ptBR },
                       )}`}
                     />
-                    <Metadata label="Participantes" value={String(campaign.participantCount)} />
+                    <CampaignMetadataRow
+                      label="Participantes"
+                      value={String(campaign.participantCount)}
+                    />
                   </div>
                   <Button
                     nativeButton={false}
@@ -140,14 +144,5 @@ function ParticipatingCampaignsPage() {
         ) : null}
       </div>
     </AppInset>
-  );
-}
-
-function Metadata({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-3">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="truncate font-medium">{value}</span>
-    </div>
   );
 }

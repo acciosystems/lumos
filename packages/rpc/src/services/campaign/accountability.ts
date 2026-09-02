@@ -4,6 +4,11 @@ import {
   CampaignType,
   type CampaignAccountabilityInput,
 } from '@lumos/validation/campaign';
+import {
+  addCampaignCalendarDays,
+  getSaoPauloCalendarInstant,
+  toCampaignCalendarDate,
+} from '@lumos/validation/campaign-calendar';
 import { ORPCError } from '@orpc/client';
 
 import {
@@ -11,9 +16,9 @@ import {
   toPublicCampaignAsset,
   type PreparedCampaignAsset,
 } from './assets';
-import { CAMPAIGN_TIME_ZONE, reconcileCampaignLifecycle } from './lifecycle';
+import { reconcileCampaignLifecycle } from './lifecycle';
 
-export const CAMPAIGN_ACCOUNTABILITY_TIME_ZONE = CAMPAIGN_TIME_ZONE;
+export { CAMPAIGN_TIME_ZONE as CAMPAIGN_ACCOUNTABILITY_TIME_ZONE } from '@lumos/validation/campaign-calendar';
 
 export type CampaignAccountabilityStatus =
   | 'NOT_REQUIRED'
@@ -29,22 +34,8 @@ export type CampaignAccountabilityStatus =
  * server-side comparisons.
  */
 export function getCampaignAccountabilityDeadline(endDate: Date): Date {
-  const endCalendarDate = new Date(
-    Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), endDate.getUTCDate() + 7),
-  );
-  const wallClock = Date.UTC(
-    endCalendarDate.getUTCFullYear(),
-    endCalendarDate.getUTCMonth(),
-    endCalendarDate.getUTCDate(),
-    23,
-    59,
-    59,
-  );
-
-  // Resolve the IANA timezone offset twice so this remains correct if the
-  // timezone rules ever include a transition around the target date.
-  const firstCandidate = new Date(wallClock - getTimeZoneOffset(new Date(wallClock)));
-  return new Date(wallClock - getTimeZoneOffset(firstCandidate));
+  const deadlineCalendarDate = addCampaignCalendarDays(toCampaignCalendarDate(endDate), 7);
+  return getSaoPauloCalendarInstant(deadlineCalendarDate, { hour: 23, minute: 59, second: 59 });
 }
 
 export function getCampaignAccountabilityStatus({
@@ -226,33 +217,4 @@ export async function saveCampaignAccountability(
       },
     },
   });
-}
-
-function getTimeZoneOffset(date: Date): number {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: CAMPAIGN_ACCOUNTABILITY_TIME_ZONE,
-    calendar: 'iso8601',
-    hourCycle: 'h23',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).formatToParts(date);
-  const values: Record<string, string> = {};
-  for (const part of parts) {
-    if (part.type !== 'literal') values[part.type] = part.value;
-  }
-
-  const localAsUtc = Date.UTC(
-    Number(values.year),
-    Number(values.month) - 1,
-    Number(values.day),
-    Number(values.hour),
-    Number(values.minute),
-    Number(values.second),
-  );
-
-  return localAsUtc - date.getTime();
 }

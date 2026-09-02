@@ -1,13 +1,13 @@
 import { env } from '@lumos/env/rpc';
 import { AVATAR_CONTENT_TYPE, AVATAR_UPLOAD_EXPIRES_IN_SECONDS } from '@lumos/validation/user';
 
-import {
-  createSingleWriteUploadUrl,
-  deleteUploadObject,
-  getPublicObjectUrl,
-  headUploadObject,
-  isUploadObjectNotFound,
-  publishUploadObject,
+import { createSingleWriteUploadUrl, publishUploadObject } from '../upload/storage';
+
+export {
+  deleteUploadObject as deleteAvatarObject,
+  getPublicObjectUrl as getAvatarPublicUrl,
+  headUploadObject as headAvatarObject,
+  isUploadObjectNotFound as isObjectNotFound,
 } from '../upload/storage';
 
 export const AVATAR_STAGING_PREFIX = 'avatar-staging';
@@ -19,10 +19,6 @@ export function getAvatarStagingKey(userId: string, uploadId: string) {
 
 export function getAvatarPublishedKey(userId: string, uploadId: string) {
   return `${AVATAR_PUBLISHED_PREFIX}/${userId}/${uploadId}.webp`;
-}
-
-export function getAvatarPublicUrl(key: string) {
-  return getPublicObjectUrl(key);
 }
 
 /**
@@ -63,10 +59,6 @@ export async function createAvatarUploadUrl(stagingKey: string) {
   });
 }
 
-export async function headAvatarObject(key: string, signal?: AbortSignal) {
-  return headUploadObject(key, signal);
-}
-
 export async function publishAvatarObject(
   {
     sourceKey,
@@ -92,12 +84,6 @@ export async function publishAvatarObject(
     signal,
   );
 }
-
-export async function deleteAvatarObject(key: string, signal?: AbortSignal) {
-  return deleteUploadObject(key, signal);
-}
-
-export const isObjectNotFound = isUploadObjectNotFound;
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

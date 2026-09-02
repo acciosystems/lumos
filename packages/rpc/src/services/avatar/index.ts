@@ -10,22 +10,24 @@ import { ORPCError } from '@orpc/client';
 import { ulid } from 'ulid';
 
 import { runDatabaseTransaction, withActiveCompensationDeadline } from '../../deadline';
+import { isLeaseStale, terminalUploadIntentData, throwUploadRateLimit } from '../upload/policy';
+import {
+  deleteUploadObject,
+  getPublicObjectUrl,
+  headUploadObject,
+  isUploadObjectNotFound,
+} from '../upload/storage';
 import {
   getAvatarCleanupKeys,
-  isLeaseStale,
   isTerminalAvatarUploadStatus,
   TERMINAL_AVATAR_UPLOAD_STATUSES,
 } from './policy';
 import { isValidAvatarObject } from './policy';
 import {
   createAvatarUploadUrl,
-  deleteAvatarObject,
-  getAvatarPublicUrl,
   getAvatarPublishedKey,
   getAvatarStagingKey,
   getManagedAvatarKey,
-  headAvatarObject,
-  isObjectNotFound,
   publishAvatarObject,
 } from './storage';
 
@@ -118,23 +120,23 @@ export async function confirmAvatarUpload({
 
   if (intent.status === UploadIntentStatus.CONFIRMED && intent.publishedKey) {
     await safelyCleanupAvatarIntent(intent.id, log);
-    return { image: getAvatarPublicUrl(intent.publishedKey) };
+    return { image: getPublicObjectUrl(intent.publishedKey) };
   }
 
   const claim = await claimAvatarIntent(intent, userId, log);
   if ('publishedKey' in claim) {
     await safelyCleanupAvatarIntent(intent.id, log);
-    return { image: getAvatarPublicUrl(claim.publishedKey) };
+    return { image: getPublicObjectUrl(claim.publishedKey) };
   }
 
   intent = claim.intent;
   const publishedKey = getAvatarPublishedKey(userId, intent.id);
 
-  let uploadedObject: Awaited<ReturnType<typeof headAvatarObject>>;
+  let uploadedObject: Awaited<ReturnType<typeof headUploadObject>>;
   try {
-    uploadedObject = await headAvatarObject(intent.stagingKey);
+    uploadedObject = await headUploadObject(intent.stagingKey);
   } catch (error) {
-    if (isObjectNotFound(error)) {
+    if (isUploadObjectNotFound(error)) {
       await withActiveCompensationDeadline(async () => {
         if (await rejectOwnedIntent(intent.id, claim.token, 'missing_object')) {
           await safelyCleanupAvatarIntent(intent.id, log);
@@ -192,7 +194,7 @@ export async function confirmAvatarUpload({
     });
   }
 
-  const fileUrl = getAvatarPublicUrl(publishedKey);
+  const fileUrl = getPublicObjectUrl(publishedKey);
   try {
     await requireProcessingLease(intent.id, claim.token);
     await confirmAvatarInDatabase({
@@ -211,7 +213,7 @@ export async function confirmAvatarUpload({
     // makes this branch safe and lets an idempotent retry finish housekeeping.
     if (currentIntent?.status === UploadIntentStatus.CONFIRMED && currentIntent.publishedKey) {
       await safelyCleanupAvatarIntent(currentIntent.id, log);
-      return { image: getAvatarPublicUrl(currentIntent.publishedKey) };
+      return { image: getPublicObjectUrl(currentIntent.publishedKey) };
     }
 
     await compensateFailedPublication(
@@ -534,7 +536,7 @@ async function expirePendingIntent(intentId: string, now: Date) {
       status: UploadIntentStatus.PENDING,
       expiresAt: { lte: now },
     },
-    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'expired'),
+    data: terminalUploadIntentData(UploadIntentStatus.EXPIRED, 'expired'),
   });
   return expired.count === 1;
 }
@@ -546,7 +548,7 @@ async function rejectOwnedIntent(intentId: string, processingToken: string, reas
       status: UploadIntentStatus.PROCESSING,
       processingToken,
     },
-    data: terminalIntentData(UploadIntentStatus.REJECTED, reason),
+    data: terminalUploadIntentData(UploadIntentStatus.REJECTED, reason),
   });
   return rejected.count === 1;
 }
@@ -567,17 +569,6 @@ async function resetOwnedIntent(intentId: string, processingToken: string, reaso
     },
   });
   return reset.count === 1;
-}
-
-function terminalIntentData(status: UploadIntentStatus, failureReason: string) {
-  return {
-    status,
-    activeSlot: null,
-    processingToken: null,
-    processingStartedAt: null,
-    failureReason,
-    cleanupPending: true,
-  };
 }
 
 async function safelyMaintainAvatarObjectCleanups(log: AvatarLog) {
@@ -620,9 +611,9 @@ async function safelyCleanupAvatarObject(
 
       const attempt = cleanup.attemptCount + 1;
       try {
-        await deleteAvatarObject(cleanup.objectKey);
+        await deleteUploadObject(cleanup.objectKey);
       } catch (error) {
-        if (!isObjectNotFound(error)) {
+        if (!isUploadObjectNotFound(error)) {
           await prisma.avatarObjectCleanup.updateMany({
             where: { id: cleanup.id },
             data: { attemptCount: { increment: 1 } },
@@ -670,7 +661,7 @@ async function maintainAvatarUploadIntents(userId: string, log: AvatarLog) {
       status: UploadIntentStatus.PENDING,
       expiresAt: { lte: now },
     },
-    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'expired'),
+    data: terminalUploadIntentData(UploadIntentStatus.EXPIRED, 'expired'),
   });
 
   await prisma.uploadIntent.updateMany({
@@ -681,7 +672,7 @@ async function maintainAvatarUploadIntents(userId: string, log: AvatarLog) {
       expiresAt: { lte: now },
       OR: [{ processingStartedAt: null }, { processingStartedAt: { lte: staleProcessing } }],
     },
-    data: terminalIntentData(UploadIntentStatus.EXPIRED, 'processing_lease_expired'),
+    data: terminalUploadIntentData(UploadIntentStatus.EXPIRED, 'processing_lease_expired'),
   });
 
   const cleanupIntents = await prisma.uploadIntent.findMany({
@@ -768,7 +759,7 @@ async function cleanupAvatarIntent(intentId: string, log: AvatarLog) {
 
 async function tryDeleteObject(key: string, log: AvatarLog, stage: string) {
   try {
-    await deleteAvatarObject(key);
+    await deleteUploadObject(key);
     return true;
   } catch (error) {
     log.set({ avatarUploadStage: stage, cleanupFailed: true });
@@ -846,11 +837,5 @@ async function isOccupiedActiveSlot(error: unknown, userId: string, activeSlot: 
 function throwExpiredUpload(): never {
   throw new ORPCError('BAD_REQUEST', {
     message: 'O upload expirou. Selecione a imagem novamente.',
-  });
-}
-
-function throwUploadRateLimit(): never {
-  throw new ORPCError('TOO_MANY_REQUESTS', {
-    message: 'Muitas tentativas de upload. Aguarde alguns minutos e tente novamente.',
   });
 }

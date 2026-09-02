@@ -53,11 +53,9 @@ export function toCampaignCreateData(
         bankAccountInfo: input.bankAccountInfo || null,
       };
 
-    default:
-      return assertNever(input);
+    default: {
+      const unsupportedInput: never = input;
+      throw new Error(`Unsupported campaign type: ${JSON.stringify(unsupportedInput)}`);
+    }
   }
-}
-
-function assertNever(value: never): never {
-  throw new Error(`Unsupported campaign type: ${JSON.stringify(value)}`);
 }
