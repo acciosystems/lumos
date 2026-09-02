@@ -36,6 +36,10 @@ compensation database work stops at 42 seconds, reserving the maximum 13-second
 acquisition-and-query budget and the final five seconds for response serialization and logging.
 Serverless execution after a response is not used for required cleanup.
 
+Removed campaign-asset cleanup selects at most five oldest tombstones, runs no more than two
+cleanup operations concurrently, and stops starting work after eight seconds. Unfinished
+tombstones remain in PostgreSQL for a later eligible request to retry.
+
 ## Accountability publication
 
 At most ten evidence objects can be submitted. Their R2 validation and copy operations start in

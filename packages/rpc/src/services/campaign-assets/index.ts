@@ -17,6 +17,8 @@ import { ORPCError } from '@orpc/client';
 import { ulid } from 'ulid';
 
 import {
+  combineOperationSignal,
+  getActiveDeadlineSignal,
   type RequestDeadline,
   runDatabaseTransaction,
   withActiveCompensationDeadline,
@@ -59,6 +61,9 @@ const ACTIVE_UPLOAD_SLOTS = Array.from(
 const MAX_UPLOADS_PER_HOUR = 40;
 const PROCESSING_LEASE_MS = 60_000;
 const INTENT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+const REMOVED_ASSET_CLEANUP_BATCH_SIZE = 5;
+const REMOVED_ASSET_CLEANUP_CONCURRENCY = 2;
+const REMOVED_ASSET_CLEANUP_BUDGET_MS = 8_000;
 
 class CampaignAssetIntentOwnershipLost extends Error {}
 
@@ -383,14 +388,56 @@ export async function cleanupRemovedCampaignAssets(
   log: AssetLog,
   signal?: AbortSignal,
 ) {
+  const startedAt = Date.now();
+  const cleanupSignal = combineOperationSignal(
+    signal ?? getActiveDeadlineSignal(),
+    REMOVED_ASSET_CLEANUP_BUDGET_MS,
+  );
   try {
     const assets = await prisma.campaignAsset.findMany({
       where: { uploaderId: userId, removedAt: { not: null } },
+      orderBy: [{ removedAt: 'asc' }, { id: 'asc' }],
+      take: REMOVED_ASSET_CLEANUP_BATCH_SIZE,
       select: { id: true },
     });
-    await Promise.all(assets.map(({ id }) => safelyCleanupRemovedAsset(id, log, signal)));
+    const results: RemovedAssetCleanupResult[] = [];
+
+    // oxlint-disable no-await-in-loop -- A chunk must settle before another bounded chunk starts.
+    for (
+      let index = 0;
+      index < assets.length && !cleanupSignal.aborted;
+      index += REMOVED_ASSET_CLEANUP_CONCURRENCY
+    ) {
+      const chunk = assets.slice(index, index + REMOVED_ASSET_CLEANUP_CONCURRENCY);
+      const chunkResults = await Promise.all(
+        chunk.map(({ id }) => safelyCleanupRemovedAsset(id, log, cleanupSignal)),
+      );
+      results.push(...chunkResults);
+    }
+    // oxlint-enable no-await-in-loop
+
+    const completedCount = countCleanupResults(results, 'cleaned');
+    const failedCount = countCleanupResults(results, 'failed');
+    const skippedCount = countCleanupResults(results, 'skipped');
+
+    log.set({
+      removedAssetCleanupSelectedCount: assets.length,
+      removedAssetCleanupCompletedCount: completedCount,
+      removedAssetCleanupFailedCount: failedCount,
+      removedAssetCleanupSkippedCount: skippedCount,
+      removedAssetCleanupDeadlineReached: cleanupSignal.aborted,
+      removedAssetCleanupMayRemain:
+        assets.length === REMOVED_ASSET_CLEANUP_BATCH_SIZE ||
+        failedCount > 0 ||
+        cleanupSignal.aborted ||
+        results.length < assets.length,
+      removedAssetCleanupDurationMs: Date.now() - startedAt,
+    });
   } catch {
-    log.set({ assetUploadStage: 'removed_asset_cleanup_failed' });
+    log.set({
+      assetUploadStage: 'removed_asset_cleanup_failed',
+      removedAssetCleanupDurationMs: Date.now() - startedAt,
+    });
   }
 }
 
@@ -739,18 +786,40 @@ async function safelyCleanupUploadIntent(intentId: string, log: AssetLog, signal
   });
 }
 
-async function safelyCleanupRemovedAsset(assetId: string, log: AssetLog, signal?: AbortSignal) {
-  await withActiveCompensationDeadline(async () => {
+type RemovedAssetCleanupResult = 'cleaned' | 'failed' | 'skipped';
+
+function countCleanupResults(
+  results: RemovedAssetCleanupResult[],
+  result: RemovedAssetCleanupResult,
+) {
+  return results.filter((current) => current === result).length;
+}
+
+async function safelyCleanupRemovedAsset(
+  assetId: string,
+  log: AssetLog,
+  signal?: AbortSignal,
+): Promise<RemovedAssetCleanupResult> {
+  return withActiveCompensationDeadline(async () => {
     try {
+      if (signal?.aborted) return 'skipped';
+
       const asset = await prisma.campaignAsset.findUnique({ where: { id: assetId } });
-      if (!asset?.removedAt) return;
+      if (!asset?.removedAt || signal?.aborted) return 'skipped';
+
       await deleteCampaignAssetObject(asset.objectKey, signal);
-      await prisma.campaignAsset.deleteMany({
+      // If the batch ran out of time after R2 accepted the delete, leave the tombstone behind.
+      // A later request can repeat the idempotent object delete and remove the row safely.
+      if (signal?.aborted) return 'skipped';
+
+      const deleted = await prisma.campaignAsset.deleteMany({
         where: { id: asset.id, removedAt: { not: null } },
       });
+      return deleted.count ? 'cleaned' : 'skipped';
     } catch (error) {
       log.set({ assetUploadStage: 'asset_cleanup_failed', cleanupAssetId: assetId });
       void error;
+      return 'failed';
     }
   });
 }
