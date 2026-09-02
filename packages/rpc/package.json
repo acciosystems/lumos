@@ -15,6 +15,7 @@
     "@lumos/database": "workspace:*",
     "@lumos/env": "workspace:*",
     "@lumos/logging": "workspace:*",
+    "@lumos/request-deadline": "workspace:*",
     "@lumos/validation": "workspace:*",
     "@orpc/client": "^1.14.13",
     "@orpc/server": "^1.14.13",

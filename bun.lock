@@ -21,8 +21,10 @@
         "@fontsource-variable/geist": "^5.3.0",
         "@fontsource/boldonse": "^5.3.0",
         "@lumos/auth": "workspace:*",
+        "@lumos/database": "workspace:*",
         "@lumos/env": "workspace:*",
         "@lumos/logging": "workspace:*",
+        "@lumos/request-deadline": "workspace:*",
         "@lumos/rpc": "workspace:*",
         "@lumos/validation": "workspace:*",
         "@tabler/icons-react": "^3.46.0",
@@ -69,6 +71,7 @@
         "@lumos/email": "workspace:*",
         "@lumos/env": "workspace:*",
         "@lumos/logging": "workspace:*",
+        "@lumos/request-deadline": "workspace:*",
         "@lumos/validation": "workspace:*",
         "@vercel/functions": "^3.9.5",
         "better-auth": "^1.6.25",
@@ -98,6 +101,7 @@
       "dependencies": {
         "@lumos/env": "workspace:*",
         "@lumos/logging": "workspace:*",
+        "@lumos/request-deadline": "workspace:*",
         "evlog": "catalog:",
         "resend": "^6.24.0",
       },
@@ -113,9 +117,13 @@
       "name": "@lumos/logging",
       "dependencies": {
         "@lumos/env": "workspace:*",
+        "@lumos/request-deadline": "workspace:*",
         "@vercel/functions": "^3.9.5",
         "evlog": "catalog:",
       },
+    },
+    "packages/request-deadline": {
+      "name": "@lumos/request-deadline",
     },
     "packages/rpc": {
       "name": "@lumos/rpc",
@@ -126,6 +134,7 @@
         "@lumos/database": "workspace:*",
         "@lumos/env": "workspace:*",
         "@lumos/logging": "workspace:*",
+        "@lumos/request-deadline": "workspace:*",
         "@lumos/validation": "workspace:*",
         "@orpc/client": "^1.14.13",
         "@orpc/server": "^1.14.13",
@@ -322,6 +331,8 @@
     "@lumos/env": ["@lumos/env@workspace:packages/env"],
 
     "@lumos/logging": ["@lumos/logging@workspace:packages/logging"],
+
+    "@lumos/request-deadline": ["@lumos/request-deadline@workspace:packages/request-deadline"],
 
     "@lumos/rpc": ["@lumos/rpc@workspace:packages/rpc"],
 

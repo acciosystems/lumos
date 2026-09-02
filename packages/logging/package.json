@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@lumos/env": "workspace:*",
+    "@lumos/request-deadline": "workspace:*",
     "@vercel/functions": "^3.9.5",
     "evlog": "catalog:"
   }

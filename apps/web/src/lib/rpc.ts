@@ -1,3 +1,4 @@
+import { requireActiveRequestDeadline } from '@lumos/request-deadline';
 import { router } from '@lumos/rpc';
 import {
   createORPCClient,
@@ -6,7 +7,6 @@ import {
   RPCLink,
   type RouterClient,
 } from '@lumos/rpc/client';
-import { createRequestDeadline } from '@lumos/rpc/deadline';
 import { createIsomorphicFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
 
@@ -25,7 +25,7 @@ export const useRPC = createIsomorphicFn()
       // @ts-expect-error needed because of evlog context
       context: () => ({
         headers: getRequestHeaders(),
-        deadline: createRequestDeadline(),
+        deadline: requireActiveRequestDeadline(),
       }),
     }),
   );

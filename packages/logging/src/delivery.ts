@@ -1,3 +1,4 @@
+import { combineOperationSignal, getActiveCompensationSignal } from '@lumos/request-deadline';
 import { waitUntil } from '@vercel/functions';
 import type { DrainContext, WideEvent } from 'evlog';
 
@@ -46,8 +47,10 @@ function reportDropped(
   );
 }
 
-function isAbortError(error: unknown) {
-  return error instanceof DOMException && error.name === 'AbortError';
+function isTimeoutError(error: unknown) {
+  return (
+    error instanceof DOMException && (error.name === 'AbortError' || error.name === 'TimeoutError')
+  );
 }
 
 async function readIngestResponse(response: Response): Promise<IngestResponse | undefined> {
@@ -66,9 +69,9 @@ async function readIngestResponse(response: Response): Promise<IngestResponse | 
 async function deliverEvents(events: WideEvent[], overrides: DeliveryOverrides = {}) {
   if (events.length === 0) return;
 
-  const controller = new AbortController();
-  const timeout = setTimeout(
-    () => controller.abort(),
+  const deadlineSignal = getActiveCompensationSignal();
+  const signal = combineOperationSignal(
+    deadlineSignal,
     overrides.timeoutMs ?? AXIOM_DELIVERY_TIMEOUT_MS,
   );
 
@@ -85,7 +88,7 @@ async function deliverEvents(events: WideEvent[], overrides: DeliveryOverrides =
           'User-Agent': 'lumos/evlog',
         },
         body: JSON.stringify(events),
-        signal: controller.signal,
+        signal,
       },
     );
 
@@ -99,9 +102,7 @@ async function deliverEvents(events: WideEvent[], overrides: DeliveryOverrides =
       reportDropped(events, 'partial_rejection', { droppedCount: result.failed });
     }
   } catch (error) {
-    reportDropped(events, isAbortError(error) ? 'timeout' : 'network_error');
-  } finally {
-    clearTimeout(timeout);
+    reportDropped(events, isTimeoutError(error) ? 'timeout' : 'network_error');
   }
 }
 

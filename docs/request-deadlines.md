@@ -24,10 +24,13 @@ occur directly between the browser and R2 and are reconciled by the upload-inten
 
 ## Enforcement
 
-Every RPC procedure runs in a request-local deadline context. It rejects foreground work before
-the 40-second cutoff and before each database transaction, query, or R2 operation. A client
-disconnect aborts foreground work through the same context. Database operations already in flight
-remain bounded by the configured PostgreSQL timeouts.
+Nitro creates one request-local deadline before request-body handling and authentication enrichment;
+TanStack Start then reuses it for SSR, server functions, and API routes. HTTP and in-process RPC
+calls, authentication session checks, email, password-compromise checks, and Axiom delivery reuse
+that deadline rather than creating nested windows. Foreground work rejects before the 40-second
+cutoff and before each database transaction, query, or R2 operation. A client disconnect aborts
+foreground work through the same context. Database operations already in flight remain bounded by
+the configured PostgreSQL timeouts.
 
 Cleanup that repairs a durable upload or avatar state runs under the compensation context instead.
 It is awaited before the RPC handler settles. R2 work cannot start after 55 seconds from the

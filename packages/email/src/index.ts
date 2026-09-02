@@ -2,6 +2,11 @@ import { randomUUID } from 'node:crypto';
 
 import { env } from '@lumos/env/email';
 import { scheduleAxiomDelivery } from '@lumos/logging/delivery';
+import {
+  assertForegroundDeadline,
+  combineOperationSignal,
+  getActiveRequestDeadline,
+} from '@lumos/request-deadline';
 import { createLogger } from 'evlog';
 import { Resend } from 'resend';
 
@@ -19,9 +24,10 @@ export interface SendEmailOptions {
 export async function sendEmail(options: SendEmailOptions, signal?: AbortSignal) {
   const deliveryId = randomUUID();
   const startedAt = Date.now();
-  const handoffSignal = signal
-    ? AbortSignal.any([signal, AbortSignal.timeout(RESEND_HANDOFF_TIMEOUT_MS)])
-    : AbortSignal.timeout(RESEND_HANDOFF_TIMEOUT_MS);
+  const deadline = getActiveRequestDeadline();
+  assertActiveForegroundDeadline(deadline, 'email_before_handoff');
+  const requestSignal = combineSignals(signal, deadline?.foregroundSignal);
+  const handoffSignal = combineOperationSignal(requestSignal, RESEND_HANDOFF_TIMEOUT_MS);
   let response: Awaited<ReturnType<typeof resend.emails.send>>;
 
   try {
@@ -43,6 +49,7 @@ export async function sendEmail(options: SendEmailOptions, signal?: AbortSignal)
       >[1] & { signal: AbortSignal },
     );
   } catch {
+    assertActiveForegroundDeadline(deadline, 'email_handoff');
     emitHandoffFailure({
       deliveryId,
       kind: options.kind,
@@ -54,6 +61,7 @@ export async function sendEmail(options: SendEmailOptions, signal?: AbortSignal)
   }
 
   if (handoffSignal.aborted || response.error || !response.data?.id) {
+    assertActiveForegroundDeadline(deadline, 'email_after_handoff');
     emitHandoffFailure({
       deliveryId,
       kind: options.kind,
@@ -63,6 +71,8 @@ export async function sendEmail(options: SendEmailOptions, signal?: AbortSignal)
     });
     throw new Error('Email provider rejected the message.');
   }
+
+  assertActiveForegroundDeadline(deadline, 'email_after_handoff');
 
   scheduleAxiomDelivery(
     createLogger({
@@ -77,6 +87,19 @@ export async function sendEmail(options: SendEmailOptions, signal?: AbortSignal)
   );
 
   return { providerMessageId: response.data.id };
+}
+
+function combineSignals(...signals: Array<AbortSignal | undefined>) {
+  const availableSignals = signals.filter((signal): signal is AbortSignal => signal !== undefined);
+  if (availableSignals.length === 0) return undefined;
+  return availableSignals.length === 1 ? availableSignals[0] : AbortSignal.any(availableSignals);
+}
+
+function assertActiveForegroundDeadline(
+  deadline: ReturnType<typeof getActiveRequestDeadline>,
+  stage: string,
+) {
+  if (deadline) assertForegroundDeadline(deadline, stage);
 }
 
 function emitHandoffFailure({

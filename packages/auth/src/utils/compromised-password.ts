@@ -3,6 +3,11 @@ import { createHash } from 'node:crypto';
 import type { AuthContext } from '@better-auth/core';
 import { getCurrentAuthContext } from '@better-auth/core/context';
 import { scheduleAxiomDelivery } from '@lumos/logging/delivery';
+import {
+  assertForegroundDeadline,
+  combineOperationSignal,
+  getActiveRequestDeadline,
+} from '@lumos/request-deadline';
 import { APIError } from 'better-auth/api';
 import { hashPassword } from 'better-auth/crypto';
 import { createLogger } from 'evlog';
@@ -69,7 +74,9 @@ export async function checkPasswordCompromise(
 ): Promise<PasswordCompromiseCheckResult> {
   const { prefix, suffix } = getPasswordHashParts(password);
   const startedAt = Date.now();
-  const signal = AbortSignal.timeout(timeoutMs);
+  const deadline = getActiveRequestDeadline();
+  assertActiveForegroundDeadline(deadline, 'auth_hibp_before_request');
+  const signal = combineOperationSignal(deadline?.foregroundSignal, timeoutMs);
 
   try {
     const response = await fetch(`${PWNED_PASSWORDS_API_URL}/${prefix}`, {
@@ -79,6 +86,7 @@ export async function checkPasswordCompromise(
       },
       signal,
     });
+    assertActiveForegroundDeadline(deadline, 'auth_hibp_after_request');
 
     if (!response.ok) {
       return {
@@ -92,6 +100,7 @@ export async function checkPasswordCompromise(
     }
 
     const compromised = matchesCompromisedSuffix(await response.text(), suffix);
+    assertActiveForegroundDeadline(deadline, 'auth_hibp_after_request');
     if (compromised === undefined) {
       return {
         status: 'unavailable',
@@ -105,6 +114,7 @@ export async function checkPasswordCompromise(
 
     return { status: compromised ? 'compromised' : 'clear' };
   } catch {
+    assertActiveForegroundDeadline(deadline, 'auth_hibp_request');
     return {
       status: 'unavailable',
       failure: {
@@ -114,6 +124,13 @@ export async function checkPasswordCompromise(
       },
     };
   }
+}
+
+function assertActiveForegroundDeadline(
+  deadline: ReturnType<typeof getActiveRequestDeadline>,
+  stage: string,
+) {
+  if (deadline) assertForegroundDeadline(deadline, stage);
 }
 
 function emitPasswordCompromiseCheckFailure(failure: PasswordCompromiseCheckFailure) {

@@ -1,0 +1,10 @@
+{
+  "name": "@lumos/request-deadline",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  }
+}
