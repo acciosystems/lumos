@@ -23,9 +23,9 @@ import {
   runDatabaseTransaction,
   withActiveCompensationDeadline,
   withCompensationDeadline,
-} from '../../deadline';
-import { reconcileCampaignLifecycle } from '../campaign-lifecycle';
-import { isLeaseStale } from '../upload/policy';
+} from '../../../deadline';
+import { isLeaseStale } from '../../upload/policy';
+import { reconcileCampaignLifecycle } from '../lifecycle';
 import { prepareInParallel } from './parallel-publication';
 import { isOwnedCampaignAssetIntent, isValidCampaignAssetObject } from './policy';
 import {

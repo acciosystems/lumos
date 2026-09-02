@@ -10,8 +10,8 @@ import {
   confirmPreparedCampaignAsset,
   toPublicCampaignAsset,
   type PreparedCampaignAsset,
-} from './campaign-assets';
-import { CAMPAIGN_TIME_ZONE, reconcileCampaignLifecycle } from './campaign-lifecycle';
+} from './assets';
+import { CAMPAIGN_TIME_ZONE, reconcileCampaignLifecycle } from './lifecycle';
 
 export const CAMPAIGN_ACCOUNTABILITY_TIME_ZONE = CAMPAIGN_TIME_ZONE;
 

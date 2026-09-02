@@ -29,36 +29,30 @@ import {
 } from '../deadline';
 import { authorized, publicProcedure } from '../procedures';
 import {
-  getCampaignAccountabilityDeadline,
-  getCampaignAccountabilityStatus,
-  saveCampaignAccountability,
-  toPublicCampaignAccountability,
-} from '../services/campaign-accountability';
-import {
+  assertCampaignDatesNotEnded,
   cleanupRemovedCampaignAssets,
   compensatePreparedCampaignAssets,
   confirmPreparedCampaignAsset,
   createCampaignAssetUploadIntent,
   discardCampaignAssetUpload,
   finishPreparedCampaignAssets,
+  getCampaignAccountabilityDeadline,
+  getCampaignAccountabilityStatus,
+  getEffectiveCampaignStatus,
+  getSaoPauloCalendarDate,
   prepareCampaignAssetUploads,
+  reconcileCampaignLifecycle,
+  reserveCampaignOperation,
+  saveCampaignAccountability,
+  toCampaignCollectionPointData,
+  toCampaignCollectionPointFields,
+  toCampaignCreateData,
+  toCampaignUpdateData,
+  toPublicCampaignAccountability,
   type PreparedCampaignAsset,
   toPublicCampaignAsset,
   verifyCampaignAssetUpload,
-} from '../services/campaign-assets';
-import { toCampaignCreateData } from '../services/campaign-create';
-import { reserveCampaignOperation } from '../services/campaign-idempotency';
-import {
-  assertCampaignDatesNotEnded,
-  getEffectiveCampaignStatus,
-  getSaoPauloCalendarDate,
-  reconcileCampaignLifecycle,
-} from '../services/campaign-lifecycle';
-import {
-  toCampaignCollectionPointData,
-  toCampaignCollectionPointFields,
-  toCampaignUpdateData,
-} from '../services/campaign-update';
+} from '../services/campaign';
 
 const activeParticipantWhere = { cancelledAt: null } as const;
 

@@ -7,7 +7,7 @@ import {
   headUploadObject,
   isUploadObjectNotFound,
   publishUploadObject,
-} from '../upload/storage';
+} from '../../upload/storage';
 
 export function getCampaignAssetStagingKey(userId: string, uploadId: string, contentType: string) {
   return `campaign-assets/staging/${userId}/${uploadId}.${extensionFor(contentType)}`;
