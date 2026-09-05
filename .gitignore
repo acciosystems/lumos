@@ -4,7 +4,7 @@ node_modules
 # output
 out
 dist
-artifacts
+# artifacts
 *.tgz
 
 # code coverage
