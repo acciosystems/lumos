@@ -20,7 +20,7 @@ export default defineConfig({
     evlog({
       env: { service: 'lumos/web' },
       redact: true,
-      silent: true,
+      silent: false,
       exclude: ['/api/rpc/**', '/_serverFn/**'],
       routes: {
         '/api/auth/**': { service: 'lumos/auth' },
