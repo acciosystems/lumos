@@ -56,7 +56,7 @@ Os resumos apresentam intenção de produto; o código e sua validação sustent
 
 | Termo | Uso comum a todas as partes |
 | --- | --- |
-| AccioLabs | Empresa fictícia, software house situada em Votorantim/SP. Não inventar fundação, equipe, clientes, endereço ou histórico adicional. |
+| AccioLabs | Empresa fictícia, criada exclusivamente para este TCC, apresentada como software house situada em Votorantim/SP. Não inventar fundação, equipe, clientes, endereço ou histórico adicional. |
 | Nossa Causa | Nome da plataforma descrita no TCC. |
 | Lumos | Nome do repositório/projeto técnico; não substituir o nome do produto por ele. |
 | MVP | Recorte do trabalho. Conferir o que está implementado; a prioridade P0 nos resumos não comprova conclusão. |
@@ -78,6 +78,7 @@ Registrar aqui definições que afetem mais de uma parte, inclusive o recorte te
 | D-004 | Tratar o manual do usuário como fictício. | Instrução do usuário. | Fase 7 | Configuração inicial |
 | D-005 | Interpretar a parte `sumario` como síntese acadêmica no estilo abstract, com RESUMO em português e ABSTRACT em inglês, e não como lista de seções. Preservar o identificador dos arquivos. | Esclarecimento explícito do usuário nesta tarefa. | Sumário e integração pré-textual | Codex / 2026-09-05 |
 | D-006 | Aplicar às duas versões a estrutura do exemplo fornecido: um parágrafo curto com contextualização, problema e proposta do trabalho, seguido de palavras-chave. Usar somente a estrutura do exemplo, nunca seu conteúdo como fonte. Não exigir blocos de método, resultados e conclusão. | Esclarecimento e exemplo estrutural fornecidos pelo usuário. | Sumário e integração pré-textual | Codex / 2026-09-05 |
+| D-007 | Declarar de forma inequívoca, na introdução e nas partes que apresentarem a organização, que a AccioLabs é uma empresa ficcional criada exclusivamente para o contexto deste TCC. A apresentação deve se limitar a sua caracterização acadêmica, sem biografia empresarial inventada. | Esclarecimento explícito do usuário nesta tarefa. | Introdução e partes que mencionarem a empresa | Codex / 2026-09-05 |
 
 ## Organização dos arquivos e passagem para ABNT
 
@@ -111,7 +112,7 @@ Ao atualizar, informar responsável, arquivos produzidos e pendências relevante
 | Parte / identificador | Responsável | Estado | Planejamento / texto | Dependências ou observações |
 | --- | --- | --- | --- | --- |
 | Sumário — `sumario` | Codex | Concluído | `artifacts/planejamento-sumario.md`; `artifacts/texto-sumario.md` | Abertura revisada em ambos os idiomas em 2026-09-05, com apoio em Ghoorah, Mariyani-Squire e Amin (2025). Fonte e limites registrados no planejamento para consolidação bibliográfica. Revisão acadêmica e de equivalência concluída; revalidar na integração com as fases e normalizar conforme P-001. |
-| Introdução — `introducao` | A atribuir | Não iniciado | — | Dados adicionais sobre a empresa dependem de esclarecimento. |
+| Introdução — `introducao` | Codex | Concluído | `artifacts/planejamento-introducao.md`; `artifacts/texto-introducao.md` | D-007 aplicada: AccioLabs é apresentada como empresa ficcional criada exclusivamente para o TCC; revalidar a coerência com as fases durante a integração final. |
 | Fase 1 — `fase-01` | A atribuir | Não iniciado | — | Base em `docs/references.md`. |
 | Fase 2 — `fase-02` | A atribuir | Não iniciado | — | Base em referências; alinhar com a fase 1. |
 | Fase 3 — `fase-03` | A atribuir | Não iniciado | — | Esclarecer o sentido de sistema atual e respeitar o MVP. |
