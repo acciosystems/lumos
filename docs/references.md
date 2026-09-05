@@ -24,15 +24,9 @@ https://guaiaca.ufpel.edu.br/handle/prefix/14489
 
 ---
 
-Doações físicas / logística
-
-LIANG, Shuai; WANG, Xiang; WANG, Xihui. Coordination research of in-kind donation in disaster relief based on deprivation theory. Systems Engineering – Theory & Practice, v. 42, n. 9, 2022. DOI: 10.12011/SETP2019-2886.
-
----
-
 Tese brasileira sobre gestão de doações
 
-Modelagem e simulação dos processos da gestão de doações para ajuda humanitária em localidades com baixa resiliência. Tese de Doutorado, Universidade Federal de Santa Catarina.
+VARELLA, Leonardo. Modelagem e simulação dos processos da gestão de doações para ajuda humanitária em localidades com baixa resiliência. 2019. Tese (Doutorado em Engenharia de Produção) — Universidade Federal de Santa Catarina.
 
 https://repositorio.ufsc.br/handle/123456789/215066
 
@@ -41,8 +35,6 @@ https://repositorio.ufsc.br/handle/123456789/215066
 Confiança e doações
 
 CHAPMAN, Cassandra M.; HORNSEY, Matthew J.; GILLESPIE, Nicole. To What Extent Is Trust a Prerequisite for Charitable Giving? A Systematic Review and Meta-Analysis. Nonprofit and Voluntary Sector Quarterly, 2021. DOI: 10.1177/08997640211003250.
-
-https://journals.sagepub.com/doi/10.1177/08997640211003250
 
 # Cadeia lógica
 

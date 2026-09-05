@@ -15,26 +15,26 @@ O escopo da apresentação da AccioLabs será restrito aos dados definidos: trat
 
 ## Estrutura proposta para a redação
 
-| Ordem | Finalidade | Conteúdo previsto | Limite editorial |
-| --- | --- | --- | --- |
-| 1 | Delimitar a natureza da empresa | Declarar que a AccioLabs é ficcional e foi criada exclusivamente para este TCC. | Usar formulação direta; não sugerir que a empresa existe fora do trabalho. |
-| 2 | Caracterizar a organização no recorte acadêmico | Informar que a AccioLabs é apresentada como uma software house situada em Votorantim/SP. | Não expandir a caracterização com história, estrutura ou dados empresariais não fornecidos. |
-| 3 | Apresentar o objeto do trabalho | Vincular a empresa à concepção e ao desenvolvimento da plataforma web Nossa Causa. | Usar Nossa Causa como produto e Lumos apenas como nome técnico do repositório. |
-| 4 | Situar o problema e a proposta | Resumir a proposta de centralizar a organização e o acompanhamento de campanhas de doação, conforme a documentação do projeto. | Tratar a solução como proposta de TCC e respeitar o recorte do MVP; não declarar impacto, adoção ou resultados medidos. |
-| 5 | Delimitar o documento | Indicar, em formulação concisa, que as seções seguintes desenvolvem o levantamento, o projeto e a documentação da solução. | Ajustar a referência às seções à estrutura final integrada; não antecipar conteúdo inexistente. |
+| Ordem | Finalidade                                      | Conteúdo previsto                                                                                                              | Limite editorial                                                                                                        |
+| ----- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| 1     | Delimitar a natureza da empresa                 | Declarar que a AccioLabs é ficcional e foi criada exclusivamente para este TCC.                                                | Usar formulação direta; não sugerir que a empresa existe fora do trabalho.                                              |
+| 2     | Caracterizar a organização no recorte acadêmico | Informar que a AccioLabs é apresentada como uma software house situada em Votorantim/SP.                                       | Não expandir a caracterização com história, estrutura ou dados empresariais não fornecidos.                             |
+| 3     | Apresentar o objeto do trabalho                 | Vincular a empresa à concepção e ao desenvolvimento da plataforma web Nossa Causa.                                             | Usar Nossa Causa como produto e Lumos apenas como nome técnico do repositório.                                          |
+| 4     | Situar o problema e a proposta                  | Resumir a proposta de centralizar a organização e o acompanhamento de campanhas de doação, conforme a documentação do projeto. | Tratar a solução como proposta de TCC e respeitar o recorte do MVP; não declarar impacto, adoção ou resultados medidos. |
+| 5     | Delimitar o documento                           | Indicar, em formulação concisa, que as seções seguintes desenvolvem o levantamento, o projeto e a documentação da solução.     | Ajustar a referência às seções à estrutura final integrada; não antecipar conteúdo inexistente.                         |
 
 A abertura deve usar uma frase inequívoca, com sentido equivalente a: “A AccioLabs é uma empresa ficcional, criada exclusivamente para o desenvolvimento deste Trabalho de Conclusão de Curso.” A redação final poderá variar a forma, mas não poderá enfraquecer nem omitir essa informação.
 
 ## Fontes e evidências
 
-| Fonte | Situação | Uso previsto |
-| --- | --- | --- |
-| `artifacts/TCC-PRINCIPAL.md` | Consultado. | Confirmar nomenclatura, escopo do MVP, limites sobre a empresa e a decisão D-007. |
-| Instrução do usuário nesta tarefa | Consultada. | Sustentar a declaração de que a empresa é ficcional e criada apenas para o TCC. |
-| `docs/nossa-causa-resumo-pt.md` | Consultado. | Apresentar o objetivo da Nossa Causa, o problema delimitado e as modalidades previstas sem convertê-las em entregas comprovadas. |
-| `docs/nossa-causa-summary-en.md` | Consultado. | Conferir consistência terminológica com a descrição do projeto. |
-| `docs/references.md` | Consultado como base bibliográfica disponível. | Não é necessário para caracterizar a empresa ficcional. Poderá fundamentar uma contextualização breve sobre transparência, confiança ou gestão de doações somente após conferência do trabalho original e se essa contextualização for mantida na introdução. |
-| Fases 1 e 2 | Ainda não redigidas. | Revalidar, na integração, a formulação do problema e toda referência bibliográfica usada para contextualizá-lo. |
+| Fonte                             | Situação                                       | Uso previsto                                                                                                                                                                                                                                                  |
+| --------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `artifacts/TCC-PRINCIPAL.md`      | Consultado.                                    | Confirmar nomenclatura, escopo do MVP, limites sobre a empresa e a decisão D-007.                                                                                                                                                                             |
+| Instrução do usuário nesta tarefa | Consultada.                                    | Sustentar a declaração de que a empresa é ficcional e criada apenas para o TCC.                                                                                                                                                                               |
+| `docs/nossa-causa-resumo-pt.md`   | Consultado.                                    | Apresentar o objetivo da Nossa Causa, o problema delimitado e as modalidades previstas sem convertê-las em entregas comprovadas.                                                                                                                              |
+| `docs/nossa-causa-summary-en.md`  | Consultado.                                    | Conferir consistência terminológica com a descrição do projeto.                                                                                                                                                                                               |
+| `docs/references.md`              | Consultado como base bibliográfica disponível. | Não é necessário para caracterizar a empresa ficcional. Poderá fundamentar uma contextualização breve sobre transparência, confiança ou gestão de doações somente após conferência do trabalho original e se essa contextualização for mantida na introdução. |
+| Fases 1 e 2                       | Ainda não redigidas.                           | Revalidar, na integração, a formulação do problema e toda referência bibliográfica usada para contextualizá-lo.                                                                                                                                               |
 
 Não serão usadas referências bibliográficas para comprovar fatos sobre a AccioLabs, pois ela não é uma empresa real. Caso a introdução inclua uma afirmação geral sobre confiança, transparência ou coordenação de doações, a afirmação deverá ser limitada ao que a fonte original efetivamente sustentar e integrada à bibliografia final.
 

@@ -15,12 +15,12 @@ O identificador e o título de referência “Sumário” permanecem no acompanh
 
 ## Estrutura da redação
 
-| Posição | Função | Conteúdo a selecionar das fontes do TCC | Limite editorial |
-| --- | --- | --- | --- |
-| Abertura | Contextualizar o tema | Associação entre confiança dos doadores e percepção de transparência financeira em organizações sem fins lucrativos, conforme Ghoorah, Mariyani-Squire e Amin (2025). | Apresentar associação, sem afirmar causalidade ou impacto da plataforma. Ajuste solicitado pelo usuário após a primeira redação. |
-| Desenvolvimento | Apresentar o problema | Dificuldades de organização e acompanhamento identificadas no contexto do produto, com sustentação bibliográfica a conferir nas fases 1 e 2. | Escolher o problema central; não enumerar todos os desafios nem generalizar uma situação do projeto para todas as campanhas. |
-| Fechamento | Apresentar a proposta e sua finalidade | Nossa Causa como plataforma web proposta para centralização e gestão de campanhas, respeitando o recorte do MVP. | Descrever a finalidade sem convertê-la em benefício comprovado; mencionar modalidades somente conforme o escopo alinhado. |
-| Após o parágrafo | Identificar os temas centrais | Termos representativos do conteúdo efetivamente redigido. | Selecionar quatro palavras-chave, acompanhando a estrutura do exemplo, sem copiar sua seleção. |
+| Posição          | Função                                 | Conteúdo a selecionar das fontes do TCC                                                                                                                               | Limite editorial                                                                                                                 |
+| ---------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Abertura         | Contextualizar o tema                  | Associação entre confiança dos doadores e percepção de transparência financeira em organizações sem fins lucrativos, conforme Ghoorah, Mariyani-Squire e Amin (2025). | Apresentar associação, sem afirmar causalidade ou impacto da plataforma. Ajuste solicitado pelo usuário após a primeira redação. |
+| Desenvolvimento  | Apresentar o problema                  | Dificuldades de organização e acompanhamento identificadas no contexto do produto, com sustentação bibliográfica a conferir nas fases 1 e 2.                          | Escolher o problema central; não enumerar todos os desafios nem generalizar uma situação do projeto para todas as campanhas.     |
+| Fechamento       | Apresentar a proposta e sua finalidade | Nossa Causa como plataforma web proposta para centralização e gestão de campanhas, respeitando o recorte do MVP.                                                      | Descrever a finalidade sem convertê-la em benefício comprovado; mencionar modalidades somente conforme o escopo alinhado.        |
+| Após o parágrafo | Identificar os temas centrais          | Termos representativos do conteúdo efetivamente redigido.                                                                                                             | Selecionar quatro palavras-chave, acompanhando a estrutura do exemplo, sem copiar sua seleção.                                   |
 
 Usar três frases como ponto de partida editorial, uma para cada função do parágrafo, ajustando a divisão se a clareza exigir. Manter extensão próxima à concisão do exemplo, sem criar um limite obrigatório de palavras. Não acrescentar subtítulos internos, citações extensas, tabelas, imagens ou inventário de tecnologias ao abstract.
 
@@ -28,15 +28,15 @@ Não impor seções de método, resultados e conclusão: elas não fazem parte d
 
 ## Fontes e evidências
 
-| Fonte | Situação neste planejamento | Uso na redação |
-| --- | --- | --- |
-| `AGENTS.md` e `artifacts/TCC-PRINCIPAL.md` | Consultados. | Regras, nomes, recorte, distinção entre proposta e implementação e decisões de estrutura. |
-| Instruções e exemplo do usuário | Consultados. | Estrutura bilíngue e apresentação de palavras-chave; nenhum aproveitamento como fonte factual. |
-| `docs/nossa-causa-resumo-pt.md` | Consultado. | Intenção do produto, público, problema e modalidades previstas. Não comprova entregas ou impactos. |
-| `docs/nossa-causa-summary-en.md` | Consultado. | Apoio terminológico para a versão inglesa; mesma limitação quanto à implementação. |
-| `docs/references.md` | Lista consultada; artigo de Ghoorah, Mariyani-Squire e Amin (2025) consultado na revisão da abertura. Demais trabalhos não verificados nesta parte. | Fundamentar a contextualização na associação relatada pelo artigo, sem tratar a cadeia lógica da lista como conclusão demonstrada. |
-| Textos das fases 1, 2, 3, 4 e 6 e considerações finais | Ainda não disponíveis entre os artefatos consultados. | Conferir problema, proposta, recorte e compatibilidade com o desenvolvimento na integração. |
-| Código e validações do repositório | Não auditados para este planejamento. | Consultar se a redação vier a afirmar uma funcionalidade como implementada; registrar a versão usada como evidência. |
+| Fonte                                                  | Situação neste planejamento                                                                                                                         | Uso na redação                                                                                                                     |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `AGENTS.md` e `artifacts/TCC-PRINCIPAL.md`             | Consultados.                                                                                                                                        | Regras, nomes, recorte, distinção entre proposta e implementação e decisões de estrutura.                                          |
+| Instruções e exemplo do usuário                        | Consultados.                                                                                                                                        | Estrutura bilíngue e apresentação de palavras-chave; nenhum aproveitamento como fonte factual.                                     |
+| `docs/nossa-causa-resumo-pt.md`                        | Consultado.                                                                                                                                         | Intenção do produto, público, problema e modalidades previstas. Não comprova entregas ou impactos.                                 |
+| `docs/nossa-causa-summary-en.md`                       | Consultado.                                                                                                                                         | Apoio terminológico para a versão inglesa; mesma limitação quanto à implementação.                                                 |
+| `docs/references.md`                                   | Lista consultada; artigo de Ghoorah, Mariyani-Squire e Amin (2025) consultado na revisão da abertura. Demais trabalhos não verificados nesta parte. | Fundamentar a contextualização na associação relatada pelo artigo, sem tratar a cadeia lógica da lista como conclusão demonstrada. |
+| Textos das fases 1, 2, 3, 4 e 6 e considerações finais | Ainda não disponíveis entre os artefatos consultados.                                                                                               | Conferir problema, proposta, recorte e compatibilidade com o desenvolvimento na integração.                                        |
+| Código e validações do repositório                     | Não auditados para este planejamento.                                                                                                               | Consultar se a redação vier a afirmar uma funcionalidade como implementada; registrar a versão usada como evidência.               |
 
 O texto pode apresentar a finalidade do projeto com base no contexto disponível. Afirmações gerais sobre confiança, transparência ou efeitos sociais exigem fundamentação efetivamente conferida. Não usar a cadeia lógica da lista de referências como demonstração concluída.
 
