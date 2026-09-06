@@ -1,0 +1,71 @@
+flowchart LR
+    subgraph atores["Atores"]
+        direction TB
+        visitante[Visitante]
+        usuario[Usuário autenticado]
+        organizador[Organizador]
+    end
+
+    subgraph sistema["Nossa Causa"]
+        direction LR
+
+        subgraph acesso["Acesso e consulta"]
+            direction TB
+            criar_conta([Criar conta])
+            entrar([Entrar no sistema])
+            consultar([Consultar campanhas])
+            filtrar([Aplicar filtros])
+            detalhes([Visualizar detalhes])
+            transparencia([Consultar informações de transparência])
+        end
+
+        subgraph participacao["Conta, participação e perfil"]
+            direction TB
+            administrar_conta([Administrar conta])
+            participar([Participar de campanha física])
+            cancelar_participacao([Cancelar participação])
+            manter_perfil([Manter perfil de organizador])
+        end
+
+        subgraph gestao["Gestão de campanhas"]
+            direction TB
+            criar_campanha([Criar campanha])
+            editar([Editar campanha])
+            publicar([Publicar atualização])
+            progresso([Registrar progresso de itens])
+            concluir([Concluir campanha])
+            cancelar_campanha([Cancelar campanha])
+            prestacao([Enviar prestação de contas])
+        end
+    end
+
+    visitante --> criar_conta
+    visitante --> entrar
+    visitante --> consultar
+    visitante --> filtrar
+    visitante --> detalhes
+    visitante --> transparencia
+
+    usuario --> consultar
+    usuario --> filtrar
+    usuario --> detalhes
+    usuario --> transparencia
+    usuario --> administrar_conta
+    usuario --> participar
+    usuario --> cancelar_participacao
+    usuario --> manter_perfil
+
+    organizador -. "usuário autenticado com perfil" .-> usuario
+    organizador --> criar_campanha
+    organizador --> editar
+    organizador --> publicar
+    organizador --> progresso
+    organizador --> concluir
+    organizador --> cancelar_campanha
+    organizador --> prestacao
+    concluir -. "habilita" .-> prestacao
+
+    classDef ator fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef acao fill:#EFF6FF,stroke:#2563EB,color:#0F172A,stroke-width:1.5px;
+    class visitante,usuario,organizador ator;
+    class criar_conta,entrar,consultar,filtrar,detalhes,transparencia,administrar_conta,participar,cancelar_participacao,manter_perfil,criar_campanha,editar,publicar,progresso,concluir,cancelar_campanha,prestacao acao;

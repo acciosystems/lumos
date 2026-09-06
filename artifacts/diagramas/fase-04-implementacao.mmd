@@ -1,0 +1,29 @@
+flowchart TB
+    navegador["Navegador do usuário"]
+
+    subgraph sistema["Nossa Causa"]
+        aplicacao["Aplicação web\nTelas, formulários e consultas"]
+        servicos["Serviços da aplicação\nPermissões e regras de negócio"]
+        autenticacao["Autenticação\nIdentificação e proteção de acesso"]
+        validacao["Validação\nConferência dos dados informados"]
+    end
+
+    dados[("Banco de dados\nContas, campanhas e registros")]
+    arquivos[("Armazenamento de arquivos\nImagens e evidências")]
+    email["Serviço de e-mail\nVerificação e recuperação de acesso"]
+
+    navegador --> aplicacao
+    aplicacao --> servicos
+    aplicacao --> autenticacao
+    servicos --> validacao
+    servicos --> dados
+    servicos --> arquivos
+    autenticacao --> dados
+    autenticacao --> email
+
+    classDef interface fill:#F8FAFC,stroke:#475569,color:#0F172A,stroke-width:1.5px;
+    classDef interno fill:#EFF6FF,stroke:#2563EB,color:#0F172A,stroke-width:1.5px;
+    classDef externo fill:#F0FDF4,stroke:#16A34A,color:#0F172A,stroke-width:1.5px;
+    class navegador interface;
+    class aplicacao,servicos,autenticacao,validacao interno;
+    class dados,arquivos,email externo;

@@ -1,0 +1,76 @@
+erDiagram
+    USUARIO {
+        string id PK
+        string nome
+        string email
+        string nome_de_usuario
+    }
+
+    PERFIL_ORGANIZADOR {
+        string id PK
+        string tipo
+        string nome_publico
+        string cnpj
+        boolean cnpj_verificado
+    }
+
+    CAMPANHA {
+        string id PK
+        string titulo
+        string modalidade
+        string estado
+        string tema
+        string regiao
+        date data_inicial
+        date data_final
+        string local_fisico
+        int meta_de_itens
+        int progresso_de_itens
+        string chave_pix
+        string dados_bancarios
+    }
+
+    PONTO_COLETA {
+        string id PK
+        string nome
+        string endereco
+        string instrucoes
+    }
+
+    PARTICIPACAO {
+        string id PK
+        date data_confirmacao
+        date data_cancelamento
+    }
+
+    ATUALIZACAO {
+        string id PK
+        string mensagem
+        date data_publicacao
+    }
+
+    PRESTACAO_CONTAS {
+        string id PK
+        int total_itens
+        int total_valor_centavos
+        string resumo_resultado
+        boolean enviada_no_prazo
+    }
+
+    ARQUIVO_CAMPANHA {
+        string id PK
+        string tipo
+        string nome_original
+        string tipo_de_conteudo
+    }
+
+    USUARIO ||--o| PERFIL_ORGANIZADOR : mantem
+    PERFIL_ORGANIZADOR ||--o{ CAMPANHA : organiza
+    CAMPANHA ||--o{ PONTO_COLETA : define
+    USUARIO ||--o{ PARTICIPACAO : realiza
+    CAMPANHA ||--o{ PARTICIPACAO : recebe
+    USUARIO ||--o{ ATUALIZACAO : publica
+    CAMPANHA ||--o{ ATUALIZACAO : possui
+    CAMPANHA ||--o| PRESTACAO_CONTAS : apresenta
+    CAMPANHA ||--o{ ARQUIVO_CAMPANHA : possui
+    PRESTACAO_CONTAS o|--o{ ARQUIVO_CAMPANHA : reune
