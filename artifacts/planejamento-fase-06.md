@@ -5,7 +5,7 @@
 - Identificador: `fase-06`.
 - Responsável pelo planejamento: Codex.
 - Data do planejamento: 2026-09-06.
-- Estado: Partes 0, 1 e 2 concluídas; Fase 6 em redação, com as Partes 3 a 6 ainda não iniciadas.
+- Estado: Partes 0, 1, 2 e 3 concluídas; Fase 6 em redação, com as Partes 4 a 6 ainda não iniciadas.
 - Recorte: MVP implementado da plataforma Nossa Causa, no mesmo snapshot funcional adotado nas Fases 3, 4 e 5.
 - Entrega final prevista: `artifacts/texto-fase-06.md` e os recursos visuais descritos neste planejamento.
 
@@ -380,13 +380,15 @@ Na Parte 1, foram conferidos o fluxo de consulta pública e o fluxo autenticado 
 
 Na Parte 2, as rotas visuais do MVP foram conferidas no código e em uma execução local da aplicação, e quinze telas foram consolidadas no tópico 6.2. A verificação em execução cobriu as páginas públicas e anônimas, além do redirecionamento aplicado pela barreira compartilhada das áreas autenticadas. As variações internas dessas áreas também foram comparadas com o código, sem iniciar uma sessão autenticada. O cadastro estava habilitado no ambiente consultado, e o console do navegador não apresentou erros da aplicação após a disponibilização do banco de dados. O inventário exclui rotas de API, layouts, estados técnicos e diálogos de confirmação. As abas Conta e Segurança foram mantidas como telas distintas, e a prestação de contas foi registrada como relatório integrado ao painel da campanha e ao seu detalhe público. A redação foi produzida com a skill `humanizar` em modo de criação e, nesta correção, revisada em modo de revisão, sempre com o perfil acadêmico.
 
+Na Parte 3, a matriz F01–F19 foi confirmada sem inclusão ou remoção de unidades de entrada. As dezenove capturas foram obtidas pelo Chrome DevTools MCP em uma aplicação local, em tema claro e viewport de desktop. Foi usada uma conta de demonstração, um perfil organizador institucional e campanhas físicas e virtuais fictícias nos estados necessários; esses registros foram removidos do banco de desenvolvimento depois das capturas. Nenhuma credencial, token válido, dado pessoal ou dado bancário real foi exibido. A árvore de acessibilidade foi conferida antes de cada registro e os PNGs foram revisados, com recaptura dos cartões cujo primeiro recorte não preservava a legibilidade completa. O tópico 6.2.1 recebeu as figuras individuais, suas fontes e uma interpretação por grupo. A redação foi revisada com a skill `humanizar`, em modo de revisão e perfil acadêmico.
+
 ## Critérios para concluir a execução futura
 
 - [x] O snapshot e o manifesto de evidências foram registrados.
 - [x] O tópico 6.1 descreve o padrão real do sistema e está coerente com a Fase 4.
 - [x] O tópico 6.2 relaciona todas as telas sem imagens e sem contar rotas técnicas.
-- [ ] O tópico 6.2.1 possui uma evidência legível para cada formulário confirmado no snapshot.
-- [ ] As capturas foram produzidas com dados fictícios, revisadas e livres de conteúdo sensível.
+- [x] O tópico 6.2.1 possui uma evidência legível para cada formulário confirmado no snapshot.
+- [x] As capturas foram produzidas com dados fictícios, revisadas e livres de conteúdo sensível.
 - [ ] O tópico 6.2.2 cita fonte conceitual conferida e apresenta um diagrama rastreável à implementação.
 - [ ] A fonte Mermaid do diagrama foi validada e preservada.
 - [ ] A implementação TSDoc, sua ferramenta e sua cobertura foram verificadas.

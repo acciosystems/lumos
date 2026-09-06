@@ -58,3 +58,131 @@ Fonte: elaboração própria com base na implementação do MVP Nossa Causa (202
 As telas de consulta podem conter controles de entrada sem perder sua finalidade principal. O catálogo, por exemplo, recebe filtros para refinar a listagem, enquanto o detalhe da campanha apresenta informações já registradas e oferece participação apenas na situação aplicável. As abas de configurações foram relacionadas separadamente porque os dados de conta e os mecanismos de segurança são administrados em conjuntos distintos.
 
 Não há uma tela exclusiva de relatório no MVP. A prestação de contas é preenchida no painel da campanha concluída e aparece no detalhe público quando foi publicada. Por esse motivo, ela foi classificada como relatório integrado a essas duas telas, sem atribuir ao sistema uma página ou um gerador de relatórios inexistente.
+
+## 6.2.1 Imagens de cada formulário do software
+
+Foram registradas dezenove unidades de entrada de dados do MVP em uma execução local da aplicação. As capturas foram produzidas em tema claro e viewport de desktop, com o Chrome DevTools MCP. Os dados exibidos pertencem a uma conta e a campanhas fictícias preparadas apenas para a documentação; nenhuma credencial, token válido, dado bancário real ou dado pessoal foi informado ou submetido durante o registro.
+
+As Figuras 4 a 8 mostram os controles acessíveis sem sessão autenticada. Os filtros do catálogo são incluídos porque permitem informar critérios de consulta. A redefinição de senha foi aberta com um identificador fictício, sem tentar alterar uma senha, pois o objetivo é demonstrar os campos visíveis, não executar o fluxo de recuperação.
+
+Figura 4 — Filtros de campanhas
+
+![Filtros de campanhas](imagens/fase-06/formularios/f01-filtros-campanhas.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 5 — Entrada na conta
+
+![Entrada na conta](imagens/fase-06/formularios/f02-entrar-na-conta.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 6 — Criação de conta
+
+![Criação de conta](imagens/fase-06/formularios/f03-criacao-conta.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 7 — Solicitação de redefinição de senha
+
+![Solicitação de redefinição de senha](imagens/fase-06/formularios/f04-solicitacao-redefinicao.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 8 — Redefinição de senha
+
+![Redefinição de senha](imagens/fase-06/formularios/f05-redefinicao-senha.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+As Figuras 9 a 14 concentram os formulários de organizador e de campanha. A comparação entre os estados físico e virtual torna visíveis os campos condicionais de cada modalidade, sem alterar o escopo funcional descrito nas fases anteriores.
+
+Figura 9 — Perfil de organizador institucional
+
+![Perfil de organizador institucional](imagens/fase-06/formularios/f06-perfil-organizador.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 10 — Criação de campanha física
+
+![Criação de campanha física](imagens/fase-06/formularios/f07-criar-campanha-fisica.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 11 — Criação de campanha virtual
+
+![Criação de campanha virtual](imagens/fase-06/formularios/f08-criar-campanha-virtual.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 12 — Edição de campanha física
+
+![Edição de campanha física](imagens/fase-06/formularios/f09-editar-campanha-fisica.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 13 — Edição de campanha virtual
+
+![Edição de campanha virtual](imagens/fase-06/formularios/f10-editar-campanha-virtual.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 14 — Registro de progresso de itens
+
+![Registro de progresso de itens](imagens/fase-06/formularios/f11-progresso-de-itens.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+As Figuras 15 a 17 registram operações realizadas durante e depois do ciclo de vida de uma campanha. A atualização comunica uma novidade aos doadores, enquanto os formulários de prestação de contas exigem um resumo e permitem anexar evidências. A modalidade física pede o total de itens; a virtual pede o total arrecadado, coerente com as características de cada campanha.
+
+Figura 15 — Publicação de atualização de campanha
+
+![Publicação de atualização de campanha](imagens/fase-06/formularios/f12-publicacao-de-atualizacao.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 16 — Prestação de contas de campanha física
+
+![Prestação de contas de campanha física](imagens/fase-06/formularios/f13-prestacao-contas-fisica.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 17 — Prestação de contas de campanha virtual
+
+![Prestação de contas de campanha virtual](imagens/fase-06/formularios/f14-prestacao-contas-virtual.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+As Figuras 18 a 22 apresentam a manutenção da conta. Os diálogos foram registrados abertos para evidenciar as unidades de entrada que não ocupam uma página inteira. O cadastro de chave de acesso não foi confirmado, porque a conclusão exige a interação com o autenticador do dispositivo e não é necessária para apresentar o formulário.
+
+Figura 18 — Dados básicos da conta
+
+![Dados básicos da conta](imagens/fase-06/formularios/f15-dados-basicos-conta.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 19 — Alteração de avatar
+
+![Alteração de avatar](imagens/fase-06/formularios/f16-alteracao-avatar.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 20 — Alteração de endereço de e-mail
+
+![Alteração de endereço de e-mail](imagens/fase-06/formularios/f17-alteracao-email.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 21 — Alteração de senha
+
+![Alteração de senha](imagens/fase-06/formularios/f18-alteracao-senha.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+Figura 22 — Registro de chave de acesso
+
+![Registro de chave de acesso](imagens/fase-06/formularios/f19-registro-chave-acesso.png)
+
+Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
+
+As imagens documentam as entradas disponíveis no snapshot da aplicação e suas variações relevantes; não constituem um manual de uso nem comprovam a realização de doações, transferências ou prestações de contas. Durante a diagramação final, os arquivos originais poderão ser organizados em pranchas para preservar a legibilidade, sem eliminar a identificação individual de cada formulário.
