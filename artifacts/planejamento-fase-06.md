@@ -5,7 +5,7 @@
 - Identificador: `fase-06`.
 - Responsável pelo planejamento: Codex.
 - Data do planejamento: 2026-09-06.
-- Estado: Partes 0, 1, 2 e 3 concluídas; Fase 6 em redação, com as Partes 4 a 6 ainda não iniciadas.
+- Estado: Partes 0 a 4 concluídas; Fase 6 em redação, com as Partes 5 e 6 pendentes.
 - Recorte: MVP implementado da plataforma Nossa Causa, no mesmo snapshot funcional adotado nas Fases 3, 4 e 5.
 - Entrega final prevista: `artifacts/texto-fase-06.md` e os recursos visuais descritos neste planejamento.
 
@@ -215,8 +215,8 @@ Exemplo de padrão de nome: `f07-criar-campanha-fisica.png`. Não incluir e-mail
 
 | Fonte | Uso planejado | Verificação na execução |
 | --- | --- | --- |
-| OBJECT MANAGEMENT GROUP. *Unified Modeling Language — Version 2.5.1*. 2017. Disponível em: <https://www.omg.org/spec/UML/2.5.1/PDF>. | Fundamentar classificadores, atributos, operações e relacionamentos na explicação conceitual. | Conferir os trechos específicos sobre classificação e classes, registrar páginas e preparar a referência para normalização. |
-| MERMAID. *Class diagrams*. Disponível em: <https://mermaid.js.org/syntax/classDiagram.html>. | Conferir a sintaxe de classes, anotações, relações e multiplicidades usada na fonte editável. | Verificar a documentação correspondente à versão disponível durante a execução; usar como fonte técnica de elaboração, não como substituta da referência conceitual UML. |
+| OBJECT MANAGEMENT GROUP. *Unified Modeling Language — Version 2.5.1*. 2017. Disponível em: <https://www.omg.org/spec/UML/2.5.1/PDF>. | Fundamentar classificadores, atributos, operações e relacionamentos na explicação conceitual. | Conferida em 2026-09-06; a seção 11.4.4, p. 195, descreve a notação de classe e seus compartimentos, enquanto a seção 11.5.4, pp. 201–202, trata de associações, multiplicidades e composição. |
+| MERMAID. *Class diagrams*. Disponível em: <https://mermaid.js.org/syntax/classDiagram.html>. | Conferir a sintaxe de classes, anotações, relações e multiplicidades usada na fonte editável. | Conferida em 2026-09-06; documentação apresentada como versão 11.17.2. A fonte editável foi validada com Mermaid CLI 11.17.0. |
 
 ### TSDoc
 
@@ -382,6 +382,8 @@ Na Parte 2, as rotas visuais do MVP foram conferidas no código e em uma execuç
 
 Na Parte 3, a matriz F01–F19 foi confirmada sem inclusão ou remoção de unidades de entrada. As dezenove capturas foram obtidas pelo Chrome DevTools MCP em uma aplicação local, em tema claro e viewport de desktop. Foi usada uma conta de demonstração, um perfil organizador institucional e campanhas físicas e virtuais fictícias nos estados necessários; esses registros foram removidos do banco de desenvolvimento depois das capturas. Nenhuma credencial, token válido, dado pessoal ou dado bancário real foi exibido. A árvore de acessibilidade foi conferida antes de cada registro e os PNGs foram revisados, com recaptura dos cartões cujo primeiro recorte não preservava a legibilidade completa. O tópico 6.2.1 recebeu as figuras individuais, suas fontes e uma interpretação por grupo. A redação foi revisada com a skill `humanizar`, em modo de revisão e perfil acadêmico.
 
+Na Parte 4, a especificação UML 2.5.1 e a documentação oficial de diagramas de classe do Mermaid foram consultadas em 2026-09-06. O diagrama foi delimitado ao domínio de campanhas para combinar entidades persistidas, enumerações, um contrato de entrada e módulos funcionais reais sem tratá-los todos como classes TypeScript. A rastreabilidade das caixas e relações foi registrada no manifesto de evidências. A fonte `artifacts/diagramas/fase-06-classes.mmd` foi renderizada com Mermaid CLI 11.17.0 e sua saída foi inspecionada visualmente. Após as revisões de coerência, o recorte foi reduzido aos elementos que acrescentam contratos e operações ao DER, e a composição foi reposicionada para não atravessar a caixa do contrato. A renderização passou de aproximadamente 2397 × 1893 para 784 × 893 pixels. O texto do tópico 6.2.2 explicita a adaptação e diferencia o recorte do DER. A redação foi revisada com a skill `humanizar`, em modo de revisão e perfil acadêmico.
+
 ## Critérios para concluir a execução futura
 
 - [x] O snapshot e o manifesto de evidências foram registrados.
@@ -389,8 +391,8 @@ Na Parte 3, a matriz F01–F19 foi confirmada sem inclusão ou remoção de unid
 - [x] O tópico 6.2 relaciona todas as telas sem imagens e sem contar rotas técnicas.
 - [x] O tópico 6.2.1 possui uma evidência legível para cada formulário confirmado no snapshot.
 - [x] As capturas foram produzidas com dados fictícios, revisadas e livres de conteúdo sensível.
-- [ ] O tópico 6.2.2 cita fonte conceitual conferida e apresenta um diagrama rastreável à implementação.
-- [ ] A fonte Mermaid do diagrama foi validada e preservada.
+- [x] O tópico 6.2.2 cita fonte conceitual conferida e apresenta um diagrama rastreável à implementação.
+- [x] A fonte Mermaid do diagrama foi validada e preservada.
 - [ ] A implementação TSDoc, sua ferramenta e sua cobertura foram verificadas.
 - [ ] O tópico 6.2.3 contém exatamente a imagem fornecida pelo usuário e nenhuma captura adicional.
 - [ ] Quadro e figuras possuem título, fonte, menção e interpretação no texto.

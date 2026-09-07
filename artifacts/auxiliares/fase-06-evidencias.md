@@ -29,7 +29,7 @@
 | 1 — Padrão do sistema | Rastreabilidade entre interface, procedimentos, validação, serviços, autenticação e persistência. | Concluída em 2026-09-06. |
 | 2 — Lista de telas | Inventário textual de quinze telas, sem imagens. | Concluída em 2026-09-06. |
 | 3 — Formulários | Matriz F01–F19 e capturas com dados fictícios. | Concluída em 2026-09-06. |
-| 4 — Diagrama de classe | Fonte Mermaid e pesquisa conceitual. | Não iniciada. |
+| 4 — Diagrama de classe | Fonte Mermaid, pesquisa conceitual e rastreabilidade à implementação. | Concluída em 2026-09-06. |
 | 5 — TSDoc | Implementação verificada e imagem fornecida pelo usuário. | Não iniciada; depende dos insumos previstos. |
 
 ## Capturas de formulários — Parte 3
@@ -62,5 +62,27 @@
 | F17 | `artifacts/imagens/fase-06/formularios/f17-alteracao-email.png` | Diálogo de e-mail aberto. | Campo de endereço e confirmação visíveis. |
 | F18 | `artifacts/imagens/fase-06/formularios/f18-alteracao-senha.png` | Diálogo de senha aberto. | Campos de senha completos e legíveis. |
 | F19 | `artifacts/imagens/fase-06/formularios/f19-registro-chave-acesso.png` | Diálogo de chave de acesso aberto. | Campo de nome visível; registro não confirmado. |
+
+## Diagrama de classe — Parte 4
+
+| Item | Registro |
+| --- | --- |
+| Fonte conceitual | OBJECT MANAGEMENT GROUP. *Unified Modeling Language — Version 2.5.1*. 2017, seção 11.4.4, p. 195, e seção 11.5.4, pp. 201–202. Consulta em 2026-09-06. |
+| Fonte de notação | MERMAID. *Class diagrams*. Documentação apresentada como versão 11.17.2. Consulta em 2026-09-06. |
+| Fonte editável | `artifacts/diagramas/fase-06-classes.mmd`. |
+| Validação | Renderização concluída com Mermaid CLI 11.17.0 em 2026-09-06. Após as revisões de coerência, a saída passou de aproximadamente 2397 × 1893 para 784 × 893 pixels e foi novamente inspecionada. A composição entre campanha e prestação de contas foi reposicionada para não atravessar a caixa do contrato. O recorte menor e a proporção próxima à página favorecem a leitura na inserção em largura integral. Não foi mantida exportação, pois a diagramação final permanece adiada. |
+| Recorte | Domínio de campanhas: entidades persistidas, enumeração de modalidade, contrato de prestação de contas e módulos funcionais. |
+| Rótulos | A figura traduz atributos e operações para português; a tabela de rastreabilidade preserva os identificadores técnicos correspondentes. |
+| Limite de interpretação | As caixas `<<tipo validado>>` e `<<módulo funcional>>` representam tipos inferidos e módulos de funções TypeScript; não afirmam a existência de classes concretas. |
+
+| Elemento exibido | Correspondente técnico verificado |
+| --- | --- |
+| Campanha; Prestação de contas | Modelos `Campaign` e `CampaignAccountability` em `packages/database/prisma/schemas/campaign.prisma`. |
+| Modalidade da campanha | Enumeração `CampaignType` no mesmo esquema Prisma, reexportada pela validação compartilhada. |
+| Contrato de prestação de contas | Tipo inferido de `campaignAccountabilityInputSchema` em `packages/validation/src/campaign.ts`. Os contratos de criação e edição foram omitidos da figura para preservar a legibilidade, embora as operações correspondentes permaneçam representadas. |
+| Procedimentos de campanha | Procedimentos `create`, `updateDetails`, `saveAccountability` e `transitionLifecycle` em `packages/rpc/src/routers/campaign.ts`. |
+| Serviços de campanha | Funções `toCampaignCreateData`, `toCampaignUpdateData` e `saveCampaignAccountability` nos serviços de campanhas do pacote RPC. |
+| Campanha–prestação | Relação opcional `Campaign.accountability`, representada pela composição `1` para `0..1`. A relação com arquivos foi retirada do recorte para reduzir a densidade visual; ela permanece documentada no DER da Fase 4. |
+| Contrato–modalidade; procedimentos–contrato; serviços–campanha | Discriminação por `type` no esquema Valibot, entrada do procedimento e chamadas aos serviços de campanha. |
 
 Este manifesto será atualizado ao fim de cada parte concluída. Caminhos técnicos e detalhes de conferência pertencem a este material auxiliar e não serão reproduzidos no texto do TCC.

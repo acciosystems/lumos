@@ -1,0 +1,59 @@
+classDiagram
+    direction TB
+
+    class Campaign["Campanha"] {
+        <<entidade persistida>>
+        +String id
+        +CampaignType modalidade
+        +CampaignStatus estado
+        +String título
+        +Integer metaItens [física]
+        +Integer itensAtuais [física]
+        +String chavePix [virtual]
+    }
+
+    class CampaignAccountability["Prestação de contas"] {
+        <<entidade persistida>>
+        +String id
+        +Integer totalItens [física]
+        +Integer totalCentavos [virtual]
+        +String resumoResultado
+        +Boolean enviadaNoPrazo
+    }
+
+    class CampaignType["Modalidade da campanha"] {
+        <<enumeração>>
+        PHYSICAL
+        VIRTUAL
+    }
+
+    class CampaignAccountabilityInput["Contrato de prestação de contas"] {
+        <<tipo validado>>
+        +String id
+        +CampaignType modalidade
+        +String resumoResultado
+        +Integer totalItens [física]
+        +Integer totalCentavos [virtual]
+    }
+
+    class CampaignRouter["Procedimentos de campanha"] {
+        <<módulo funcional>>
+        +criar(entrada)
+        +editar(entrada)
+        +salvarPrestação(entrada)
+        +alterarCiclo(entrada)
+    }
+
+    class CampaignServices["Serviços de campanha"] {
+        <<módulo funcional>>
+        +prepararCriação(entrada)
+        +prepararEdição(entrada)
+        +salvarPrestação(entrada)
+    }
+
+    CampaignAccountability "0..1" --* "1" Campaign : prestação
+    Campaign --> CampaignType : modalidade
+    CampaignAccountabilityInput ..> CampaignType : define total
+    CampaignRouter ..> CampaignAccountabilityInput : recebe
+    CampaignRouter ..> CampaignServices : chama
+    CampaignServices ..> Campaign : aplica regras e persiste

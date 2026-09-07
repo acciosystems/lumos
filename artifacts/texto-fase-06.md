@@ -186,3 +186,17 @@ Figura 22 — Registro de chave de acesso
 Fonte: elaboração própria a partir da aplicação Nossa Causa, com dados fictícios (2026).
 
 As imagens documentam as entradas disponíveis no snapshot da aplicação e suas variações relevantes; não constituem um manual de uso nem comprovam a realização de doações, transferências ou prestações de contas. Durante a diagramação final, os arquivos originais poderão ser organizados em pranchas para preservar a legibilidade, sem eliminar a identificação individual de cada formulário.
+
+## 6.2.2 Diagrama de classe
+
+O diagrama de classe apresenta uma visão estática de uma parte do sistema. Ele reúne os elementos estruturais selecionados, seus atributos, suas operações e os relacionamentos entre eles. A especificação da UML descreve classes, propriedades, operações e associações como elementos dessa representação; as multiplicidades indicam quantas instâncias podem participar de um vínculo (OBJECT MANAGEMENT GROUP, 2017). A notação adotada na figura foi produzida em Mermaid, cuja sintaxe distingue atributos de operações, relações e anotações de classe (MERMAID, s.d.).
+
+A Nossa Causa foi implementada principalmente com funções TypeScript, tipos inferidos e esquemas de validação, e não com uma hierarquia manual de classes de domínio. Por isso, a figura usa o título exigido para o diagrama de classe, mas explicita a natureza de cada elemento por estereótipos. As caixas de entidades persistidas correspondem aos registros do domínio; as de tipos validados representam contratos de entrada; e as de módulos funcionais reúnem procedimentos e serviços. Esses dois últimos grupos não são apresentados como classes concretas da linguagem.
+
+Figura 23 — Estrutura de entidades, contrato e operações do domínio de campanhas da Nossa Causa
+
+Fonte: elaboração própria a partir da implementação do MVP Nossa Causa (2026).
+
+A Figura 23 organiza a campanha como elemento central. Seus atributos registram a modalidade, o estado e os dados próprios das campanhas físicas ou virtuais. A relação de composição indica que uma campanha pode ter, no máximo, uma prestação de contas, cujos totais também variam conforme a modalidade.
+
+O recorte também mostra o caminho entre entrada e persistência. O contrato de prestação de contas depende da modalidade da campanha, pois o total informado muda entre campanhas físicas e virtuais. Os procedimentos recebem esse contrato e acionam serviços que aplicam regras e registram alterações; a criação, a edição e as transições do ciclo de vida aparecem como operações do mesmo conjunto. Assim, a figura acrescenta um contrato e dependências operacionais à visão de entidades apresentada no DER, em vez de apenas repetir seus relacionamentos.
