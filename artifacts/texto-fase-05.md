@@ -2,7 +2,7 @@
 
 ## 5.1 Requisitos de hardware, software e equipamento
 
-A Nossa Causa é acessada pela web. Por isso, o usuário não precisa instalar um programa próprio da plataforma nem utilizar equipamento especializado. As condições de uso variam conforme a ação realizada: consultar campanhas exige menos recursos do que criar uma conta, administrar uma campanha ou enviar evidências de uma prestação de contas.
+A Nossa Causa é acessada pela web. Por isso, o usuário não precisa instalar um programa próprio da plataforma nem utilizar equipamento especializado. As ações de gestão e o envio de evidências acrescentam etapas de autenticação, preenchimento ou transferência de arquivos que não fazem parte da consulta pública.
 
 O Quadro 3 apresenta os requisitos do usuário final no recorte do MVP. Eles descrevem capacidades necessárias para usar a plataforma, e não uma configuração mínima de computador ou telefone. Não foram estabelecidas marcas, modelos, sistemas operacionais, quantidade de memória, espaço de armazenamento, resolução de tela ou velocidade mínima de conexão, pois essas especificações não fazem parte das regras atuais do sistema.
 

@@ -151,6 +151,8 @@ O texto posterior ao diagrama explicará as diferenças condicionais entre campa
 
 - **Object Management Group (2017):** fundamentará a definição de UML no tópico 4.1, a noção de casos de uso e atores no tópico 4.2 e a distinção entre a visão lógica elaborada para o TCC e as construções de implantação da UML no tópico 4.3. Serão usados, respectivamente, a cláusula 1, p. 1; a seção 18.1, pp. 639–642; e as seções 19.1 e 19.2, pp. 653–654.
 - **Chen (1976):** fundamentará, no tópico 4.4, as noções de entidade, relacionamento e atributo do modelo entidade-relacionamento. A consulta cobrirá as páginas 10 a 12 do artigo.
+- **Mermaid, documentação de DER (s.d.b):** apoiará a leitura da notação de pé-de-galinha e dos marcadores de cardinalidade usados no tópico 4.4. A consulta cobrirá a documentação oficial de *Entity Relationship Diagrams*, apresentada como versão 11.17.2.
+- **OWASP, *Authorization Cheat Sheet* (s.d.b):** fundamentará, no tópico 4.3, o princípio geral de que a autorização não deve depender do cliente e precisa ser verificada em cada requisição. A fonte não será usada como evidência da organização interna do MVP.
 
 As citações bibliográficas serão registradas no mapa central de referências. Elas não converterão as características do MVP em resultados da literatura nem substituirão a conferência técnica do sistema.
 
@@ -217,7 +219,7 @@ O texto final foi redigido e revisado com a skill `humanizar`, em modo de criaç
 
 Uma revisão posterior de coerência detalhou os casos de uso, incluiu criação e acesso à conta, separou as consultas públicas das ações de criação e entrada e atribuiu a manutenção do perfil ao usuário autenticado. O DER passou a apresentar o período e os dados próprios das modalidades física e virtual. As exportações permanecerão adiadas até uma solicitação de diagramação, sem alterar a conclusão da fase.
 
-Em 2026-09-07, a orientação que dispensava referências foi revogada. A redação passou a citar a especificação UML da OMG para os tópicos 4.1 a 4.3 e Chen (1976) para o tópico 4.4. Os conceitos, os localizadores, as cópias de consulta e os locais de uso foram registrados no mapa central.
+Em 2026-09-07, a orientação que dispensava referências foi revogada. A redação passou a citar a especificação UML da OMG nos tópicos 4.1 a 4.3, Chen (1976) e a documentação de DER do Mermaid no tópico 4.4, além da OWASP no princípio geral de autorização apresentado no tópico 4.3. A descrição da organização interna da Nossa Causa permaneceu vinculada à conferência técnica do MVP. Os conceitos, os localizadores, as cópias de consulta e os locais de uso foram registrados no mapa central.
 
 ## Critérios de aceite do planejamento
 

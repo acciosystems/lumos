@@ -4,7 +4,7 @@ Esta fase apresenta o projeto lógico da Nossa Causa conforme o recorte do MVP a
 
 ## 4.1 UML
 
-UML, sigla de *Unified Modeling Language*, é uma linguagem de modelagem usada para representar partes de um sistema por meio de diagramas (OBJECT MANAGEMENT GROUP, 2017). Cada diagrama simplifica o sistema para responder a uma pergunta diferente. Um pode mostrar quem realiza determinada ação; outro, como os blocos da aplicação se organizam; um terceiro, quais informações se relacionam.
+UML, sigla de *Unified Modeling Language*, é uma linguagem de modelagem usada para representar partes de um sistema por meio de diagramas. Cada diagrama simplifica o sistema para responder a uma pergunta diferente. Um pode mostrar quem realiza determinada ação; outro, como os blocos da aplicação se organizam; um terceiro, quais informações se relacionam (OBJECT MANAGEMENT GROUP, 2017, cláusula 1, p. 1).
 
 Nesta fase, a UML orienta a representação das interações dos usuários e da organização lógica da aplicação. O Diagrama Entidade-Relacionamento complementa essas visões ao tratar das informações registradas. Juntos, os modelos permitem examinar a Nossa Causa sem depender de detalhes de programação ou de telas específicas.
 
@@ -34,7 +34,7 @@ Figura 2 — Organização lógica da implementação da Nossa Causa
 
 Fonte: elaboração própria (2026).
 
-A Figura 2 mostra que a interface não decide sozinha as regras sensíveis do sistema. As regras e permissões são aplicadas antes da gravação dos dados. Essa separação ajuda a manter, em um mesmo ponto de controle, condições como a exigência de autenticação, o vínculo entre campanha e organizador e a distinção entre as duas modalidades de campanha.
+A Figura 2 mostra que a interface não decide sozinha as regras sensíveis do sistema. Em aplicações web, os controles de autorização não devem depender do cliente e precisam verificar as permissões em cada requisição (OWASP, s.d.b). Na Nossa Causa, a conferência técnica do MVP identificou que as regras e permissões são aplicadas antes da gravação dos dados. Essa separação concentra as condições de autenticação, o vínculo entre campanha e organizador e a distinção entre as duas modalidades de campanha em operações protegidas.
 
 O diagrama também deixa explícito o limite das integrações externas do MVP. Há armazenamento de arquivos e envio de mensagens ligadas à conta, mas não há processador de pagamentos nem serviço de notificações de campanha. A transferência virtual permanece fora da plataforma e ocorre entre doador e organizador.
 
@@ -42,7 +42,7 @@ O diagrama também deixa explícito o limite das integrações externas do MVP. 
 
 O Diagrama Entidade-Relacionamento, ou DER, descreve as informações relevantes para o sistema e os vínculos entre elas. No modelo entidade-relacionamento, uma entidade é algo que pode ser distinguido, um relacionamento é uma associação entre entidades e os atributos expressam as informações registradas sobre esses elementos (CHEN, 1976, p. 10-12). Assim, uma entidade pode representar algo sobre o qual a plataforma precisa guardar dados, como uma campanha ou um perfil de organizador. Seus atributos descrevem características desse elemento. Os relacionamentos mostram como uma entidade se conecta a outra.
 
-As cardinalidades indicam quantas ocorrências podem participar de cada relação. Por exemplo, um perfil de organizador pode estar associado a várias campanhas, enquanto uma campanha pode ter apenas uma prestação de contas. Essa leitura ajuda a compreender quais registros dependem de outros e quais informações permanecem separadas.
+Na Figura 3, as cardinalidades indicam quantas ocorrências de uma entidade podem se associar a outra. A notação de pé-de-galinha adotada pelo Mermaid representa essas quantidades nos marcadores das extremidades das relações (MERMAID, s.d.b). Assim, um perfil de organizador pode estar associado a várias campanhas, enquanto uma campanha pode ter apenas uma prestação de contas. Essa leitura ajuda a compreender quais registros dependem de outros e quais informações permanecem independentes.
 
 Figura 3 — Diagrama Entidade-Relacionamento da Nossa Causa
 

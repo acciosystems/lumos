@@ -51,8 +51,10 @@ O levantamento realizado em 2026-09-07 identificou os seguintes grupos de fontes
 | Varella (2019) | Fases 1 e 2. | Tese, repositório e localizador usado identificados. |
 | Especificação UML 2.5.1, da Object Management Group | Fase 4, tópicos 4.1 a 4.3, e Fase 6, tópico 6.2.2. | Seções, páginas, URL e cópia local identificadas. |
 | Chen (1976), sobre o modelo entidade-relacionamento | Fase 4, tópico 4.4. | DOI, páginas e cópia de consulta identificados. |
-| Documentação de diagrama de classes do Mermaid | Fase 6, tópico 6.2.2. | Página e versão consultada identificadas. |
-| Documentação oficial do TSDoc | Fase 6, tópico 6.2.3. | Página introdutória, especificação e páginas das tags identificadas; diferenciação das entradas na citação final pendente. |
+| Documentação de diagramas do Mermaid | Fase 4, tópico 4.4, e Fase 6, tópico 6.2.2. | Páginas de DER e de diagrama de classe, ambas na versão 11.17.2, identificadas. |
+| Documentação oficial do TSDoc | Fase 6, tópico 6.2.3. | Página introdutória, especificação e páginas das tags identificadas; chamadas diferenciadas no texto e no mapa. |
+| OWASP Cheat Sheet Series | Fase 4, tópico 4.3, e Fase 6, tópico 6.1. | Validação no lado protegido e autorização por requisição; cópias locais e chamadas diferenciadas identificadas. |
+| Especificação WebAuthn nível 3, do W3C | Fase 6, tópico 6.2.1. | Cerimônia de registro de chave de acesso e interação com autenticador compatível; recomendação de 25 ago. 2026 e cópia local identificadas. |
 
 O conteúdo detalhado, inclusive cada página da documentação do TSDoc, foi registrado em `artifacts/auxiliares/referencias-utilizadas.md`. O inventário deverá crescer apenas quando uma parte do texto usar uma nova fonte. Obras consultadas e descartadas poderão permanecer no planejamento da parte correspondente, mas não entrarão no mapa central nem na bibliografia final.
 
@@ -94,9 +96,22 @@ Quadros, diagramas e capturas com indicação de elaboração própria também n
 
 - As Fases 7 e 8 e as considerações finais ainda poderão introduzir novas fontes.
 - A orientação institucional de normalização ainda precisa ser confirmada antes da bibliografia final.
-- As páginas oficiais do TSDoc deverão receber chamadas distintas se todas permanecerem necessárias ao tópico 6.2.3.
+- As chamadas do TSDoc foram diferenciadas; a integração ainda deverá aplicar a norma institucional escolhida de modo uniforme.
 - Datas de acesso e metadados ausentes deverão ser conferidos na fonte original durante a integração.
 - Liang, Wang e Wang (2022) permanece excluído conforme D-009 e não deverá reaparecer no mapa.
+
+## Referências reservadas para fases futuras
+
+As fontes abaixo foram selecionadas para orientar a redação futura, mas ainda não sustentam nenhum trecho do TCC. Por isso, não entram no mapa central nem na bibliografia final até que uma afirmação correspondente seja mantida no texto.
+
+| Fase e tópico | Fonte candidata | Uso permitido na redação futura | Cuidados antes de citar |
+| --- | --- | --- | --- |
+| Fase 7, 7.6.1 Segurança — senhas | OPEN WEB APPLICATION SECURITY PROJECT (OWASP). *Password Storage Cheat Sheet*. Disponível em: <https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html>. | Distinguir armazenamento de senhas por função de derivação de chave da criptografia reversível e justificar práticas planejadas ou verificadas. | Confirmar o algoritmo efetivamente usado pelo serviço de autenticação; não atribuir ao MVP configurações não conferidas. |
+| Fase 7, 7.6.1 Segurança — dados criptografados | OPEN WEB APPLICATION SECURITY PROJECT (OWASP). *Cryptographic Storage Cheat Sheet*. Disponível em: <https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html>. | Fundamentar princípios para dados em repouso e gestão de chaves, se fizerem parte do recorte. | Não confundir hash de senha com criptografia nem alegar chaves, algoritmos ou rotação inexistentes. |
+| Fase 7, 7.6.2 Backup | NATIONAL INSTITUTE OF STANDARDS AND TECHNOLOGY (NIST). *Contingency Planning Guide for Federal Information Systems*. NIST SP 800-34 Rev. 1, 2010. DOI: 10.6028/NIST.SP.800-34r1. Disponível em: <https://csrc.nist.gov/pubs/sp/800/34/r1/upd1/final>. | Delimitar planejamento de contingência, recuperação e prioridades de backup. | Tratar backup e restauração como planejamento enquanto não houver execução comprovada; adaptar o escopo federal da publicação ao contexto acadêmico. |
+| Fase 8, Manutenção do sistema | INTERNATIONAL ORGANIZATION FOR STANDARDIZATION (ISO); INTERNATIONAL ELECTROTECHNICAL COMMISSION (IEC); INSTITUTE OF ELECTRICAL AND ELECTRONICS ENGINEERS (IEEE). *ISO/IEC/IEEE 14764:2022: Software engineering — Software life cycle processes — Maintenance*. 2022. Disponível em: <https://www.iso.org/standard/80710.html>. | Definir manutenção de software e distinguir atividades de manutenção de operação, backup e recuperação. | Conferir a norma e a disponibilidade institucional antes da citação final; não apresentar atividades propostas como práticas já realizadas. |
+
+Ao usar uma dessas fontes, o agente responsável deverá baixar ou conferir uma cópia de consulta autorizada, criar a entrada correspondente no mapa central e registrar seção, finalidade e localizador conforme D-015.
 
 ## Critérios de aceite
 
