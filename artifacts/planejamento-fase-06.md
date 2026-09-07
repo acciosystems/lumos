@@ -5,11 +5,11 @@
 - Identificador: `fase-06`.
 - Responsável pelo planejamento: Codex.
 - Data do planejamento: 2026-09-06.
-- Estado: Partes 0 a 4 concluídas; Parte 5 redigida e aguardando a imagem do usuário; Parte 6 pendente.
+- Estado: concluída em 2026-09-07; Partes 0 a 6 consolidadas e revisadas. A imagem única do tópico TSDoc permanece reservada à integração visual final.
 - Recorte: MVP implementado da plataforma Nossa Causa, no mesmo snapshot funcional adotado nas Fases 3, 4 e 5.
 - Entrega final prevista: `artifacts/texto-fase-06.md` e os recursos visuais descritos neste planejamento.
 
-A Fase 6 será executada em partes sequenciais, com uma verificação de saída ao final de cada parte. O agente executor deverá concluir uma parte antes de iniciar a seguinte. Essa divisão é obrigatória porque a fase reúne cinco trabalhos diferentes: descrição da arquitetura, inventário da interface, produção de evidências visuais, modelagem estrutural e documentação do código.
+A Fase 6 foi executada em partes sequenciais, com uma verificação de saída ao final de cada parte. A divisão separou cinco trabalhos: descrição da arquitetura, inventário da interface, produção de evidências visuais, modelagem estrutural e documentação do código.
 
 ## Objetivo
 
@@ -25,8 +25,9 @@ As evidências deverão pertencer à mesma versão da aplicação. O texto não 
 4. TSDoc será a alternativa tecnológica adotada em substituição a JAVADOC/SUMMARY no tópico 6.2.3.
 5. A infraestrutura de TSDoc não existia no snapshot inicial deste planejamento, mas estaria implementada na execução da fase. Em 2026-09-07, o usuário determinou que a Parte 5 adotasse TSDoc como essa alternativa e considerasse uma cobertura parcial, concentrada em APIs e módulos relevantes, sem incluir componentes React.
 6. O tópico de TSDoc terá uma única imagem de exemplo, fornecida pelo usuário. O agente não deverá criar nem substituir essa imagem.
+7. Em 2026-09-07, o usuário determinou o encerramento da Fase 6. A imagem única do tópico TSDoc passou a ser uma dependência condicional da integração visual e não impede a conclusão da fase. Como não houve conferência de ferramenta, comando ou saída TSDoc no repositório, o texto preservará essa limitação e tratará a compatibilidade dos comentários como premissa fornecida.
 
-As definições iniciais foram registradas como D-013 e a premissa específica da Parte 5 como D-014 em `artifacts/TCC-PRINCIPAL.md`.
+As definições iniciais foram registradas como D-013, a premissa específica da Parte 5 como D-014 e o encerramento da fase como D-017 em `artifacts/TCC-PRINCIPAL.md`.
 
 ## Adaptações da estrutura inicial
 
@@ -76,13 +77,13 @@ O diagrama será mantido em Mermaid, no arquivo `artifacts/diagramas/fase-06-cla
 TSDoc será apresentado como a alternativa tecnológica adotada para substituir JAVADOC ou SUMMARY previstos na estrutura original. Como convenção de comentários de documentação para APIs TypeScript, ele será tratado, na Parte 5, como uma implementação existente por instrução do usuário, com cobertura parcial e orientada pela relevância dos contratos. O texto deverá distinguir:
 
 - a sintaxe e as convenções TSDoc;
-- a ferramenta efetivamente usada pelo projeto para validar ou gerar a documentação;
-- a cobertura realmente existente no snapshot da execução;
-- a imagem única escolhida como exemplo.
+- a cobertura parcial adotada como premissa para o tópico;
+- a ausência de evidência verificada sobre ferramenta, comando ou saída;
+- a imagem única reservada à integração final.
 
 Como alternativa adotada, o recorte incluirá contratos compartilhados de validação, funções de calendário, procedimentos e serviços de campanhas, além de APIs selecionadas de autenticação. Componentes React, rotas visuais, modelos gerados, migrações, scripts de infraestrutura e auxiliares privados ficarão fora da cobertura. A seção não afirmará que todo o código está documentado nem confundirá a convenção TSDoc com a ferramenta que verifica ou apresenta os comentários.
 
-A única figura deste tópico será fornecida pelo usuário. Antes da integração, o executor deverá confirmar o nome do arquivo, a legibilidade, o conteúdo que ela demonstra e a legenda apropriada. Nenhuma captura adicional de código, terminal ou documentação gerada será inserida nesse tópico.
+A única figura deste tópico será fornecida pelo usuário. Durante a integração, o executor deverá confirmar o nome do arquivo, a legibilidade, o conteúdo que ela demonstra e a legenda apropriada. Nenhuma captura adicional de código, terminal ou documentação gerada será inserida nesse tópico. A ausência atual desse insumo não reabre a Fase 6.
 
 ## Estrutura planejada do texto final
 
@@ -304,13 +305,13 @@ Os caminhos abaixo são rastreabilidade interna e não deverão aparecer no text
 
 ### Parte 5 — Tópico 6.2.3: TSDoc
 
-**Pré-condições:** implementação TSDoc existente e imagem única fornecida pelo usuário.
+**Pré-condição do recorte textual:** premissa de implementação e cobertura definida pelo usuário em D-014. A imagem única foi transferida para a integração visual por D-017.
 
 **Objetivo:** documentar a alternativa tecnológica efetivamente adotada.
 
-**Ações:** conferir configuração e comandos; consultar a documentação oficial; verificar comentários e saída; delimitar cobertura; incorporar somente a figura fornecida; redigir a seção e sua interpretação.
+**Ações:** consultar a documentação oficial; delimitar a cobertura adotada; distinguir a convenção das ferramentas compatíveis; registrar a ausência de evidência sobre ferramenta, comando e saída; reservar somente a figura fornecida para a integração; redigir a seção e seus limites.
 
-**Portão de saída:** distinção correta entre padrão e ferramenta, afirmações sustentadas pela implementação e exatamente uma imagem no tópico. Se a imagem ainda não tiver sido fornecida, concluir apenas o trabalho independente e manter a parte como aguardando esse insumo.
+**Portão de saída:** distinção correta entre convenção e ferramenta, cobertura apresentada como premissa e ausência de alegações não verificadas sobre a implementação. A figura reservada à integração não bloqueia o encerramento da parte.
 
 ### Parte 6 — Consolidação e revisão final
 
@@ -318,7 +319,7 @@ Os caminhos abaixo são rastreabilidade interna e não deverão aparecer no text
 
 **Ações:** revisar transições e repetição; aplicar a skill `humanizar` em modo de revisão e perfil acadêmico; conferir fontes, figuras, quadro, nomenclatura e referências cruzadas; executar as verificações técnicas pertinentes; atualizar o quadro central somente depois de todo o aceite.
 
-**Portão de saída:** critérios finais atendidos e Fase 6 pronta para integração. O agente não deverá marcar a parte como concluída se o tópico TSDoc ou sua imagem permanecer pendente.
+**Portão de saída:** critérios finais atendidos e Fase 6 pronta para integração. A reserva da imagem TSDoc deverá permanecer explícita, sem ser confundida com uma evidência já incorporada.
 
 ## Dependências e integração
 
@@ -356,12 +357,12 @@ Os caminhos abaixo são rastreabilidade interna e não deverão aparecer no text
 | Diagrama ilegível ou fictício | Limitar elementos, rastrear cada caixa ao código e declarar estereótipos e adaptação. |
 | Duplicação do DER | Priorizar contratos, operações e dependências, usando entidades somente como âncoras. |
 | TSDoc diferente do previsto | Analisar a implementação futura antes da escrita e não nomear antecipadamente o gerador. |
-| Ausência da imagem TSDoc | Manter a Parte 5 pendente sem criar substituto; o restante da fase pode avançar. |
+| Ausência da imagem TSDoc | Reservar sua inserção à integração visual, sem criar substituto nem apresentar a figura como já incorporada. |
 | Confundir desenvolvimento com implantação | Adiar ambiente produtivo, segurança operacional, backup e treinamento para a Fase 7. |
 
 ## Dúvidas e pendências
 
-Não há dúvida que impeça o planejamento ou as Partes 0 a 4. O usuário informou que a implementação TSDoc e a imagem única estarão disponíveis no momento apropriado. A Parte 5 deverá verificar a primeira e aguardar a segunda; não será usada uma imagem provisória.
+Não há dúvida pendente que impeça a conclusão da fase. O tópico TSDoc foi encerrado com a premissa de implementação definida pelo usuário, sem atribuir ao repositório uma ferramenta, um comando ou uma saída que não foram verificados. A imagem única permanece reservada à integração visual, e nenhuma imagem provisória será usada.
 
 O número F01–F19 é uma estimativa baseada no snapshot de 2026-09-06. Alterações da interface poderão aumentar, reduzir ou reorganizar a matriz. O executor deverá registrar a diferença no manifesto e explicar mudanças que afetem o escopo compartilhado.
 
@@ -392,11 +393,13 @@ Na Parte 3, a matriz F01–F19 foi confirmada sem inclusão ou remoção de unid
 
 Na Parte 4, a especificação UML 2.5.1 e a documentação oficial de diagramas de classe do Mermaid foram consultadas em 2026-09-06. O diagrama foi delimitado ao domínio de campanhas para combinar entidades persistidas, enumerações, um contrato de entrada e módulos funcionais reais sem tratá-los todos como classes TypeScript. A rastreabilidade das caixas e relações foi registrada no manifesto de evidências. A fonte `artifacts/diagramas/fase-06-classes.mmd` foi renderizada com Mermaid CLI 11.17.0 e sua saída foi inspecionada visualmente. Após as revisões de coerência, o recorte foi reduzido aos elementos que acrescentam contratos e operações ao DER, e a composição foi reposicionada para não atravessar a caixa do contrato. A renderização passou de aproximadamente 2397 × 1893 para 784 × 893 pixels. O texto do tópico 6.2.2 explicita a adaptação e diferencia o recorte do DER. A redação foi revisada com a skill `humanizar`, em modo de revisão e perfil acadêmico.
 
-Na Parte 5, por instrução do usuário em 2026-09-07, TSDoc foi adotado como alternativa tecnológica a JAVADOC/SUMMARY e sua implementação foi considerada existente. A redação delimitou a cobertura a contratos compartilhados, calendário de campanhas e APIs de domínio nos pacotes de validação, RPC e autenticação. Componentes React, rotas visuais, código gerado, migrações, scripts de infraestrutura e auxiliares privados foram excluídos. A documentação oficial do TSDoc foi consultada para distinguir a convenção das ferramentas compatíveis e descrever resumo, `@remarks`, `@param`, `@returns` e `@throws` apenas como convenções pertinentes. A imagem única permanece aguardando fornecimento do usuário; nenhuma imagem substituta foi criada. A redação foi revisada com a skill `humanizar`, em modo de criação e perfil acadêmico.
+Na Parte 5, por instrução do usuário em 2026-09-07, TSDoc foi adotado como alternativa tecnológica a JAVADOC/SUMMARY e sua implementação foi considerada existente. A redação delimitou a cobertura a contratos compartilhados, calendário de campanhas e APIs de domínio nos pacotes de validação, RPC e autenticação. Componentes React, rotas visuais, código gerado, migrações, scripts de infraestrutura e auxiliares privados foram excluídos. A documentação oficial do TSDoc foi consultada para distinguir a convenção das ferramentas compatíveis e descrever resumo, `@remarks`, `@param`, `@returns` e `@throws` apenas como convenções pertinentes. A revisão final explicitou que ferramenta, comando e saída não foram verificados. A imagem única foi reservada à integração visual por D-017, e nenhuma imagem substituta foi criada. A redação foi revisada com a skill `humanizar`, em modo de criação e perfil acadêmico.
 
 Em uma auditoria documental realizada em 2026-09-07, o tópico 6.1 recebeu referências da OWASP para distinguir as funções da validação no cliente e no lado protegido, além de fundamentar a autorização aplicada fora da interface. O tópico 6.2.1 passou a citar a seção 6.3.2 da especificação WebAuthn para a interação necessária durante a criação de uma chave de acesso. As seis páginas da documentação do TSDoc receberam chamadas diferenciadas no texto e no mapa central. As cópias de consulta, os localizadores e os locais de uso foram conferidos na mesma revisão.
 
-## Critérios para concluir a execução futura
+Na Parte 6, foram conferidos o quadro de responsabilidades, o inventário de telas, as dezenove capturas, o diagrama de classe, as referências externas e os limites do tópico TSDoc. O texto recebeu menções explícitas aos Quadros 4 e 5 e uma síntese final que preserva para a Fase 7 os temas de implantação, treinamento, segurança operacional e backup. A revisão não identificou ampliação do MVP nem caminhos internos na prosa destinada ao TCC. Com a decisão D-017, a imagem TSDoc ficou como tarefa condicional de integração e a Fase 6 foi concluída em 2026-09-07.
+
+## Critérios de conclusão da execução
 
 - [x] O snapshot e o manifesto de evidências foram registrados.
 - [x] O tópico 6.1 descreve o padrão real do sistema e está coerente com a Fase 4.
@@ -406,9 +409,9 @@ Em uma auditoria documental realizada em 2026-09-07, o tópico 6.1 recebeu refer
 - [x] O tópico 6.2.2 cita fonte conceitual conferida e apresenta um diagrama rastreável à implementação.
 - [x] A fonte Mermaid do diagrama foi validada e preservada.
 - [x] A premissa de implementação TSDoc, seu escopo parcial e as fontes conceituais foram registrados.
-- [ ] A ferramenta, o comando e a saída da implementação TSDoc foram conferidos no repositório.
-- [ ] O tópico 6.2.3 contém exatamente a imagem fornecida pelo usuário e nenhuma captura adicional.
-- [ ] Quadro e figuras possuem título, fonte, menção e interpretação no texto.
-- [ ] O texto final não cita caminhos internos nem amplia o escopo do MVP.
-- [ ] A skill `humanizar` foi aplicada à redação e à revisão acadêmica final.
-- [ ] A coerência com as Fases 3, 4, 5 e 7 foi conferida antes da atualização do estado central.
+- [x] O tópico 6.2.3 registra que ferramenta, comando e saída TSDoc não foram conferidos e não os apresenta como evidência verificada.
+- [x] A única imagem do tópico 6.2.3 permanece reservada à integração visual, sem captura substituta ou figura adicional.
+- [x] Quadro e figuras incorporados possuem título, fonte, menção e interpretação no texto; os recursos condicionais permanecem identificados para a integração.
+- [x] O texto final não cita caminhos internos na prosa nem amplia o escopo do MVP.
+- [x] A skill `humanizar` foi aplicada à redação e à revisão acadêmica final.
+- [x] A coerência com as Fases 3, 4, 5 e 7 foi conferida antes da atualização do estado central.

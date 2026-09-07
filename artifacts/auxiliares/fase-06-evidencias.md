@@ -30,7 +30,8 @@
 | 2 — Lista de telas | Inventário textual de quinze telas, sem imagens. | Concluída em 2026-09-06. |
 | 3 — Formulários | Matriz F01–F19 e capturas com dados fictícios. | Concluída em 2026-09-06. |
 | 4 — Diagrama de classe | Fonte Mermaid, pesquisa conceitual e rastreabilidade à implementação. | Concluída em 2026-09-06. |
-| 5 — TSDoc | Alternativa a JAVADOC/SUMMARY, escopo textual, fontes oficiais e imagem única fornecida pelo usuário. | Redação concluída sob a premissa de implementação existente; aguarda a imagem do usuário e a conferência posterior da ferramenta, do comando e da saída. |
+| 5 — TSDoc | Alternativa a JAVADOC/SUMMARY, escopo textual, fontes oficiais e imagem única fornecida pelo usuário. | Concluída em 2026-09-07 sob a premissa de implementação existente. Ferramenta, comando e saída não foram apresentados como evidência verificada; a imagem ficou reservada à integração visual. |
+| 6 — Consolidação | Revisão das transições, fontes, recursos visuais, nomenclatura, limites e coerência com as fases relacionadas. | Concluída em 2026-09-07. |
 
 ## Capturas de formulários — Parte 3
 
@@ -94,6 +95,7 @@
 | Cobertura incluída | Contratos compartilhados de validação, funções de calendário, procedimentos e serviços de campanhas e APIs selecionadas de autenticação. |
 | Exclusões | Componentes React, rotas visuais, modelos e clientes gerados, esquemas Prisma, migrações, seeds, scripts de infraestrutura, testes e auxiliares privados. |
 | Limite de afirmação | A cobertura é parcial e não mede a totalidade dos comentários do monorepo. TSDoc define a convenção; a ferramenta compatível interpreta ou verifica os comentários. |
-| Imagem | A única imagem do tópico continua dependente do arquivo fornecido pelo usuário. Nenhuma imagem alternativa foi criada. |
+| Evidência da ferramenta | Nenhuma ferramenta, comando ou saída específica foi conferida no repositório; a compatibilidade dos comentários integra a premissa fornecida pelo usuário para esta parte. |
+| Imagem | A única imagem do tópico continua dependente do arquivo fornecido pelo usuário e será tratada na integração visual. Nenhuma imagem alternativa foi criada, e sua ausência não reabre a Fase 6. |
 
-Este manifesto será atualizado ao fim de cada parte concluída. Caminhos técnicos e detalhes de conferência pertencem a este material auxiliar e não serão reproduzidos no texto do TCC.
+A execução prevista, da Parte 0 à Parte 6, foi concluída. Caminhos técnicos e detalhes de conferência pertencem a este material auxiliar e não serão reproduzidos no texto do TCC. A integração visual deverá acrescentar somente a imagem TSDoc fornecida pelo usuário e ajustar a numeração final dos recursos.
