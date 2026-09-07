@@ -110,7 +110,7 @@ Quadros, diagramas e capturas com indicação de elaboração própria também n
 
 ## Dependências e pendências
 
-- A Fase 8 e as considerações finais ainda poderão introduzir novas fontes.
+- As considerações finais ainda poderão introduzir novas fontes.
 - As fontes de segurança, contingência e Neon usadas na Fase 7 tiveram o acesso registrado em 2026-09-07.
 - A orientação institucional de normalização ainda precisa ser confirmada antes da bibliografia final.
 - As chamadas do TSDoc foram diferenciadas; a integração ainda deverá aplicar a norma institucional escolhida de modo uniforme.
@@ -128,15 +128,16 @@ As novas fontes abaixo foram incorporadas à redação da Fase 7 e registradas n
 | Fase 7, 7.6.2 Backup | NIST, *Contingency Planning Guide for Federal Information Systems*. | Delimitar planejamento de contingência, recuperação e prioridades de backup. | R-022; o escopo federal foi adaptado ao contexto acadêmico. |
 | Fase 7, 7.6.2 Backup na Neon | Neon, *Connection pooling* e *Announcing Point-in-Time Restore*. | Fundamentar a separação de conexões e condicionar a recuperação pontual à configuração disponível. | R-023 e R-024; nenhum recurso dependente de plano foi presumido. |
 
-## Referências reservadas para fases futuras
+## Referências incorporadas na Fase 8
 
-A fonte abaixo foi selecionada para orientar a Fase 8, mas ainda não sustenta nenhum trecho do TCC. Por isso, não entra no mapa central nem na bibliografia final até que uma afirmação correspondente seja mantida no texto.
+As fontes abaixo foram verificadas e incorporadas à redação da Fase 8. Seus usos, localizadores e materiais de consulta constam do mapa central; a normalização em `artifacts/referencias.md` permanece reservada à integração.
 
-| Fase e tópico | Fonte candidata | Uso permitido na redação futura | Cuidados antes de citar |
+| Fase e tópico | Fonte utilizada | Uso na redação | Registro no mapa central |
 | --- | --- | --- | --- |
-| Fase 8, Manutenção do sistema | INTERNATIONAL ORGANIZATION FOR STANDARDIZATION (ISO); INTERNATIONAL ELECTROTECHNICAL COMMISSION (IEC); INSTITUTE OF ELECTRICAL AND ELECTRONICS ENGINEERS (IEEE). *ISO/IEC/IEEE 14764:2022: Software engineering — Software life cycle processes — Maintenance*. 2022. Disponível em: <https://www.iso.org/standard/80710.html>. | Definir manutenção de software e distinguir atividades de manutenção de operação, backup e recuperação. | Conferir a norma e a disponibilidade institucional antes da citação final; não apresentar atividades propostas como práticas já realizadas. |
+| Fase 8, Manutenção do sistema | ISO/IEC/IEEE 14764:2022. | Delimitar manutenção, operação, solicitação de modificação e categorias de manutenção. | R-025; página oficial e prévia pública conferidas em 2026-09-07. |
+| Fase 8, Manutenção do sistema | IEEE Computer Society, *SWEBOK Guide V4.0a*. | Relacionar solicitação, análise de impacto, modificação, testes, documentação e nova versão no processo de manutenção. | R-026; cópia de uso acadêmico disponível em `artifacts/auxiliares/referencias/`. |
 
-Ao usar essa fonte, o agente responsável deverá baixar ou conferir uma cópia de consulta autorizada, criar a entrada correspondente no mapa central e registrar seção, finalidade e localizador conforme D-015.
+As duas fontes foram incluídas no mapa central no momento da redação, conforme D-015.
 
 ## Critérios de aceite
 

@@ -1,0 +1,81 @@
+# 8. Manutenção do sistema
+
+Esta fase apresenta um plano de manutenção para o MVP Nossa Causa. O plano parte do snapshot documentado nas Fases 6 e 7 e não descreve atendimento em produção, execução de backup, restauração, treinamento, publicação de versões ou incidentes reais. Seu objetivo é estabelecer como uma necessidade de mudança seria registrada, analisada, implementada, verificada e acompanhada depois de uma eventual implantação.
+
+## 8.1 Escopo e tipos de manutenção
+
+A manutenção de software abrange as atividades necessárias para modificar um produto existente e preservar sua integridade. A ISO/IEC/IEEE 14764:2022 apresenta esse processo para produtos, código, dados, documentos e registros. O guia SWEBOK também relaciona a manutenção ao registro de solicitações e problemas, à análise de impacto, à modificação dos artefatos, aos testes e à liberação de nova versão (ISO/IEC/IEEE, 2022; IEEE Computer Society, 2026).
+
+O recorte desta fase é a alteração do software do Nossa Causa. A implantação, a configuração dos serviços, o backup, a restauração e a administração do ambiente permanecem no planejamento operacional da Fase 7. Esses elementos podem motivar ou ser afetados por uma mudança de software, mas não são apresentados aqui como manutenção executada. Essa separação é coerente com a norma, que exclui de seu escopo as funções de operação, como backup, recuperação e administração do sistema (ISO/IEC/IEEE, 2022).
+
+Uma solicitação de modificação pode ser agrupada como correção ou melhoria. A norma distingue manutenção corretiva, preventiva, adaptativa, aditiva, perfectiva e de emergência. A manutenção de emergência é uma correção temporária; as manutenções adaptativa, aditiva e perfectiva correspondem a melhorias. O Quadro 9 aplica essas categorias ao contexto do MVP. Os exemplos indicam situações que poderiam ocorrer e não registros de atividades já realizadas.
+
+Quadro 9 — Classificação planejada das solicitações de manutenção
+
+| Tipo        | Finalidade                                                                               | Aplicação prevista no Nossa Causa                                                                                                                                                      |
+| ----------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Corretiva   | Corrigir problema identificado após a entrega.                                           | Corrigir comportamento que impeça um fluxo de campanha, autenticação, autorização, atualização ou prestação de contas de atender à regra definida.                                     |
+| Preventiva  | Tratar falha latente antes que produza efeito operacional.                               | Revisar vulnerabilidades, limites de requisição, idempotência, limpeza de objetos e compatibilidade de dependências antes de uma falha observável.                                     |
+| Emergencial | Manter o sistema temporariamente operacional enquanto a correção definitiva é preparada. | Restringir temporariamente uma operação afetada ou aplicar contenção documentada para proteger integridade, autenticação ou dados. Não há ocorrência desse tipo registrada no recorte. |
+| Adaptativa  | Manter a utilização diante de mudança no ambiente técnico.                               | Ajustar a aplicação a mudança compatível em runtime, navegador, banco de dados, serviço externo, configuração de conexão ou requisito de infraestrutura.                               |
+| Aditiva     | Acrescentar funcionalidade após a entrega.                                               | Avaliar nova capacidade solicitada, como recurso ainda não entregue do produto, e definir se cabe à manutenção ou a um esforço de desenvolvimento separado.                            |
+| Perfectiva  | Melhorar documentação, desempenho, manutenibilidade ou outro atributo do produto.        | Reduzir complexidade, aperfeiçoar formulários e mensagens, melhorar desempenho ou completar documentação técnica de módulos relevantes.                                                |
+
+Fonte: elaboração própria (2026), com base em ISO/IEC/IEEE (2022) e IEEE Computer Society (2026).
+
+A classificação não substitui a análise de escopo. Funcionalidades que ainda não fazem parte do MVP não são tratadas como entregas mantidas. Cada proposta deverá ser examinada quanto ao impacto, ao tamanho e à compatibilidade com a versão em uso antes de ser incorporada ao ciclo de manutenção.
+
+## 8.2 Condições atuais de manutenibilidade do MVP
+
+Manutenibilidade é o grau de efetividade e eficiência com que um produto ou sistema pode ser modificado. No Nossa Causa, a separação entre aplicação web, validação, procedimentos RPC, autenticação, banco de dados, logging e ambiente favorece a localização de responsabilidades. O repositório também preserva histórico Git, migrações versionadas do Prisma e documentos técnicos sobre comportamentos que precisam ser mantidos. Esses elementos apoiam a compreensão do impacto de uma alteração, mas não eliminam a necessidade de revisão técnica (ISO/IEC/IEEE, 2022).
+
+O Quadro 10 reúne as evidências verificadas no snapshot de 7 de setembro de 2026. A última alteração de programação anterior à redação desta fase ocorreu no commit `aefaf85`, em 5 de setembro de 2026. Mudanças posteriores do TCC não foram consideradas como alteração funcional do MVP.
+
+Quadro 10 — Recursos e limites atuais para manutenção
+
+| Área                     | Evidência verificada                                                                                                                                  | Limite ou cuidado                                                                                                                                                                |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Organização do código    | Monorepo Bun/Turborepo com pacotes separados para interface, validação, RPC, autenticação, dados, logging, e-mail e ambiente.                         | A estrutura reduz acoplamentos aparentes, mas cada mudança ainda requer análise das dependências entre pacotes.                                                                  |
+| Controle de versões      | Histórico Git com identificação das mudanças realizadas no repositório.                                                                               | O histórico preserva alterações técnicas, mas não comprova um processo organizacional de atendimento ou validação por usuários.                                                  |
+| Verificações estáticas   | Os comandos de lint e type-check foram executados com êxito no snapshot. A aplicação web também declara build e verificação posterior ao build.       | Não foi localizada suíte de testes dedicada nem workflow de CI rastreado. Lint, tipos e build não substituem validação funcional ou de regressão.                                |
+| Banco de dados           | Schemas e migrações Prisma são versionados. A configuração administrativa usa `DIRECT_DATABASE_URL`, separada da conexão agrupada de runtime.         | Qualquer alteração de schema exige avaliar compatibilidade, cópia anterior, migração e retorno conforme o cenário da Fase 7.                                                     |
+| Observabilidade          | O código emite eventos estruturados para Axiom e registra diagnóstico seguro quando a entrega falha. Há telemetria para saturação e timeout do banco. | Dataset, monitores, notificadores e métricas do fornecedor dependem de configuração externa; sua operação não foi comprovada.                                                    |
+| Segurança e dependências | O repositório define o comando `bun audit` e documenta uma exceção para `deepmerge-ts`, com reavaliação prevista até 25 de setembro de 2026.          | A auditoria executada neste snapshot reportou nove alertas transitivos. O resultado não determina, por si só, exposição em produção, mas exige avaliação, registro e tratamento. |
+| Documentação             | Há documentos de ciclo de vida, idempotência, limites de requisição, conexões, observabilidade e Manual do Usuário.                                   | A Fase 6 delimita uma cobertura parcial de TSDoc sem apresentar ferramenta, comando ou saída como evidência verificada; não se afirma documentação integral do código.           |
+
+Fonte: elaboração própria (2026).
+
+Os resultados mostram uma base para manutenção rastreável, mas também uma limitação importante: a validação automática disponível é estática. Portanto, uma alteração relevante deverá incluir um roteiro funcional proporcional ao risco, com dados de demonstração e sem expor credenciais, dados pessoais ou informações bancárias.
+
+## 8.3 Processo proposto de manutenção
+
+O ciclo proposto inicia-se com uma solicitação de modificação. A ISO/IEC/IEEE 14764:2022 trata a solicitação como item que descreve uma mudança proposta e recomenda considerar incidentes, eventos, reclamações, relatórios de falha e pedidos das partes interessadas durante sua formulação. No Nossa Causa, cada solicitação deverá receber um registro próprio, com identificador, descrição, impacto esperado, responsável e estado de acompanhamento. Esse registro permitirá reconhecer solicitações repetidas e relacionar mudanças dependentes.
+
+Em seguida, o responsável técnico classificará a solicitação segundo o Quadro 9 e verificará se ela afeta o MVP mantido. A análise de impacto deverá percorrer, quando aplicável, a rota ou interface, os contratos de validação, os procedimentos RPC, autorização, autenticação, schema e migrações, objetos enviados, e-mail, logging, documentos técnicos, Manual do Usuário e configurações de serviços externos. Essa análise delimita o que precisa ser alterado e quais comportamentos devem permanecer inalterados. A relação entre solicitação, impacto, artefatos modificados, testes e nova versão é compatível com o processo de manutenção descrito no SWEBOK (IEEE Computer Society, 2026).
+
+Antes da implementação, o registro da solicitação deverá reunir critérios de aceite, riscos, dependências, estratégia de verificação e, quando houver dados ou schema, condições de migração e retorno. A alteração será versionada e não poderá deslocar regras de autorização ou validação para a interface. Alterações de dependências deverão considerar notas oficiais, compatibilidade e auditoria; alterações de banco deverão empregar a conexão administrativa direta prevista na Fase 7, nunca a conexão agrupada do runtime.
+
+Depois da alteração, o responsável executará lint, conferência de formatação, type-check e build quando forem aplicáveis. Como o snapshot não possui suíte dedicada de testes, a verificação funcional deverá ser documentada no registro da solicitação ou em evidência associada, com fluxos afetados, dados de demonstração e resultado. Uma falha de regressão bloqueia a liberação planejada até que seja corrigida ou que o retorno seja definido.
+
+Antes de uma eventual liberação, serão revisados migrações, configuração, eventos de observabilidade, documentação e efeito sobre o plano de recuperação. Após a liberação, os sinais relacionados à mudança deverão ser acompanhados pelo período definido pela equipe. O encerramento depende da atualização do registro de manutenção, dos documentos afetados, das exceções de segurança e das pendências identificadas. Não há acordo de nível de serviço ou prazo de atendimento definido neste recorte; esses parâmetros dependerão de decisão organizacional futura.
+
+## 8.4 Plano de manutenção do Nossa Causa
+
+O Quadro 11 traduz o processo em atividades planejadas. Os papéis são funcionais e não identificam pessoas, pois não há equipe operacional designada para o cenário acadêmico.
+
+Quadro 11 — Plano de manutenção do MVP
+
+| Gatilho                                           | Atividade planejada                                                                                                           | Evidência esperada                                                                 | Papel previsto                                 |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Defeito, reclamação ou evento relevante           | Registrar, reproduzir com dados seguros, classificar impacto e definir verificação de regressão.                              | Registro da solicitação, diagnóstico seguro, critérios de aceite e resultado.      | Responsável técnico.                           |
+| Mudança funcional                                 | Revisar interface, validação no cliente e no servidor, autorização, documentação e Manual do Usuário.                         | Critérios funcionais e documentos atualizados.                                     | Responsável técnico e representante funcional. |
+| Mudança de schema ou dados                        | Preparar migração versionada, avaliar compatibilidade, revisar cópia anterior e validar em ambiente isolado.                  | Análise de impacto, migração e roteiro de retorno.                                 | Responsável técnico pelo banco.                |
+| Atualização de dependência, runtime ou fornecedor | Consultar documentação oficial, verificar compatibilidade, auditar dependências e revisar configuração afetada.               | Registro da análise, lockfile ou configuração revisados e verificações aplicáveis. | Responsável técnico.                           |
+| Exceção de segurança próxima do prazo             | Reexecutar a auditoria, avaliar alcance, corrigir, remover ou renovar a exceção com justificativa datada.                     | Auditoria, decisão registrada e registro de manutenção atualizado.                 | Responsável pela manutenção de segurança.      |
+| Saturação, timeout ou falha de entrega de logs    | Correlacionar eventos, examinar a causa e abrir solicitação quando a origem estiver no software.                              | Registro seguro da análise e decisão de correção, contenção ou acompanhamento.     | Responsável técnico.                           |
+| Antes e depois de uma liberação planejada         | Conferir verificações, migração, documentação, observabilidade e condições de retorno; depois, acompanhar os sinais afetados. | Checklist da versão candidata e registro de acompanhamento.                        | Responsável técnico e representante funcional. |
+| Revisão periódica                                 | Reavaliar dependências, exceções, dívida técnica, documentação e procedimentos afetados por mudanças.                         | Registros de manutenção atualizados e registro da revisão.                         | Mantenedores do sistema.                       |
+
+Fonte: elaboração própria (2026).
+
+O plano não fixa frequência de releases, janela de observação ou tempo de solução, porque essas informações não foram definidas para a AccioLabs fictícia nem para uma operação real do Nossa Causa. Ao ordenar as solicitações futuras, deverão ser considerados, antes da conveniência de implementação, os riscos à segurança, à integridade de dados, à autenticação e aos fluxos centrais de campanhas físicas e virtuais. Assim, a manutenção permanece vinculada ao comportamento comprovado do MVP e à documentação que sustenta sua evolução.

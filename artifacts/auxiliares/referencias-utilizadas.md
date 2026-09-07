@@ -1,7 +1,7 @@
 # Mapa central de referências utilizadas
 
 - Última atualização: 2026-09-07.
-- Escopo conferido: `artifacts/texto-sumario.md`, `artifacts/texto-introducao.md` e `artifacts/texto-fase-01.md` a `artifacts/texto-fase-07.md`.
+- Escopo conferido: `artifacts/texto-sumario.md`, `artifacts/texto-introducao.md` e `artifacts/texto-fase-01.md` a `artifacts/texto-fase-08.md`.
 - Planejamento: `artifacts/planejamento-referencias.md`.
 - Saída futura: `artifacts/referencias.md`.
 
@@ -35,6 +35,8 @@ Este arquivo controla a relação entre as fontes externas e os trechos do TCC. 
 | R-022 | NATIONAL INSTITUTE OF STANDARDS AND TECHNOLOGY (NIST). *Contingency Planning Guide for Federal Information Systems*. NIST SP 800-34 Rev. 1, 2010. DOI: 10.6028/NIST.SP.800-34r1. Chamada: NIST (2010). | `artifacts/texto-fase-07.md`, tópico 7.6.2 “Backup: planejamento, estratégias e execução”. | Relação entre planejamento de contingência, prioridades, estratégias de recuperação, testes e manutenção do plano. | `artifacts/auxiliares/referencias/nist-sp-800-34-r1.md`; <https://csrc.nist.gov/pubs/sp/800/34/r1/upd1/final>. | Conteúdo, DOI, cópia parcial local e acesso conferidos em 2026-09-07; normalização final pendente. |
 | R-023 | NEON. *Connection pooling*. Chamada: Neon (s.d.a). | `artifacts/texto-fase-07.md`, tópicos 7.2 e 7.6.2. | Uso de PgBouncer no endpoint agrupado e limites que mantêm tarefas administrativas na conexão direta. | `artifacts/auxiliares/referencias/neon-connection-pooling.md`; <https://neon.com/docs/connect/connection-pooling>. | Conteúdo, cópia parcial local e acesso conferidos em 2026-09-07; data de publicação e normalização final pendentes. |
 | R-024 | NEON. *Announcing Point-in-Time Restore*. 2024. Chamada: Neon (2024). | `artifacts/texto-fase-07.md`, tópico 7.6.2 “Backup: planejamento, estratégias e execução”. | Recuperação pontual vinculada à janela de retenção configurada e limitação de uma cópia lógica isolada. Seções “Restore a Branch from History” e “Neon’s Point-in-Time Restore vs. Roll-your-own Restore”. | `artifacts/auxiliares/referencias/neon-point-in-time-restore-2024.md`; <https://neon.com/blog/announcing-point-in-time-restore>. | Conteúdo, cópia parcial local e acesso conferidos em 2026-09-07; normalização final pendente. |
+| R-025 | INTERNATIONAL ORGANIZATION FOR STANDARDIZATION (ISO); INTERNATIONAL ELECTROTECHNICAL COMMISSION (IEC); INSTITUTE OF ELECTRICAL AND ELECTRONICS ENGINEERS (IEEE). *ISO/IEC/IEEE 14764:2022: Software engineering — Software life cycle processes — Maintenance*. 2022. Chamada: ISO/IEC/IEEE (2022). | `artifacts/texto-fase-08.md`, tópicos 8.1, 8.2 e 8.3. | Escopo de manutenção de software; separação de backup, recuperação e administração do sistema; tipos de manutenção; solicitação de modificação e manutenibilidade. Seções 1 e 3.1.1–3.1.10, pp. 1–4; resumo público da página oficial. | <https://www.iso.org/standard/80710.html>; prévia pública: <https://preview.sist.si/sist-preview/80710/9a26fc3a1a464fa286fb85d6c1eeed31/ISO-IEC-IEEE-14764-2022.pdf>. | Edição, conteúdo e localizadores conferidos em 2026-09-07; normalização final pendente. |
+| R-026 | IEEE COMPUTER SOCIETY. *Guide to the Software Engineering Body of Knowledge (SWEBOK Guide)*, versão 4.0a. 2026. Chamada: IEEE Computer Society (2026). | `artifacts/texto-fase-08.md`, tópicos 8.1 e 8.3. | Manutenção como modificação de software preservando integridade; registro e acompanhamento de solicitações e problemas; análise de impacto, alteração de artefatos, testes, documentação e nova versão. Capítulo 7, pp. 7-2–7-12. | `artifacts/auxiliares/referencias/swebok-guide-v4.0a.pdf`; <https://computer.org/swebok>. | Conteúdo, acesso acadêmico, cópia local e localizadores conferidos em 2026-09-07; normalização final pendente. |
 
 ## Fontes internas e evidências não bibliográficas
 
@@ -42,7 +44,7 @@ Este arquivo controla a relação entre as fontes externas e os trechos do TCC. 
 | --- | --- | --- |
 | `docs/nossa-causa-resumo-pt.md` | Problema de projeto, finalidade da plataforma, modalidades de campanha e limites do produto. | Documento interno de escopo; não apresentar como pesquisa empírica nem incluir automaticamente na bibliografia. |
 | `docs/nossa-causa-summary-en.md` | Conferência terminológica e equivalência do conteúdo em inglês. | Documento interno de apoio; mesma limitação da versão em português. |
-| Código, banco de dados e aplicação em execução | Afirmações sobre arquitetura, requisitos implementados, telas, formulários, domínio e controles nas Fases 3 a 7. | Evidência técnica rastreada nos planejamentos e manifestos; não é referência bibliográfica por padrão. |
+| Código, banco de dados e aplicação em execução | Afirmações sobre arquitetura, requisitos implementados, telas, formulários, domínio e controles nas Fases 3 a 8. | Evidência técnica rastreada nos planejamentos e manifestos; não é referência bibliográfica por padrão. |
 | Quadros, diagramas e capturas produzidos para o TCC | Representações e evidências visuais das Fases 2 a 6. | Manter a fonte de elaboração própria em cada legenda; não criar entrada bibliográfica. |
 
 ## Fontes excluídas
