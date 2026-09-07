@@ -1,6 +1,6 @@
 # FASE 4 — PROJETO LÓGICO: SISTEMA PROPOSTO
 
-Esta fase apresenta o projeto lógico da Nossa Causa conforme o recorte do MVP analisado anteriormente. O objetivo é mostrar, de forma complementar, como as pessoas interagem com a plataforma, como as responsabilidades são organizadas e quais informações precisam ser relacionadas. Os diagramas não incluem recursos previstos para versões futuras, como processamento de pagamentos, notificações automáticas, reputação, denúncias ou recompensas.
+Esta fase apresenta o projeto lógico da Nossa Causa conforme o recorte do MVP analisado anteriormente. O objetivo é mostrar, de forma complementar, como as pessoas interagem com a plataforma, como as responsabilidades são organizadas e quais informações precisam ser relacionadas. Os diagramas concentram-se nos fluxos centrais já implementados; processamento de pagamentos, notificações automáticas, reputação, denúncias e recompensas são discutidos no tópico 4.5 como possibilidades de evolução.
 
 ## 4.1 UML
 
@@ -8,7 +8,7 @@ UML, sigla de *Unified Modeling Language*, é uma linguagem de modelagem usada p
 
 Nesta fase, a UML orienta a representação das interações dos usuários e da organização lógica da aplicação. O Diagrama Entidade-Relacionamento complementa essas visões ao tratar das informações registradas. Juntos, os modelos permitem examinar a Nossa Causa sem depender de detalhes de programação ou de telas específicas.
 
-Os diagramas adotam os mesmos limites do MVP. A plataforma divulga dados para transferência virtual, mas não recebe nem confirma pagamentos. A participação registrada é exclusiva das campanhas físicas. A prestação de contas é preenchida pelo organizador e publicada para consulta, sem auditoria automática das informações declaradas.
+Os diagramas adotam o mesmo escopo funcional do MVP. A modalidade virtual utiliza dados de pagamento fornecidos pelo organizador e preserva a transferência direta entre as partes. A participação registrada pertence às campanhas físicas, e a prestação de contas torna públicos os resultados e as evidências declarados pelo organizador.
 
 ## 4.2 Diagrama de caso de uso
 
@@ -36,7 +36,7 @@ Fonte: elaboração própria (2026).
 
 A Figura 2 mostra que a interface não decide sozinha as regras sensíveis do sistema. Em aplicações web, os controles de autorização não devem depender do cliente e precisam verificar as permissões em cada requisição (OWASP, s.d.b). Na Nossa Causa, a conferência técnica do MVP identificou que as regras e permissões são aplicadas antes da gravação dos dados. Essa separação concentra as condições de autenticação, o vínculo entre campanha e organizador e a distinção entre as duas modalidades de campanha em operações protegidas.
 
-O diagrama também deixa explícito o limite das integrações externas do MVP. Há armazenamento de arquivos e envio de mensagens ligadas à conta, mas não há processador de pagamentos nem serviço de notificações de campanha. A transferência virtual permanece fora da plataforma e ocorre entre doador e organizador.
+O diagrama também apresenta as integrações escolhidas para o MVP: armazenamento de arquivos e envio de mensagens ligadas à conta. A transferência virtual ocorre diretamente entre doador e organizador. Processadores de pagamento e notificações de campanha permanecem reservados à evolução da arquitetura.
 
 ## 4.4 DER
 
@@ -53,3 +53,15 @@ A Figura 3 apresenta o usuário como origem de dois vínculos principais: a cria
 As modalidades física e virtual compartilham a entidade campanha, mas usam informações próprias. A campanha física registra local, meta de itens e pontos de coleta. A virtual divulga PIX ou dados bancários. Na prestação de contas, a campanha física informa o total de itens; a virtual, o total monetário declarado. O modelo não possui uma entidade para transações individuais, porque o MVP não processa ou registra transferências financeiras.
 
 O DER prioriza as entidades ligadas ao domínio das campanhas. Registros técnicos de sessão, mecanismos de segurança e controles temporários de arquivos não aparecem na figura, pois não alteram a compreensão dos relacionamentos apresentados nesta fase.
+
+## 4.5 Possibilidades de evolução do sistema
+
+Os diagramas anteriores representam um produto minimamente viável com os fluxos centrais da Nossa Causa. A concepção da plataforma também inclui recursos para etapas posteriores, discutidos separadamente para preservar a fidelidade dos modelos e mostrar como essa base poderá evoluir.
+
+Uma primeira frente reúne reputação e denúncias. O sistema de reputação foi concebido para considerar cancelamentos de última hora, cumprimento do prazo de prestação de contas e qualidade da organização da campanha. A versão analisada já registra cancelamentos e classifica a prestação como enviada dentro ou fora do prazo de sete dias corridos nas duas modalidades, mas não converte essas informações em pontuação. A definição inicial do produto também considerava um cálculo baseado na quantidade de itens doados. Essa alternativa atende diretamente às campanhas físicas, e não foi estabelecido um critério variável equivalente para as virtuais. Como o atraso seria uma infração dos termos da plataforma, a evolução desse recurso precisará definir uma política coerente entre as modalidades antes de relacioná-la à reputação. No MVP, porém, o atraso não gera penalidade automática. O canal de denúncias acrescentaria a possibilidade de reportar campanhas ou organizadores problemáticos; ele também não está representado nos casos de uso ou no modelo de dados atuais.
+
+Outra frente procura ampliar a participação. A proposta de recompensas associa um identificador de participação a cada usuário para permitir rankings e premiações definidas pelos organizadores. As notificações automáticas poderiam emitir avisos sobre as campanhas e complementar as atualizações que hoje ficam disponíveis na página pública. A viabilidade técnica ainda está em avaliação; por isso, o recurso não foi incorporado ao diagrama de implementação.
+
+A terceira frente trata das doações financeiras. Uma versão posterior poderá integrar, de forma opcional, processadores como Stripe ou Polar. A proposta oferece uma alternativa ao envio direto por PIX ou conta bancária, sem exigir a substituição desse modelo. Como o MVP não registra transações individuais, uma eventual integração demandará nova análise lógica antes de modificar os casos de uso, os componentes externos e o modelo de dados.
+
+Essas possibilidades descrevem caminhos de continuidade do produto. Elas não possuem prazo de execução nem compõem as funcionalidades verificadas neste trabalho; por isso, sua apresentação textual não altera os diagramas elaborados para o MVP.

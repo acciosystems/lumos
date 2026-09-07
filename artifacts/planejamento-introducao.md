@@ -6,7 +6,7 @@
 - Responsável: Codex.
 - Data: 2026-09-05.
 - Etapa: planejamento, redação e revisão concluídos em 2026-09-05.
-- Orientação central: `artifacts/TCC-PRINCIPAL.md`, especialmente a decisão D-007.
+- Orientação central: `artifacts/TCC-PRINCIPAL.md`, especialmente as decisões D-007 e D-024.
 - Entrega posterior: `artifacts/texto-introducao.md`.
 
 A introdução apresentará a AccioLabs e situará o desenvolvimento da plataforma Nossa Causa no contexto acadêmico deste TCC. A empresa será declarada, logo no primeiro parágrafo, como uma organização ficcional criada exclusivamente para o trabalho. Essa declaração não será uma nota lateral: ela delimita a natureza acadêmica da organização e evita que o texto sugira a existência de uma empresa, operação comercial ou experiência profissional real.
@@ -21,7 +21,8 @@ O escopo da apresentação da AccioLabs será restrito aos dados definidos: trat
 | 2     | Caracterizar a organização no recorte acadêmico | Informar que a AccioLabs é apresentada como uma software house situada em Votorantim/SP.                                       | Não expandir a caracterização com história, estrutura ou dados empresariais não fornecidos.                             |
 | 3     | Apresentar o objeto do trabalho                 | Vincular a empresa à concepção e ao desenvolvimento da plataforma web Nossa Causa.                                             | Usar Nossa Causa como produto e Lumos apenas como nome técnico do repositório.                                          |
 | 4     | Situar o problema e a proposta                  | Resumir a proposta de centralizar a organização e o acompanhamento de campanhas de doação, conforme a documentação do projeto. | Tratar a solução como proposta de TCC e respeitar o recorte do MVP; não declarar impacto, adoção ou resultados medidos. |
-| 5     | Delimitar o documento                           | Indicar, em formulação concisa, que as seções seguintes desenvolvem o levantamento, o projeto e a documentação da solução.     | Ajustar a referência às seções à estrutura final integrada; não antecipar conteúdo inexistente.                         |
+| 5     | Situar a continuidade do produto                | Apresentar reputação, denúncias, recompensas, notificações e processamento opcional de pagamentos como ideias posteriores ao MVP. | Não atribuir implementação, prazo ou resultado a esses recursos.                                                        |
+| 6     | Delimitar o documento                           | Indicar, em formulação concisa, que as seções seguintes desenvolvem o levantamento, o projeto e a documentação da solução.     | Ajustar a referência às seções à estrutura final integrada; não antecipar conteúdo inexistente.                         |
 
 A abertura deve usar uma frase inequívoca, com sentido equivalente a: “A AccioLabs é uma empresa ficcional, criada exclusivamente para o desenvolvimento deste Trabalho de Conclusão de Curso.” A redação final poderá variar a forma, mas não poderá enfraquecer nem omitir essa informação.
 
@@ -71,6 +72,7 @@ Não há pendência que impeça a redação da introdução. A eventual inclusã
 - [x] A empresa é descrita somente como software house ficcional situada em Votorantim/SP, sem história ou dados inventados.
 - [x] A Nossa Causa é apresentada como o objeto do trabalho e não é confundida com o repositório Lumos.
 - [x] O texto mantém o recorte do MVP e não apresenta previsões como funcionalidades comprovadas.
+- [x] A visão de continuidade posterior ao MVP é apresentada conforme D-024, sem prazo ou compromisso de entrega.
 - [x] Nenhuma afirmação bibliográfica foi incluída; portanto, não há referência adicional a encaminhar à bibliografia final nesta parte.
 - [x] A redação é acadêmica, clara e livre de linguagem promocional, persona e comentários de bastidores.
 - [x] O texto final permanece separado deste planejamento e das pendências de integração.
@@ -82,3 +84,7 @@ Em 2026-09-05, foram relidos `artifacts/TCC-PRINCIPAL.md`, `docs/nossa-causa-res
 Não foi utilizada referência de `docs/references.md`, pois a introdução não faz afirmações bibliográficas sobre confiança, transparência ou gestão de doações. O problema e as modalidades de campanha são apresentados como escopo documentado do projeto, não como constatações empíricas gerais nem como benefícios comprovados.
 
 A redação em português brasileiro foi produzida e revisada com a skill `humanizar`, em modo de criação e perfil acadêmico. A revisão verificou a fidelidade aos dados disponíveis, a delimitação explícita da ficção acadêmica, a distinção entre proposta e resultado e a ausência de linguagem promocional. Em 2026-09-05, a apresentação do projeto foi ampliada para incluir o público atendido, as modalidades de campanha e os recursos previstos no recorte do MVP, sem antecipar sua análise detalhada ou apresentá-los como entregas comprovadas. A consistência com as fases ainda não redigidas deverá ser reavaliada na integração final.
+
+Em 2026-09-07, a introdução foi revisada conforme D-024 para apresentar a concepção do produto além do MVP. O novo parágrafo identifica reputação, denúncias, recompensas, notificações e processamento opcional de pagamentos como possibilidades de continuidade, sem atribuir implementação, prazo ou resultado a essas ideias.
+
+Na revisão correspondente a D-025, o MVP passou a ser apresentado como uma escolha deliberada de produto minimamente viável, formada pelos fluxos centrais da proposta e por uma base funcional para continuidade. A redação preserva as diferenças entre implementação e evolução sem associar o recorte a erro ou falta de tempo.

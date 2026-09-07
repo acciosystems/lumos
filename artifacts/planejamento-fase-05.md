@@ -163,6 +163,8 @@ Em 2026-09-06, foram conferidos os fluxos de consulta pública, autenticação, 
 
 O texto final foi produzido com a skill `humanizar`, em modo de criação e perfil acadêmico. A revisão manteve as diferenças entre consulta pública, uso autenticado, gestão pelo organizador e transferência financeira externa. Também separou os requisitos do navegador usados na consulta pública daqueles necessários à sessão autenticada e qualificou o uso de e-mail para o cadastro por senha. Foram retiradas especificações de aparelho, navegador, conexão e periféricos que não possuem validação como requisitos mínimos.
 
+Em 2026-09-07, D-025 orientou uma revisão de enquadramento do parágrafo final. Os requisitos permanecem vinculados ao escopo técnico verificado, mas o MVP é apresentado pelas capacidades de acesso digital que viabilizam seus fluxos, com a logística e as transferências diretas distribuídas entre os responsáveis apropriados.
+
 ## Critérios para concluir a redação
 
 - [x] O texto final mantém o tópico 5.1 e explica a interpretação adotada para o projeto físico.

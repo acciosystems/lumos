@@ -363,3 +363,5 @@ Essas condições não alteram a conclusão da Fase 7. Elas orientam revisões m
 - [x] O mapa central contém todas as fontes externas efetivamente usadas na fase.
 - [x] O texto final passou por revisão acadêmica com a skill `humanizar`.
 - [x] A Fase 8 pode distinguir manutenção das atividades de implantação e recuperação definidas aqui.
+
+Em 2026-09-07, a abertura da fase foi revisada conforme D-025. O cenário de implantação passa a partir da base funcional entregue pelo MVP e de seus fluxos centrais, mantendo a distinção factual entre planejamento acadêmico e atividades efetivamente executadas.

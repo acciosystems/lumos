@@ -1,6 +1,6 @@
 # 7. Implantação
 
-Esta fase apresenta o planejamento acadêmico de implantação do MVP Nossa Causa. Ela não registra contratação de serviços, realização de treinamento, execução de backup, restauração ou disponibilização real do sistema. Vercel e Neon são targets definidos na arquitetura: o adaptador Nitro utiliza o preset da Vercel, e a configuração-alvo da Neon separa o endpoint agrupado, destinado ao runtime, do endpoint direto, destinado às migrações. O cenário a seguir organiza como esses recursos seriam preparados e validados caso o sistema viesse a ser utilizado.
+Esta fase apresenta o planejamento acadêmico de implantação do MVP Nossa Causa. O produto minimamente viável fornece a base funcional para organizar a preparação do ambiente, a validação dos fluxos centrais, o treinamento e os procedimentos de recuperação. Vercel e Neon são targets definidos na arquitetura: o adaptador Nitro utiliza o preset da Vercel, e a configuração-alvo da Neon separa o endpoint agrupado, destinado ao runtime, do endpoint direto, destinado às migrações. O cenário descreve como esses recursos seriam preparados e validados em uma eventual implantação; contratação de serviços, treinamento, backup, restauração e disponibilização pública não são apresentados como atividades já executadas.
 
 ## 7.1 Cronograma do projeto inteiro
 

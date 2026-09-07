@@ -30,7 +30,8 @@ A estrutura inicial contém apenas o título “Manutenção do sistema”. Para
 - **8.1. Escopo e tipos de manutenção**;
 - **8.2. Condições atuais de manutenibilidade do MVP**;
 - **8.3. Processo proposto de manutenção**;
-- **8.4. Plano de manutenção do Nossa Causa**.
+- **8.4. Plano de manutenção do Nossa Causa**;
+- **8.5. Evolução planejada além do MVP**.
 
 A numeração poderá ser ajustada na integração conforme o modelo institucional. A adaptação não cria uma fase operacional: ela organiza o tema único solicitado e preserva a distinção entre evidência, proposta e limitação.
 
@@ -139,6 +140,10 @@ O plano será apresentado em um quadro que relacione gatilho, atividade, evidên
 
 Registros do rastreador interno de desenvolvimento não serão citados nem usados como evidência acadêmica. O texto descreverá apenas o processo de manutenção proposto e as evidências técnicas verificáveis no repositório.
 
+### 8.5. Evolução planejada além do MVP
+
+A seção aplicará o processo proposto às ideias de reputação, denúncias, recompensas, notificações e processamento opcional de pagamentos. Esses recursos serão tratados como possibilidades de evolução que ainda precisam de delimitação e análise de impacto, não como solicitações aprovadas ou funcionalidades mantidas. A discussão preservará os sete dias corridos aplicados às duas modalidades no MVP. Também registrará que o cálculo baseado na quantidade de itens atende diretamente às campanhas físicas, não possui equivalente definido para as virtuais e foi concebido junto à classificação do atraso como infração dos termos, sem penalidade automática implementada.
+
 ## Fontes externas usadas na execução
 
 ### ISO/IEC/IEEE 14764:2022 e SWEBOK Guide V4.0a
@@ -165,6 +170,7 @@ Documentação vigente dos fornecedores será consultada apenas quando o texto m
 | Fonte                                                                   | Uso planejado                                                                 |
 | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
 | `artifacts/TCC-PRINCIPAL.md`                                            | Decisões compartilhadas, estado, limites de evidência e integração.           |
+| `docs/nossa-causa-resumo-pt.md`                                         | Ideias posteriores ao MVP e questões originalmente abertas.                   |
 | `artifacts/planejamento-fase-06.md` e `artifacts/texto-fase-06.md`      | Arquitetura, telas, documentação e snapshot do desenvolvimento.               |
 | `artifacts/planejamento-fase-07.md` e `artifacts/texto-fase-07.md`      | Fronteira com implantação, segurança, backup, restauração e acompanhamento.   |
 | `artifacts/manual-do-usuario.md`                                        | Material que deverá ser revisado quando a manutenção alterar fluxos visíveis. |
@@ -245,6 +251,7 @@ Documentação vigente dos fornecedores será consultada apenas quando o texto m
 | Omitir impacto de migração                       | Incluir análise de schema, dados, compatibilidade, cópia anterior e retorno em toda mudança pertinente.   |
 | Expor dados ou segredos em evidências            | Usar dados de demonstração e registrar somente metadados seguros.                                         |
 | Deixar documentação divergente                   | Associar Manual do Usuário, documentos técnicos e TCC aos critérios de conclusão da mudança.              |
+| Tratar a visão posterior ao MVP como trabalho aprovado | Apresentar cada ideia de D-024 sem ordem, prazo ou compromisso de entrega e exigir análise antes da incorporação. |
 | Desatualizar o mapa de referências               | Aplicar D-015 no mesmo momento em que uma citação for incluída, removida ou deslocada.                    |
 
 ## Critérios de aceite do planejamento
@@ -258,6 +265,7 @@ Documentação vigente dos fornecedores será consultada apenas quando o texto m
 - [x] O plano aplicado cobre código, dependências, banco, segurança, observabilidade e documentação.
 - [x] As fontes ISO/IEC/IEEE 14764:2022 e SWEBOK Guide V4.0a foram registradas com localizadores e limites de acesso explícitos.
 - [x] A integração com a Fase 7 e o mapa central de referências foi incorporada ao fluxo.
+- [x] A visão de evolução definida em D-024 foi relacionada ao processo sem ser apresentada como manutenção já aprovada.
 - [x] A execução foi dividida em partes sequenciais.
 
 ## Critérios de conclusão da execução futura
@@ -274,3 +282,7 @@ Documentação vigente dos fornecedores será consultada apenas quando o texto m
 - [x] O mapa central contém todas as fontes externas efetivamente usadas.
 - [x] O texto final passou por revisão acadêmica com a skill `humanizar`.
 - [x] A Fase 8 está coerente com o desenvolvimento da Fase 6 e a implantação teórica da Fase 7.
+
+Em 2026-09-07, o tópico 8.5 foi acrescentado conforme D-024. A revisão relaciona as ideias posteriores ao MVP ao processo de análise de mudanças, preserva sua condição de propostas sem ordem ou prazo e não acrescenta fontes externas ao texto.
+
+Na revisão de D-025, o MVP foi caracterizado como base funcional para manutenção e evolução. O texto continua registrando as verificações disponíveis e as condições operacionais não executadas, mas deixou de apresentar essas fronteiras como insuficiência inerente ao produto minimamente viável.

@@ -24,7 +24,7 @@ O texto deverá permitir que um leitor sem formação técnica compreenda a fina
 
 ### Significado de “sistema proposto”
 
-O sistema proposto será modelado conforme o MVP implementado e analisado na Fase 3. A expressão não será usada para incluir recursos futuros. Reputação, denúncias, recompensas, notificações automáticas e processamento de pagamentos permanecerão fora dos diagramas.
+O sistema proposto será modelado conforme o MVP implementado e analisado na Fase 3. Reputação, denúncias, recompensas, notificações automáticas e processamento de pagamentos permanecerão fora dos diagramas, mas serão discutidos em uma seção textual própria como possibilidades de evolução, conforme D-024.
 
 ### Papel do tópico 4.1
 
@@ -135,6 +135,10 @@ As relações principais serão:
 
 O texto posterior ao diagrama explicará as diferenças condicionais entre campanhas físicas e virtuais. Campos de local, meta de itens e pontos de coleta pertencem à modalidade física. PIX e dados bancários pertencem à modalidade virtual. A prestação registra total de itens ou total monetário conforme a modalidade, sem representar transações individuais.
 
+### 4.5 Possibilidades de evolução do sistema
+
+A seção distinguirá os modelos do MVP da concepção mais ampla da Nossa Causa. Serão discutidas três frentes: confiança e governança, com reputação e denúncias; participação, com recompensas e notificações; e formas de contribuição financeira, com integração opcional de processadores de pagamento. O texto registrará os sete dias corridos aplicados às duas modalidades no MVP. A alternativa baseada em itens será delimitada às campanhas físicas, pois não há critério variável equivalente definido para as virtuais, e a infração dos termos será distinguida de uma penalidade automática inexistente. Esses recursos não serão acrescentados aos diagramas atuais.
+
 ## Convenções para os diagramas
 
 - Usar português brasileiro em todos os rótulos.
@@ -160,6 +164,7 @@ As citações bibliográficas serão registradas no mapa central de referências
 
 A redação usará as referências conceituais acima e não citará arquivos do repositório. Para preservar a fidelidade ao sistema, a descrição do MVP será conferida internamente com:
 
+- o escopo das ideias posteriores ao MVP registrado em `docs/nossa-causa-resumo-pt.md`;
 - os fluxos públicos e autenticados disponíveis na interface;
 - as permissões e regras aplicadas a campanhas, perfis, participação e prestação de contas;
 - as validações dos dados informados pelos usuários;
@@ -199,7 +204,7 @@ Esses materiais comprovam internamente o recorte modelado, mas seus caminhos e n
 | --- | --- |
 | Tratar o desenho Mermaid como UML formal completa | Explicar a adaptação visual e usar somente os elementos necessários ao projeto. |
 | Sobrecarregar os diagramas | Limitar cada figura a uma pergunta e deslocar detalhes para o texto. |
-| Incluir funcionalidades futuras | Conferir todos os elementos com o recorte do MVP e com a Fase 3. |
+| Confundir funcionalidades futuras com o modelo implementado | Mantê-las fora dos diagramas e identificá-las, na discussão textual, como possibilidades sem prazo ou compromisso de entrega. |
 | Confundir contribuição virtual com pagamento processado | Mostrar apenas a divulgação dos dados bancários e manter o pagamento fora da plataforma. |
 | Expor detalhes internos no texto final | Revisar nomes, legendas, fontes e parágrafos em busca de caminhos e nomes de arquivo. |
 | Transformar o DER conceitual em cópia completa do banco | Manter apenas entidades e atributos relevantes para explicar o domínio. |
@@ -221,15 +226,20 @@ Uma revisão posterior de coerência detalhou os casos de uso, incluiu criação
 
 Em 2026-09-07, a orientação que dispensava referências foi revogada. A redação passou a citar a especificação UML da OMG nos tópicos 4.1 a 4.3, Chen (1976) e a documentação de DER do Mermaid no tópico 4.4, além da OWASP no princípio geral de autorização apresentado no tópico 4.3. A descrição da organização interna da Nossa Causa permaneceu vinculada à conferência técnica do MVP. Os conceitos, os localizadores, as cópias de consulta e os locais de uso foram registrados no mapa central.
 
+Ainda em 2026-09-07, D-024 foi incorporada ao planejamento e ao texto por meio do tópico 4.5. A revisão apresenta as ideias posteriores ao MVP sem alterar os três diagramas nem atribuir estado de implementação, prazo ou compromisso de entrega. Como o novo conteúdo decorre do escopo interno do produto, nenhuma fonte bibliográfica foi acrescentada ou deslocada.
+
+Na revisão de D-025, o texto passou a tratar os diagramas como representação dos fluxos centrais escolhidos para o produto minimamente viável. As integrações e funções posteriores aparecem como evolução da arquitetura, sem caracterizar sua ausência nos modelos como falha do MVP.
+
 ## Critérios de aceite do planejamento
 
-- [x] Os tópicos 4.1 a 4.4 possuem finalidade e conteúdo delimitados.
+- [x] Os tópicos 4.1 a 4.5 possuem finalidade e conteúdo delimitados.
 - [x] Os fundamentos conceituais dos tópicos 4.1 a 4.4 usam referências primárias adequadas, sem atribuir à literatura características específicas do MVP.
 - [x] Os três diagramas previstos usam Mermaid.
 - [x] A adaptação do caso de uso às capacidades do Mermaid está registrada.
 - [x] O significado de diagrama de implementação foi definido.
 - [x] Atores, ações, componentes e entidades correspondem ao MVP.
 - [x] Funcionalidades futuras e processamento de pagamentos ficaram fora do modelo.
+- [x] As possibilidades posteriores ao MVP foram discutidas em texto conforme D-024, sem alterar os diagramas da versão analisada.
 - [x] O DER foi limitado às entidades conceituais relevantes.
 - [x] O texto final não citará arquivos do repositório.
 - [x] Foram previstas fonte editável, exportação e validação visual dos diagramas.

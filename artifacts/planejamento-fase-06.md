@@ -399,6 +399,8 @@ Em uma auditoria documental realizada em 2026-09-07, o tópico 6.1 recebeu refer
 
 Na Parte 6, foram conferidos o quadro de responsabilidades, o inventário de telas, as dezenove capturas, o diagrama de classe, as referências externas e os limites do tópico TSDoc. O texto recebeu menções explícitas aos Quadros 4 e 5 e uma síntese final que preserva para a Fase 7 os temas de implantação, treinamento, segurança operacional e backup. A revisão não identificou ampliação do MVP nem caminhos internos na prosa destinada ao TCC. Com a decisão D-017, a imagem TSDoc ficou como tarefa condicional de integração e a Fase 6 foi concluída em 2026-09-07.
 
+Conforme D-025, a redação dos tópicos 6.1, 6.2 e da síntese final passou a destacar a coerência funcional do produto minimamente viável. As fronteiras de pagamento, logística, relatórios e documentação foram preservadas, mas aparecem como escolhas de responsabilidade e composição do sistema, não como sinal de implementação insuficiente.
+
 ## Critérios de conclusão da execução
 
 - [x] O snapshot e o manifesto de evidências foram registrados.

@@ -6,7 +6,7 @@
 - Responsável: Codex.
 - Data de início: 2026-09-05.
 - Etapa atual: concluída; planejamento, redação, conferência técnica e revisão finalizados em 2026-09-05.
-- Orientação central: `artifacts/TCC-PRINCIPAL.md`, sobretudo D-001, D-010 e D-011.
+- Orientação central: `artifacts/TCC-PRINCIPAL.md`, sobretudo D-001, D-010, D-011 e D-024.
 - Texto produzido: `artifacts/texto-fase-03.md`.
 
 Nesta fase, “sistema atual” significa o MVP implementado da plataforma Nossa Causa. A análise não descreverá um processo anterior observado em uma organização, pois não houve pesquisa de campo, acompanhamento de campanhas reais ou levantamento operacional da AccioLabs. Os controles informais associados a grupos de Facebook e WhatsApp pertencem à delimitação do problema apresentada nas fases anteriores. Eles não serão convertidos em um fluxo organizacional fictício nem comparados a métricas de uso inexistentes.
@@ -54,7 +54,7 @@ O texto deverá:
 | 4 | Descoberta e participação | Explicar os controles voltados ao acesso público e ao compromisso do doador. | Listagem pública; filtros por tema e região; filtro adicional por tipo; detalhe da campanha; ingresso e cancelamento em campanhas físicas; contagem pública. | Não declarar participação em campanha virtual nem afirmar que a contagem identifica publicamente os participantes. |
 | 5 | Gestão pelo organizador | Caracterizar o painel e as ações disponíveis. | Lista de campanhas próprias; status; contagem agregada de participantes; progresso de itens; edição; atualizações; conclusão, cancelamento e visualização pública. | Não chamar indicadores agregados de análise estatística avançada nem afirmar que existe lista nominal de participantes no painel. |
 | 6 | Transparência e prestação de contas | Examinar identificação da organização e publicação dos resultados. | CNPJ público para perfis organizacionais; indicação de verificado ou não verificado; prazo e estado da prestação; total, resumo e evidências públicas. | Não apresentar o CNPJ como verificado apenas por ter formato válido; não afirmar sanção automática ou auditoria externa das informações prestadas. |
-| 7 | Limites do controle atual | Fechar a análise com o que o MVP registra e o que permanece externo. | Transferências diretas; valores declarados pelo organizador; ausência de métricas de uso e recursos pós-MVP. | Não transformar limitações em defeitos não demonstrados nem antecipar requisitos definitivos das fases seguintes. |
+| 7 | Possibilidades de evolução do sistema | Separar o que o MVP registra das ideias previstas para etapas posteriores. | Reputação, denúncias, recompensas, notificações, processamento opcional de pagamentos e política futura do prazo de prestação. | Não transformar propostas em entregas nem aplicar a alternativa baseada em itens às campanhas virtuais sem uma regra correspondente. |
 
 Os títulos poderão ser ajustados na integração para manter a numeração global do TCC. A redação deverá ser predominantemente analítica, acompanhada por um quadro de síntese. Não se prevê a necessidade de pesquisa bibliográfica adicional para descrever o funcionamento do software; referências conceituais sobre UML e modelagem permanecem reservadas à Fase 4.
 
@@ -145,6 +145,7 @@ As fontes abaixo servem à rastreabilidade do planejamento e não serão reprodu
 
 | Evidência interna | Uso na conferência |
 | --- | --- |
+| `docs/nossa-causa-resumo-pt.md` | Escopo das ideias posteriores ao MVP e questões originalmente abertas. |
 | `apps/web/src/routes/(public)/campaigns/` | Listagem, filtros e detalhe público das campanhas. |
 | `apps/web/src/routes/(app)/campaigns/` | Criação, campanhas próprias, participações, gestão e edição. |
 | `apps/web/src/components/campaign/` | Formulários, painel, participação, detalhe público e prestação de contas. |
@@ -213,6 +214,7 @@ A redação foi confrontada com as rotas, os componentes, as validações, as re
 - [x] O CNPJ é apresentado com seu estado de verificação, sem confundir validação formal e verificação de identidade.
 - [x] A prestação de contas é descrita como declaratória, com prazo e publicidade, sem alegação de auditoria ou sanção automática.
 - [x] Funcionalidades posteriores ao MVP não aparecem como entregas atuais.
+- [x] As funcionalidades posteriores ao MVP são apresentadas como visão de continuidade conforme D-024, com distinção explícita em relação à versão analisada.
 - [x] Implementação não é confundida com adoção, eficácia, impacto social ou validação por usuários.
 - [x] O quadro possui título, fonte e menção no texto, com numeração preparada para integração.
 - [x] Capturas, diagramas e inventário de telas não são duplicados indevidamente entre as Fases 3, 4 e 6.
@@ -224,3 +226,7 @@ A redação foi confrontada com as rotas, os componentes, as validações, as re
 Em 2026-09-05, foram conferidas as rotas, os componentes, as validações, as regras de negócio e os modelos de dados relacionados a campanhas, perfis organizadores, participação e prestação de contas. A análise restringiu as afirmações de implementação aos comportamentos identificados nesses materiais. A execução de `bunx turbo run type-check` foi concluída com êxito para os nove pacotes do monorepo.
 
 O texto final foi redigido e revisado com a skill `humanizar`, em modo de criação e perfil acadêmico. A revisão retirou detalhes de implementação que não contribuíam para a análise funcional e preservou as limitações do MVP: não há processamento de pagamentos, controle logístico dos itens, auditoria externa das prestações de contas, notificações automáticas ou demonstração de impacto social. O documento interno de prioridades não foi citado; as funcionalidades foram descritas diretamente no texto e no Quadro 2.
+
+Em 2026-09-07, o encerramento da fase foi ampliado conforme D-024. A revisão relaciona os controles existentes às propostas de reputação, denúncias, recompensas, notificações e integração opcional de pagamentos. O conteúdo recebeu uma subseção própria para não permanecer subordinado ao tópico de transparência. O texto também separa os sete dias corridos aplicados às duas modalidades no MVP da alternativa baseada em itens, aplicável diretamente às campanhas físicas, e registra a infração prevista nos termos sem inventar penalidade automática.
+
+Conforme D-025, a redação foi revista para apresentar o MVP como produto funcional e deliberadamente delimitado. As capacidades implementadas passaram a anteceder suas fronteiras, e os recursos posteriores foram descritos como ampliação de uma base existente, não como correção de um produto malsucedido.

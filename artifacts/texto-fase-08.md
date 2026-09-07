@@ -1,6 +1,6 @@
 # 8. Manutenção do sistema
 
-Esta fase apresenta um plano de manutenção para o MVP Nossa Causa. O plano parte do snapshot documentado nas Fases 6 e 7 e não descreve atendimento em produção, execução de backup, restauração, treinamento, publicação de versões ou incidentes reais. Seu objetivo é estabelecer como uma necessidade de mudança seria registrada, analisada, implementada, verificada e acompanhada depois de uma eventual implantação.
+Esta fase apresenta um plano de manutenção para o MVP Nossa Causa. Como produto minimamente viável, essa versão reúne uma base funcional concreta sobre a qual correções, adaptações e melhorias podem ser analisadas de forma rastreável. O plano parte do snapshot documentado nas Fases 6 e 7 e estabelece como uma necessidade de mudança seria registrada, analisada, implementada, verificada e acompanhada depois de uma eventual implantação. Atendimento em produção, backup, restauração, treinamento, publicação de versões e incidentes reais pertencem a contextos operacionais que não foram executados neste trabalho.
 
 ## 8.1 Escopo e tipos de manutenção
 
@@ -23,7 +23,7 @@ Quadro 9 — Classificação planejada das solicitações de manutenção
 
 Fonte: elaboração própria (2026), com base em ISO/IEC/IEEE (2022) e IEEE Computer Society (2026).
 
-A classificação não substitui a análise de escopo. Funcionalidades que ainda não fazem parte do MVP não são tratadas como entregas mantidas. Cada proposta deverá ser examinada quanto ao impacto, ao tamanho e à compatibilidade com a versão em uso antes de ser incorporada ao ciclo de manutenção.
+A classificação não substitui a análise de escopo. O MVP oferece a referência estável para identificar o que já pertence ao produto mantido. As funcionalidades reservadas à evolução serão examinadas quanto ao impacto, ao tamanho e à compatibilidade com essa base antes de ingressarem no ciclo de manutenção.
 
 ## 8.2 Condições atuais de manutenibilidade do MVP
 
@@ -45,7 +45,7 @@ Quadro 10 — Recursos e limites atuais para manutenção
 
 Fonte: elaboração própria (2026).
 
-Os resultados mostram uma base para manutenção rastreável, mas também uma limitação importante: a validação automática disponível é estática. Portanto, uma alteração relevante deverá incluir um roteiro funcional proporcional ao risco, com dados de demonstração e sem expor credenciais, dados pessoais ou informações bancárias.
+Os resultados mostram uma base para manutenção rastreável, apoiada por verificações estáticas. Para fortalecê-la diante de alterações relevantes, o processo proposto inclui um roteiro funcional proporcional ao risco, com dados de demonstração e sem expor credenciais, dados pessoais ou informações bancárias.
 
 ## 8.3 Processo proposto de manutenção
 
@@ -79,3 +79,15 @@ Quadro 11 — Plano de manutenção do MVP
 Fonte: elaboração própria (2026).
 
 O plano não fixa frequência de releases, janela de observação ou tempo de solução, porque essas informações não foram definidas para a AccioLabs fictícia nem para uma operação real do Nossa Causa. Ao ordenar as solicitações futuras, deverão ser considerados, antes da conveniência de implementação, os riscos à segurança, à integridade de dados, à autenticação e aos fluxos centrais de campanhas físicas e virtuais. Assim, a manutenção permanece vinculada ao comportamento comprovado do MVP e à documentação que sustenta sua evolução.
+
+## 8.5 Evolução planejada além do MVP
+
+O processo descrito nesta fase também oferece uma forma de analisar as ideias previstas para ampliar o MVP. Essas possibilidades partem de uma base funcional já estabelecida e, quando selecionadas, deverão ser registradas, delimitadas e avaliadas quanto ao impacto antes que a equipe decida incorporá-las à plataforma ou tratá-las como um esforço de desenvolvimento separado.
+
+Os mecanismos de reputação e denúncia formam uma frente relacionada à confiança e à governança das campanhas. A reputação poderá considerar cancelamentos de última hora, cumprimento do prazo de prestação de contas e qualidade da organização. O MVP adota sete dias corridos nas duas modalidades. A concepção inicial também considerava um prazo calculado conforme a quantidade de itens doados, alternativa diretamente aplicável às campanhas físicas, mas não definiu um critério variável equivalente para as virtuais. Como o atraso seria uma infração dos termos da plataforma, a análise dessa evolução deverá definir se preserva o prazo único ou estabelece regras por modalidade e como essa infração influenciará a reputação. O sistema de denúncias foi proposto para permitir o reporte de campanhas ou organizadores problemáticos. Nenhum desses mecanismos está implementado na versão mantida.
+
+As propostas de recompensas e notificações tratam da participação nas campanhas. O primeiro recurso associa um identificador de participação a cada usuário para permitir rankings e premiações definidas pelos organizadores. O segundo prevê avisos automáticos sobre as campanhas. Como sua viabilidade técnica permanece em avaliação, as notificações deverão passar pela análise de impacto antes de qualquer definição de escopo.
+
+A integração com processadores como Stripe ou Polar constitui outra possibilidade de evolução. Ela foi concebida como alternativa opcional às transferências diretas por PIX ou conta bancária. Uma solicitação dessa natureza deverá considerar as alterações necessárias nos fluxos e nos registros do sistema, pois o MVP não processa, confirma ou concilia pagamentos.
+
+Essas ideias não possuem ordem de execução, prazo ou compromisso de entrega. Quando alguma delas for formalmente selecionada, o processo de manutenção permitirá registrar a decisão, verificar sua compatibilidade com o produto existente e definir os critérios de aceite correspondentes. Até lá, permanecem como visão de continuidade da Nossa Causa.
