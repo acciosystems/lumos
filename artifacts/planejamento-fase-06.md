@@ -5,7 +5,7 @@
 - Identificador: `fase-06`.
 - Responsável pelo planejamento: Codex.
 - Data do planejamento: 2026-09-06.
-- Estado: Partes 0 a 4 concluídas; Fase 6 em redação, com as Partes 5 e 6 pendentes.
+- Estado: Partes 0 a 4 concluídas; Parte 5 redigida e aguardando a imagem do usuário; Parte 6 pendente.
 - Recorte: MVP implementado da plataforma Nossa Causa, no mesmo snapshot funcional adotado nas Fases 3, 4 e 5.
 - Entrega final prevista: `artifacts/texto-fase-06.md` e os recursos visuais descritos neste planejamento.
 
@@ -13,7 +13,7 @@ A Fase 6 será executada em partes sequenciais, com uma verificação de saída 
 
 ## Objetivo
 
-A fase deverá explicar como o MVP foi desenvolvido e demonstrar sua correspondência com o projeto lógico. O texto apresentará o padrão arquitetural efetivamente observado, relacionará as telas disponíveis, documentará visualmente os formulários, oferecerá uma representação estrutural compatível com a implementação TypeScript e explicará a documentação do código em TSDoc.
+A fase deverá explicar como o MVP foi desenvolvido e demonstrar sua correspondência com o projeto lógico. O texto apresentará o padrão arquitetural efetivamente observado, relacionará as telas disponíveis, documentará visualmente os formulários, oferecerá uma representação estrutural compatível com a implementação TypeScript e explicará o TSDoc, adotado como alternativa a JAVADOC/SUMMARY.
 
 As evidências deverão pertencer à mesma versão da aplicação. O texto não transformará bibliotecas, modelos gerados ou funções em classes fictícias, não criará uma tela de relatório inexistente e não apresentará recursos posteriores ao MVP como concluídos.
 
@@ -22,11 +22,11 @@ As evidências deverão pertencer à mesma versão da aplicação. O texto não 
 1. A execução deverá ser dividida claramente para que o agente responsável realize uma parte por vez.
 2. A lista de telas do tópico 6.2 não precisa de imagens.
 3. As imagens dos formulários deverão ser obtidas preferencialmente com o Chrome DevTools MCP.
-4. TSDoc substituirá JAVADOC ou SUMMARY no tópico 6.2.3.
-5. A infraestrutura de TSDoc ainda não existe no snapshot deste planejamento, mas estará implementada quando a fase for executada. O executor deverá analisar a implementação então existente, sem antecipar ferramenta, configuração ou cobertura.
+4. TSDoc será a alternativa tecnológica adotada em substituição a JAVADOC/SUMMARY no tópico 6.2.3.
+5. A infraestrutura de TSDoc não existia no snapshot inicial deste planejamento, mas estaria implementada na execução da fase. Em 2026-09-07, o usuário determinou que a Parte 5 adotasse TSDoc como essa alternativa e considerasse uma cobertura parcial, concentrada em APIs e módulos relevantes, sem incluir componentes React.
 6. O tópico de TSDoc terá uma única imagem de exemplo, fornecida pelo usuário. O agente não deverá criar nem substituir essa imagem.
 
-Essas definições foram registradas como D-013 em `artifacts/TCC-PRINCIPAL.md`.
+As definições iniciais foram registradas como D-013 e a premissa específica da Parte 5 como D-014 em `artifacts/TCC-PRINCIPAL.md`.
 
 ## Adaptações da estrutura inicial
 
@@ -71,16 +71,16 @@ O exemplo do projeto será uma visão estrutural dos principais tipos, entidades
 
 O diagrama será mantido em Mermaid, no arquivo `artifacts/diagramas/fase-06-classes.mmd`. A fonte editável será a entrega desta etapa; uma exportação vetorial será gerada quando solicitada para a diagramação final, segundo a regra comum do trabalho.
 
-### 6.2.3. TSDoc como equivalente tecnológico
+### 6.2.3. TSDoc como alternativa tecnológica a JAVADOC/SUMMARY
 
-TSDoc será apresentado como convenção de comentários de documentação para APIs TypeScript, em substituição à alternativa JAVADOC/SUMMARY da estrutura original. O texto deverá distinguir:
+TSDoc será apresentado como a alternativa tecnológica adotada para substituir JAVADOC ou SUMMARY previstos na estrutura original. Como convenção de comentários de documentação para APIs TypeScript, ele será tratado, na Parte 5, como uma implementação existente por instrução do usuário, com cobertura parcial e orientada pela relevância dos contratos. O texto deverá distinguir:
 
 - a sintaxe e as convenções TSDoc;
 - a ferramenta efetivamente usada pelo projeto para validar ou gerar a documentação;
 - a cobertura realmente existente no snapshot da execução;
 - a imagem única escolhida como exemplo.
 
-Não será suficiente encontrar comentários iniciados por `/**`: o executor deverá verificar a configuração, os comandos e a saída da implementação de TSDoc então disponível. Também não deverá afirmar que todo o código está documentado sem uma verificação de cobertura que sustente essa frase.
+Como alternativa adotada, o recorte incluirá contratos compartilhados de validação, funções de calendário, procedimentos e serviços de campanhas, além de APIs selecionadas de autenticação. Componentes React, rotas visuais, modelos gerados, migrações, scripts de infraestrutura e auxiliares privados ficarão fora da cobertura. A seção não afirmará que todo o código está documentado nem confundirá a convenção TSDoc com a ferramenta que verifica ou apresenta os comentários.
 
 A única figura deste tópico será fornecida pelo usuário. Antes da integração, o executor deverá confirmar o nome do arquivo, a legibilidade, o conteúdo que ela demonstra e a legenda apropriada. Nenhuma captura adicional de código, terminal ou documentação gerada será inserida nesse tópico.
 
@@ -222,8 +222,8 @@ Exemplo de padrão de nome: `f07-criar-campanha-fisica.png`. Não incluir e-mail
 
 | Fonte | Uso planejado | Verificação na execução |
 | --- | --- | --- |
-| TSDOC. *How can I use TSDoc?*. Disponível em: <https://tsdoc.org/pages/intro/using_tsdoc/>. | Distinguir a convenção de comentários das ferramentas que a validam ou transformam em documentação. | Conferir a ferramenta adotada no repositório e selecionar páginas oficiais sobre as tags realmente usadas. |
-| TSDOC. *TSDoc spec*. Disponível em: <https://tsdoc.org/pages/spec/overview/>. | Apoiar a descrição da sintaxe e de seu escopo. | Não atribuir ao padrão capacidades pertencentes ao gerador de documentação. |
+| TSDOC. *How can I use TSDoc?*. Disponível em: <https://tsdoc.org/pages/intro/using_tsdoc/>. | Fundamentar TSDoc como alternativa tecnológica a JAVADOC/SUMMARY e distinguir a convenção de comentários das ferramentas que a validam ou transformam em documentação. | Conferida em 2026-09-07. A página explica que o pacote de referência é um componente usado por outras ferramentas e que a convenção pode ser verificada por plugin compatível. |
+| TSDOC. *TSDoc spec*. Disponível em: <https://tsdoc.org/pages/spec/overview/>. | Apoiar a descrição da sintaxe e de seu escopo. | Conferida em 2026-09-07, em conjunto com as páginas das tags `@remarks`, `@param`, `@returns` e `@throws`. O texto manterá a distinção entre convenção e ferramenta. |
 
 As datas de acesso, páginas e metadados finais serão registrados somente após a consulta usada na redação. O planejamento não dispensa a conferência das fontes originais.
 
@@ -368,7 +368,7 @@ O número F01–F19 é uma estimativa baseada no snapshot de 2026-09-06. Altera�
 - [x] Foram previstas proteção de dados, consistência visual e manifesto das evidências.
 - [x] O diagrama de classes foi adaptado à implementação TypeScript funcional sem transformar tipos ou módulos em classes inexistentes.
 - [x] A fonte Mermaid, a pesquisa UML e a validação da figura foram planejadas.
-- [x] TSDoc substitui JAVADOC/SUMMARY e será conferido somente após sua implementação.
+- [x] TSDoc foi adotado como alternativa a JAVADOC/SUMMARY e será conferido somente após sua implementação.
 - [x] O tópico TSDoc foi limitado a uma imagem fornecida pelo usuário.
 - [x] Dependências, riscos, fontes internas, fontes externas e limites de afirmação foram registrados.
 
@@ -384,6 +384,8 @@ Na Parte 3, a matriz F01–F19 foi confirmada sem inclusão ou remoção de unid
 
 Na Parte 4, a especificação UML 2.5.1 e a documentação oficial de diagramas de classe do Mermaid foram consultadas em 2026-09-06. O diagrama foi delimitado ao domínio de campanhas para combinar entidades persistidas, enumerações, um contrato de entrada e módulos funcionais reais sem tratá-los todos como classes TypeScript. A rastreabilidade das caixas e relações foi registrada no manifesto de evidências. A fonte `artifacts/diagramas/fase-06-classes.mmd` foi renderizada com Mermaid CLI 11.17.0 e sua saída foi inspecionada visualmente. Após as revisões de coerência, o recorte foi reduzido aos elementos que acrescentam contratos e operações ao DER, e a composição foi reposicionada para não atravessar a caixa do contrato. A renderização passou de aproximadamente 2397 × 1893 para 784 × 893 pixels. O texto do tópico 6.2.2 explicita a adaptação e diferencia o recorte do DER. A redação foi revisada com a skill `humanizar`, em modo de revisão e perfil acadêmico.
 
+Na Parte 5, por instrução do usuário em 2026-09-07, TSDoc foi adotado como alternativa tecnológica a JAVADOC/SUMMARY e sua implementação foi considerada existente. A redação delimitou a cobertura a contratos compartilhados, calendário de campanhas e APIs de domínio nos pacotes de validação, RPC e autenticação. Componentes React, rotas visuais, código gerado, migrações, scripts de infraestrutura e auxiliares privados foram excluídos. A documentação oficial do TSDoc foi consultada para distinguir a convenção das ferramentas compatíveis e descrever resumo, `@remarks`, `@param`, `@returns` e `@throws` apenas como convenções pertinentes. A imagem única permanece aguardando fornecimento do usuário; nenhuma imagem substituta foi criada. A redação foi revisada com a skill `humanizar`, em modo de criação e perfil acadêmico.
+
 ## Critérios para concluir a execução futura
 
 - [x] O snapshot e o manifesto de evidências foram registrados.
@@ -393,7 +395,8 @@ Na Parte 4, a especificação UML 2.5.1 e a documentação oficial de diagramas 
 - [x] As capturas foram produzidas com dados fictícios, revisadas e livres de conteúdo sensível.
 - [x] O tópico 6.2.2 cita fonte conceitual conferida e apresenta um diagrama rastreável à implementação.
 - [x] A fonte Mermaid do diagrama foi validada e preservada.
-- [ ] A implementação TSDoc, sua ferramenta e sua cobertura foram verificadas.
+- [x] A premissa de implementação TSDoc, seu escopo parcial e as fontes conceituais foram registrados.
+- [ ] A ferramenta, o comando e a saída da implementação TSDoc foram conferidos no repositório.
 - [ ] O tópico 6.2.3 contém exatamente a imagem fornecida pelo usuário e nenhuma captura adicional.
 - [ ] Quadro e figuras possuem título, fonte, menção e interpretação no texto.
 - [ ] O texto final não cita caminhos internos nem amplia o escopo do MVP.

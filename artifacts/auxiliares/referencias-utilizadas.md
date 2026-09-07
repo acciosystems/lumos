@@ -1,0 +1,50 @@
+# Mapa central de referências utilizadas
+
+- Última atualização: 2026-09-07.
+- Escopo conferido: `artifacts/texto-sumario.md`, `artifacts/texto-introducao.md` e `artifacts/texto-fase-01.md` a `artifacts/texto-fase-06.md`.
+- Planejamento: `artifacts/planejamento-referencias.md`.
+- Saída futura: `artifacts/referencias.md`.
+
+Este arquivo controla a relação entre as fontes externas e os trechos do TCC. Ele não é a bibliografia final. Os números de linha indicam o snapshot da última atualização; o arquivo e a seção definem a localização principal.
+
+## Fontes bibliográficas e técnicas
+
+| ID | Referência de trabalho e chamada | Onde é usada | Finalidade e localizador | Material de consulta | Estado |
+| --- | --- | --- | --- | --- | --- |
+| R-001 | INSTITUTO PARA O DESENVOLVIMENTO DO INVESTIMENTO SOCIAL (IDIS); IPSOS. *Pesquisa Doação Brasil 2024*. São Paulo: IDIS, 2025. Chamada: IDIS (2025). | `artifacts/texto-fase-01.md`, seção “Percepção bibliográfica e documental”, linhas 7; `artifacts/texto-fase-02.md`, seções “Informação, confiança e prestação de contas” e quadro “Origem, natureza e emprego dos dados levantados”, linhas 11, 13, 27, 28 e 36. | Método, recorte da amostra, comportamento declarado de busca de informações e percepções sobre confiança e clareza no uso dos recursos. Páginas 10, 17 e 43. | `artifacts/auxiliares/referencias/Pesquisa-Doacao-Brasil-2024_IDIS.pdf`; <https://www.idis.org.br/publicacoesidis/pesquisa-doacao-brasil-2024>. | Uso e localizadores conferidos; metadados e acesso final pendentes. |
+| R-002 | CHAPMAN, Cassandra M.; HORNSEY, Matthew J.; GILLESPIE, Nicole. *To What Extent Is Trust a Prerequisite for Charitable Giving? A Systematic Review and Meta-Analysis*. *Nonprofit and Voluntary Sector Quarterly*, 2021. DOI: 10.1177/08997640211003250. Chamada: Chapman, Hornsey e Gillespie (2021). | `artifacts/texto-fase-01.md`, seção “Percepção bibliográfica e documental”, linha 9; `artifacts/texto-fase-02.md`, seção “Informação, confiança e prestação de contas” e Quadro 1, linhas 15, 29 e 36. | Associação entre confiança e doação financeira, com preservação do caráter correlacional das evidências. Página 1 nos textos atuais. | `artifacts/auxiliares/referencias/UQbecc02e_OA.pdf`. | Uso e DOI conferidos; metadados e acesso final pendentes. |
+| R-003 | GHOORAH, Ushi; MARIYANI-SQUIRE, Edward; AMIN, Sabreena Zoha. *Relationships between financial transparency, trust, and performance: an examination of donors’ perceptions*. *Humanities and Social Sciences Communications*, v. 12, artigo 315, 2025. DOI: 10.1057/s41599-025-04640-2. Chamada: Ghoorah, Mariyani-Squire e Amin (2025). | `artifacts/texto-sumario.md`, abertura do RESUMO e do ABSTRACT, linhas 3 e 9, como apoio factual sem chamada autor-data; `artifacts/texto-fase-01.md`, seção “Percepção bibliográfica e documental”, linha 11; `artifacts/texto-fase-02.md`, seção “Informação, confiança e prestação de contas” e Quadro 1, linhas 17, 30 e 36. | Associação entre transparência financeira percebida, confiança do doador e desempenho percebido. Abstract e Introduction para o resumo; páginas 1 e 4 para as Fases 1 e 2. | `artifacts/auxiliares/referencias/ghoorah-et-al-2025-transparencia-confianca-desempenho.pdf`; <https://www.nature.com/articles/s41599-025-04640-2>. | Uso, DOI e acesso de 2026-09-05 registrados; conferência final pendente. |
+| R-004 | RODRIGUES, Adriana dos Santos. *O efeito da adoção do accountability no contexto das organizações sem fins lucrativos: um experimento no Brasil*. 2022. Dissertação (Mestrado) — Universidade Federal de Pelotas. Chamada: Rodrigues (2022). | `artifacts/texto-fase-01.md`, seção “Percepção bibliográfica e documental”, linha 11; `artifacts/texto-fase-02.md`, seção “Informação, confiança e prestação de contas” e Quadro 1, linhas 19, 31 e 36. | Experimento brasileiro sobre níveis de accountability, percepções e intenção de doação; distinção do resultado não significativo do voucher. Páginas 6, 33, 41 e 43–44. | `artifacts/auxiliares/referencias/Dissertação ADRIANA DOS SANTOS RODRIGUES.pdf`; <https://guaiaca.ufpel.edu.br/handle/prefix/14489>. | Uso e localizadores conferidos; metadados e acesso final pendentes. |
+| R-005 | VARELLA, Leonardo. *Modelagem e simulação dos processos da gestão de doações para ajuda humanitária em localidades com baixa resiliência*. 2019. Tese (Doutorado em Engenharia de Produção) — Universidade Federal de Santa Catarina. Chamada: Varella (2019). | `artifacts/texto-fase-01.md`, seção “Percepção bibliográfica e documental”, linha 13; `artifacts/texto-fase-02.md`, Quadro 1 e seção “Coordenação de doações materiais”, linhas 32, 36 e 40. | Gestão de doações materiais em ajuda humanitária, limitada a aquisição, recebimento e destinação de suprimentos. Página 13 do arquivo PDF, sem numeração impressa. | `artifacts/auxiliares/referencias/varella-2019-modelagem-simulacao-gestao-doacoes.pdf`; <https://repositorio.ufsc.br/handle/123456789/215066>. | Uso e localizador conferidos; metadados e acesso final pendentes. |
+| R-006 | OBJECT MANAGEMENT GROUP. *Unified Modeling Language — Version 2.5.1*. 2017. Chamada: Object Management Group (2017). | `artifacts/texto-fase-06.md`, tópico 6.2.2 “Diagrama de classe”, linha 192. | Conceitos de classes, propriedades, operações, associações, multiplicidades e composição. Seção 11.4.4, p. 195, e seção 11.5.4, pp. 201–202. | <https://www.omg.org/spec/UML/2.5.1/PDF>. | Uso e localizadores conferidos em 2026-09-06; normalização final pendente. |
+| R-007 | MERMAID. *Class diagrams*. Chamada: Mermaid (s.d.). | `artifacts/texto-fase-06.md`, tópico 6.2.2 “Diagrama de classe”, linha 192. | Sintaxe de atributos, operações, relações e anotações usada no diagrama. Documentação apresentada como versão 11.17.2. | <https://mermaid.js.org/syntax/classDiagram.html>. | Uso conferido em 2026-09-06; data de publicação e normalização final pendentes. |
+| R-008 | TSDOC. *How can I use TSDoc?*. Chamada atual: TSDoc (s.d.). | `artifacts/texto-fase-06.md`, tópico 6.2.3 “Documentação do código com TSDoc”, linha 206. | Distinção entre a convenção de comentários e as ferramentas que a interpretam, verificam ou apresentam. | <https://tsdoc.org/pages/intro/using_tsdoc/>. | Uso conferido em 2026-09-07; chamada precisa ser diferenciada das demais páginas TSDoc. |
+| R-009 | TSDOC. *TSDoc spec*. Chamada atual: TSDoc (s.d.). | `artifacts/texto-fase-06.md`, tópico 6.2.3 “Documentação do código com TSDoc”, linha 206. | Estrutura geral da convenção e escopo da especificação. | <https://tsdoc.org/pages/spec/overview/>. | Uso conferido em 2026-09-07; chamada precisa ser diferenciada das demais páginas TSDoc. |
+| R-010 | TSDOC. *@remarks*. Chamada atual: TSDoc (s.d.). | `artifacts/texto-fase-06.md`, tópico 6.2.3 “Documentação do código com TSDoc”, linha 206. | Uso de `@remarks` para detalhes adicionais ao resumo. | <https://tsdoc.org/pages/tags/remarks/>. | Uso conferido em 2026-09-07; chamada precisa ser diferenciada das demais páginas TSDoc. |
+| R-011 | TSDOC. *@param*. Chamada atual: TSDoc (s.d.). | `artifacts/texto-fase-06.md`, tópico 6.2.3 “Documentação do código com TSDoc”, linha 206. | Descrição dos parâmetros documentados. | <https://tsdoc.org/pages/tags/param/>. | Uso conferido em 2026-09-07; chamada precisa ser diferenciada das demais páginas TSDoc. |
+| R-012 | TSDOC. *@returns*. Chamada atual: TSDoc (s.d.). | `artifacts/texto-fase-06.md`, tópico 6.2.3 “Documentação do código com TSDoc”, linha 206. | Descrição do valor retornado. | <https://tsdoc.org/pages/tags/returns/>. | Uso conferido em 2026-09-07; chamada precisa ser diferenciada das demais páginas TSDoc. |
+| R-013 | TSDOC. *@throws*. Chamada atual: TSDoc (s.d.). | `artifacts/texto-fase-06.md`, tópico 6.2.3 “Documentação do código com TSDoc”, linha 206. | Registro das exceções relevantes. | <https://tsdoc.org/pages/tags/throws/>. | Uso conferido em 2026-09-07; chamada precisa ser diferenciada das demais páginas TSDoc. |
+
+## Fontes internas e evidências não bibliográficas
+
+| Fonte | Uso geral | Tratamento |
+| --- | --- | --- |
+| `docs/nossa-causa-resumo-pt.md` | Problema de projeto, finalidade da plataforma, modalidades de campanha e limites do produto. | Documento interno de escopo; não apresentar como pesquisa empírica nem incluir automaticamente na bibliografia. |
+| `docs/nossa-causa-summary-en.md` | Conferência terminológica e equivalência do conteúdo em inglês. | Documento interno de apoio; mesma limitação da versão em português. |
+| Código, banco de dados e aplicação em execução | Afirmações sobre arquitetura, requisitos implementados, telas, formulários e domínio nas Fases 3 a 6. | Evidência técnica rastreada nos planejamentos e manifestos; não é referência bibliográfica por padrão. |
+| Quadros, diagramas e capturas produzidos para o TCC | Representações e evidências visuais das Fases 2 a 6. | Manter a fonte de elaboração própria em cada legenda; não criar entrada bibliográfica. |
+
+## Fontes excluídas
+
+| Fonte | Motivo |
+| --- | --- |
+| Liang, Wang e Wang (2022) | Excluída por decisão D-009; não é usada no texto e não deverá compor a bibliografia final. |
+
+## Controle de atualização
+
+- Acrescentar uma fonte somente quando ela sustentar conteúdo mantido no texto.
+- Registrar todos os usos de uma obra na mesma entrada.
+- Atualizar linhas e seções depois de reorganizações do texto.
+- Remover da bibliografia futura qualquer fonte sem uso remanescente.
+- Não preencher metadados ausentes por inferência.
+

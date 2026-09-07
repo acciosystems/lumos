@@ -8,7 +8,7 @@
 | Commit | `2bd68da` |
 | Estado do repositório no início | `artifacts/TCC-PRINCIPAL.md` modificado e `artifacts/planejamento-fase-06.md` ainda não rastreado, ambos pertencentes ao planejamento da Fase 6. |
 | Recorte funcional | MVP da Nossa Causa adotado nas Fases 3, 4 e 5. |
-| TSDoc | Não identificado no snapshot inicial. A implementação será conferida novamente antes da Parte 5. |
+| TSDoc | Não identificado no snapshot inicial. Em 2026-09-07, o usuário determinou a adoção de TSDoc como alternativa a JAVADOC/SUMMARY e que a Parte 5 considerasse a implementação existente, com cobertura parcial de módulos relevantes. |
 
 ## Conferência da aplicação em execução — Parte 2
 
@@ -30,7 +30,7 @@
 | 2 — Lista de telas | Inventário textual de quinze telas, sem imagens. | Concluída em 2026-09-06. |
 | 3 — Formulários | Matriz F01–F19 e capturas com dados fictícios. | Concluída em 2026-09-06. |
 | 4 — Diagrama de classe | Fonte Mermaid, pesquisa conceitual e rastreabilidade à implementação. | Concluída em 2026-09-06. |
-| 5 — TSDoc | Implementação verificada e imagem fornecida pelo usuário. | Não iniciada; depende dos insumos previstos. |
+| 5 — TSDoc | Alternativa a JAVADOC/SUMMARY, escopo textual, fontes oficiais e imagem única fornecida pelo usuário. | Redação concluída sob a premissa de implementação existente; aguarda a imagem do usuário e a conferência posterior da ferramenta, do comando e da saída. |
 
 ## Capturas de formulários — Parte 3
 
@@ -84,5 +84,16 @@
 | Serviços de campanha | Funções `toCampaignCreateData`, `toCampaignUpdateData` e `saveCampaignAccountability` nos serviços de campanhas do pacote RPC. |
 | Campanha–prestação | Relação opcional `Campaign.accountability`, representada pela composição `1` para `0..1`. A relação com arquivos foi retirada do recorte para reduzir a densidade visual; ela permanece documentada no DER da Fase 4. |
 | Contrato–modalidade; procedimentos–contrato; serviços–campanha | Discriminação por `type` no esquema Valibot, entrada do procedimento e chamadas aos serviços de campanha. |
+
+## TSDoc — Parte 5
+
+| Item | Registro |
+| --- | --- |
+| Premissa de execução | Por instrução do usuário em 2026-09-07, TSDoc é a alternativa adotada para JAVADOC/SUMMARY; os comentários e sua verificação são considerados existentes nesta parte. |
+| Fonte conceitual | TSDOC. *How can I use TSDoc?*; *TSDoc spec*; páginas das tags `@remarks`, `@param`, `@returns` e `@throws`. Consulta em 2026-09-07. |
+| Cobertura incluída | Contratos compartilhados de validação, funções de calendário, procedimentos e serviços de campanhas e APIs selecionadas de autenticação. |
+| Exclusões | Componentes React, rotas visuais, modelos e clientes gerados, esquemas Prisma, migrações, seeds, scripts de infraestrutura, testes e auxiliares privados. |
+| Limite de afirmação | A cobertura é parcial e não mede a totalidade dos comentários do monorepo. TSDoc define a convenção; a ferramenta compatível interpreta ou verifica os comentários. |
+| Imagem | A única imagem do tópico continua dependente do arquivo fornecido pelo usuário. Nenhuma imagem alternativa foi criada. |
 
 Este manifesto será atualizado ao fim de cada parte concluída. Caminhos técnicos e detalhes de conferência pertencem a este material auxiliar e não serão reproduzidos no texto do TCC.
