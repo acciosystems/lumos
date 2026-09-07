@@ -6,7 +6,7 @@
 - Responsável pelo planejamento: Codex.
 - Data do planejamento: 2026-09-07.
 - Estado: em planejamento, com inventário inicial preenchido.
-- Orientação central: `artifacts/TCC-PRINCIPAL.md`, especialmente D-008, D-009 e D-015.
+- Orientação central: `artifacts/TCC-PRINCIPAL.md`, especialmente D-008, D-009, D-015 e D-019.
 - Entregas previstas: `artifacts/auxiliares/referencias-utilizadas.md` e `artifacts/referencias.md`.
 
 Esta etapa deverá consolidar as referências bibliográficas efetivamente usadas no TCC e preservar a rastreabilidade entre cada obra e os trechos que ela sustenta. O mapa central será mantido durante a redação das partes; a lista bibliográfica final será produzida somente na integração, depois da conferência dos metadados e da remoção de fontes que não permanecerem no texto.
@@ -86,6 +86,22 @@ A integração deverá escolher e aplicar uma única norma bibliográfica, confo
 
 DOI e URL não deverão gerar entradas duplicadas para a mesma obra. Uma cópia local também não cria outra referência. Versões diferentes somente serão mantidas separadas quando o texto depender de conteúdo próprio de cada versão.
 
+## Registro temporal da pesquisa e datas de acesso
+
+Conforme D-019, o cronograma geral registrará três etapas distintas: a busca exploratória de referências para verificar a viabilidade do TCC, de 17/02/2026 a 16/03/2026; a pesquisa contínua de 10/03/2026 a 01/09/2026, que subsidiou documentos intermediários solicitados pelo orientador; e a filtragem final das referências, de 06/08/2026 a 01/09/2026. As obras consultadas nas duas primeiras etapas não correspondem, necessariamente, às fontes que sustentam o texto final. Essa distinção não permite inventar datas de consulta ou acesso para criar a aparência de uma pesquisa executada ao longo do ano.
+
+O controle temporal seguirá estas regras:
+
+1. usar a data real quando houver histórico, arquivo, anotação ou outro registro de consulta;
+2. registrar como **período retrospectivo estimado** qualquer distribuição temática que não possua evidência contemporânea;
+3. nunca transformar a data de publicação da obra em data de consulta;
+4. usar na referência on-line a data real de acesso ou conferência da página;
+5. marcar `[DATA REAL DE ACESSO A REGISTRAR]` enquanto a consulta ainda não tiver ocorrido;
+6. não preencher lacunas com datas fictícias, mesmo quando elas produziriam um cronograma visualmente mais uniforme.
+7. não incluir no mapa central ou na bibliografia final fontes das etapas exploratória ou intermediária que não sustentem conteúdo mantido no texto.
+
+O cronograma poderá agrupar a pesquisa contínua por tema, por exemplo, problema de doações, requisitos, modelagem, segurança e implantação. Sem evidência temporal, esses agrupamentos permanecerão identificados como reconstrução estimada e não comprovarão que cada obra foi consultada naquele intervalo.
+
 ## Fontes internas e elaboração própria
 
 Os documentos `docs/nossa-causa-resumo-pt.md` e `docs/nossa-causa-summary-en.md` sustentam o escopo do produto e precisam continuar diferenciados de pesquisa empírica. O código, as validações, o banco de dados e a aplicação em execução sustentam afirmações sobre implementação. Esses materiais terão rastreabilidade nos planejamentos e manifestos técnicos, mas não serão incluídos automaticamente em `artifacts/referencias.md`.
@@ -94,24 +110,33 @@ Quadros, diagramas e capturas com indicação de elaboração própria também n
 
 ## Dependências e pendências
 
-- As Fases 7 e 8 e as considerações finais ainda poderão introduzir novas fontes.
+- A Fase 8 e as considerações finais ainda poderão introduzir novas fontes.
+- As fontes de segurança, contingência e Neon usadas na Fase 7 tiveram o acesso registrado em 2026-09-07.
 - A orientação institucional de normalização ainda precisa ser confirmada antes da bibliografia final.
 - As chamadas do TSDoc foram diferenciadas; a integração ainda deverá aplicar a norma institucional escolhida de modo uniforme.
 - Datas de acesso e metadados ausentes deverão ser conferidos na fonte original durante a integração.
 - Liang, Wang e Wang (2022) permanece excluído conforme D-009 e não deverá reaparecer no mapa.
 
+## Novas referências incorporadas na Fase 7
+
+As novas fontes abaixo foram incorporadas à redação da Fase 7 e registradas no mapa central. As fontes R-016 e R-017, já empregadas em fases anteriores, também foram reutilizadas. A inclusão em `artifacts/referencias.md` ocorrerá na integração da bibliografia final.
+
+| Fase e tópico | Fonte utilizada | Uso na redação | Registro no mapa central |
+| --- | --- | --- | --- |
+| Fase 7, 7.6.1 Segurança — senhas | OWASP, *Password Storage Cheat Sheet*, e Better Auth, *Security*. | Distinguir hash de senha, criptografia reversível e o algoritmo padrão do serviço de autenticação. | R-019 e R-020. |
+| Fase 7, 7.6.1 Segurança — dados criptografados | OWASP, *Cryptographic Storage Cheat Sheet*. | Delimitar proteção de dados em repouso e gestão de segredos, sem alegar garantias não verificadas. | R-021. |
+| Fase 7, 7.6.2 Backup | NIST, *Contingency Planning Guide for Federal Information Systems*. | Delimitar planejamento de contingência, recuperação e prioridades de backup. | R-022; o escopo federal foi adaptado ao contexto acadêmico. |
+| Fase 7, 7.6.2 Backup na Neon | Neon, *Connection pooling* e *Announcing Point-in-Time Restore*. | Fundamentar a separação de conexões e condicionar a recuperação pontual à configuração disponível. | R-023 e R-024; nenhum recurso dependente de plano foi presumido. |
+
 ## Referências reservadas para fases futuras
 
-As fontes abaixo foram selecionadas para orientar a redação futura, mas ainda não sustentam nenhum trecho do TCC. Por isso, não entram no mapa central nem na bibliografia final até que uma afirmação correspondente seja mantida no texto.
+A fonte abaixo foi selecionada para orientar a Fase 8, mas ainda não sustenta nenhum trecho do TCC. Por isso, não entra no mapa central nem na bibliografia final até que uma afirmação correspondente seja mantida no texto.
 
 | Fase e tópico | Fonte candidata | Uso permitido na redação futura | Cuidados antes de citar |
 | --- | --- | --- | --- |
-| Fase 7, 7.6.1 Segurança — senhas | OPEN WEB APPLICATION SECURITY PROJECT (OWASP). *Password Storage Cheat Sheet*. Disponível em: <https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html>. | Distinguir armazenamento de senhas por função de derivação de chave da criptografia reversível e justificar práticas planejadas ou verificadas. | Confirmar o algoritmo efetivamente usado pelo serviço de autenticação; não atribuir ao MVP configurações não conferidas. |
-| Fase 7, 7.6.1 Segurança — dados criptografados | OPEN WEB APPLICATION SECURITY PROJECT (OWASP). *Cryptographic Storage Cheat Sheet*. Disponível em: <https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html>. | Fundamentar princípios para dados em repouso e gestão de chaves, se fizerem parte do recorte. | Não confundir hash de senha com criptografia nem alegar chaves, algoritmos ou rotação inexistentes. |
-| Fase 7, 7.6.2 Backup | NATIONAL INSTITUTE OF STANDARDS AND TECHNOLOGY (NIST). *Contingency Planning Guide for Federal Information Systems*. NIST SP 800-34 Rev. 1, 2010. DOI: 10.6028/NIST.SP.800-34r1. Disponível em: <https://csrc.nist.gov/pubs/sp/800/34/r1/upd1/final>. | Delimitar planejamento de contingência, recuperação e prioridades de backup. | Tratar backup e restauração como planejamento enquanto não houver execução comprovada; adaptar o escopo federal da publicação ao contexto acadêmico. |
 | Fase 8, Manutenção do sistema | INTERNATIONAL ORGANIZATION FOR STANDARDIZATION (ISO); INTERNATIONAL ELECTROTECHNICAL COMMISSION (IEC); INSTITUTE OF ELECTRICAL AND ELECTRONICS ENGINEERS (IEEE). *ISO/IEC/IEEE 14764:2022: Software engineering — Software life cycle processes — Maintenance*. 2022. Disponível em: <https://www.iso.org/standard/80710.html>. | Definir manutenção de software e distinguir atividades de manutenção de operação, backup e recuperação. | Conferir a norma e a disponibilidade institucional antes da citação final; não apresentar atividades propostas como práticas já realizadas. |
 
-Ao usar uma dessas fontes, o agente responsável deverá baixar ou conferir uma cópia de consulta autorizada, criar a entrada correspondente no mapa central e registrar seção, finalidade e localizador conforme D-015.
+Ao usar essa fonte, o agente responsável deverá baixar ou conferir uma cópia de consulta autorizada, criar a entrada correspondente no mapa central e registrar seção, finalidade e localizador conforme D-015.
 
 ## Critérios de aceite
 
@@ -119,6 +144,7 @@ Ao usar uma dessas fontes, o agente responsável deverá baixar ou conferir uma 
 - [x] Cada fonte externa citada nos textos disponíveis possui ao menos uma localização de uso.
 - [x] Fontes internas, evidências técnicas e elaboração própria foram separadas da bibliografia.
 - [x] Localizadores já conferidos foram preservados sem criação de metadados ausentes.
+- [x] Datas reais, retrospectivamente estimadas e planejadas foram separadas; datas de acesso fictícias foram vedadas.
 - [ ] As partes futuras atualizaram o mapa ao incluir ou remover fontes.
 - [ ] Todas as chamadas do texto integrado possuem entrada correspondente no mapa.
 - [ ] Toda entrada destinada à bibliografia final permanece usada no texto integrado.
