@@ -15,8 +15,8 @@ O texto deverá permitir que um leitor sem formação técnica compreenda a fina
 
 ## Decisões fornecidas pelo usuário
 
-1. A pesquisa e a referência solicitadas na estrutura inicial serão substituídas por uma explicação autoral do assunto, sem citação bibliográfica ou on-line.
-2. Essa adaptação vale para todos os tópicos, de 4.1 a 4.4. Cada tópico começará com uma explicação de seu conceito, de sua finalidade e da forma de leitura adotada no trabalho.
+1. A decisão anterior de dispensar referências foi revogada. Os fundamentos conceituais dos tópicos 4.1 a 4.4 usarão fontes primárias adequadas à UML, aos casos de uso, à organização lógica da aplicação e ao DER.
+2. Cada tópico começará com uma explicação de seu conceito, de sua finalidade e da forma de leitura adotada no trabalho. As citações sustentarão apenas esses conceitos; a descrição da Nossa Causa continuará baseada na conferência técnica interna do MVP.
 3. Todos os diagramas serão escritos em Mermaid.
 4. O texto destinado ao TCC não citará diretamente nenhum arquivo do repositório. A conferência do código servirá apenas como evidência interna de consistência.
 
@@ -60,7 +60,7 @@ A seção deverá:
 - explicar que um diagrama simplifica a realidade e responde a uma pergunta específica;
 - apresentar as três visões utilizadas nesta fase: ações dos usuários, organização da implementação e estrutura dos dados;
 - informar que as representações correspondem ao recorte do MVP;
-- preparar a leitura dos diagramas sem recorrer a referências externas.
+- preparar a leitura dos diagramas com referência à especificação UML.
 
 ### 4.2 Diagrama de caso de uso
 
@@ -147,9 +147,16 @@ O texto posterior ao diagrama explicará as diferenças condicionais entre campa
 - Manter o código Mermaid como fonte editável e gerar uma exportação vetorial, preferencialmente SVG, quando ela for necessária para a diagramação final.
 - Validar a sintaxe e a legibilidade das exportações no momento em que forem produzidas.
 
+## Referências conceituais
+
+- **Object Management Group (2017):** fundamentará a definição de UML no tópico 4.1, a noção de casos de uso e atores no tópico 4.2 e a distinção entre a visão lógica elaborada para o TCC e as construções de implantação da UML no tópico 4.3. Serão usados, respectivamente, a cláusula 1, p. 1; a seção 18.1, pp. 639–642; e as seções 19.1 e 19.2, pp. 653–654.
+- **Chen (1976):** fundamentará, no tópico 4.4, as noções de entidade, relacionamento e atributo do modelo entidade-relacionamento. A consulta cobrirá as páginas 10 a 12 do artigo.
+
+As citações bibliográficas serão registradas no mapa central de referências. Elas não converterão as características do MVP em resultados da literatura nem substituirão a conferência técnica do sistema.
+
 ## Fontes internas de conferência
 
-A redação não usará fontes bibliográficas nem citará arquivos do repositório. Para preservar a fidelidade ao sistema, a elaboração será conferida internamente com:
+A redação usará as referências conceituais acima e não citará arquivos do repositório. Para preservar a fidelidade ao sistema, a descrição do MVP será conferida internamente com:
 
 - os fluxos públicos e autenticados disponíveis na interface;
 - as permissões e regras aplicadas a campanhas, perfis, participação e prestação de contas;
@@ -178,10 +185,11 @@ Esses materiais comprovam internamente o recorte modelado, mas seus caminhos e n
 5. Produzir e revisar o diagrama de implementação em Mermaid.
 6. Produzir e revisar o DER com a sintaxe própria do Mermaid.
 7. Quando solicitada para a diagramação final, renderizar os três diagramas e corrigir problemas de sintaxe, sobreposição ou legibilidade.
-8. Redigir as explicações que antecedem e interpretam cada figura.
-9. Aplicar a skill `humanizar` ao texto final, com perfil acadêmico, preservando nomes e regras do domínio.
-10. Conferir coerência com as Fases 2, 3 e 6 e remover qualquer referência direta a arquivos internos.
-11. Atualizar o quadro de progresso somente após a revisão completa.
+8. Redigir as explicações que antecedem e interpretam cada figura, com as citações conceituais pertinentes.
+9. Atualizar o mapa central de referências e conferir os localizadores das fontes utilizadas.
+10. Aplicar a skill `humanizar` ao texto final, com perfil acadêmico, preservando nomes e regras do domínio.
+11. Conferir coerência com as Fases 2, 3 e 6 e remover qualquer referência direta a arquivos internos.
+12. Atualizar o quadro de progresso somente após a revisão completa.
 
 ## Riscos e controles
 
@@ -209,10 +217,12 @@ O texto final foi redigido e revisado com a skill `humanizar`, em modo de criaç
 
 Uma revisão posterior de coerência detalhou os casos de uso, incluiu criação e acesso à conta, separou as consultas públicas das ações de criação e entrada e atribuiu a manutenção do perfil ao usuário autenticado. O DER passou a apresentar o período e os dados próprios das modalidades física e virtual. As exportações permanecerão adiadas até uma solicitação de diagramação, sem alterar a conclusão da fase.
 
+Em 2026-09-07, a orientação que dispensava referências foi revogada. A redação passou a citar a especificação UML da OMG para os tópicos 4.1 a 4.3 e Chen (1976) para o tópico 4.4. Os conceitos, os localizadores, as cópias de consulta e os locais de uso foram registrados no mapa central.
+
 ## Critérios de aceite do planejamento
 
 - [x] Os tópicos 4.1 a 4.4 possuem finalidade e conteúdo delimitados.
-- [x] A explicação autoral substitui pesquisa e referência em todos os tópicos.
+- [x] Os fundamentos conceituais dos tópicos 4.1 a 4.4 usam referências primárias adequadas, sem atribuir à literatura características específicas do MVP.
 - [x] Os três diagramas previstos usam Mermaid.
 - [x] A adaptação do caso de uso às capacidades do Mermaid está registrada.
 - [x] O significado de diagrama de implementação foi definido.
@@ -222,7 +232,7 @@ Uma revisão posterior de coerência detalhou os casos de uso, incluiu criação
 - [x] O texto final não citará arquivos do repositório.
 - [x] Foram previstas fonte editável, exportação e validação visual dos diagramas.
 - [x] As dependências com as Fases 2, 3, 5, 6 e 7 foram registradas.
-- [x] O texto final foi redigido e revisado em português brasileiro, com explicações autorais e sem referências bibliográficas.
+- [x] O texto final foi redigido e revisado em português brasileiro, com citações conceituais e sem referências a arquivos internos.
 - [x] As três fontes Mermaid foram mantidas como os artefatos de diagrama disponíveis nesta etapa.
 - [x] A exportação vetorial e sua validação ficaram condicionadas à solicitação de diagramação final; essa atividade não é pendência da Fase 4 concluída.
 - [x] A redação foi conferida com os limites funcionais da Fase 3, inclusive a prestação de contas após a conclusão da campanha.

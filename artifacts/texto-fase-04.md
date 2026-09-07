@@ -4,7 +4,7 @@ Esta fase apresenta o projeto lógico da Nossa Causa conforme o recorte do MVP a
 
 ## 4.1 UML
 
-UML, sigla de *Unified Modeling Language*, é uma linguagem usada para representar partes de um sistema por meio de diagramas. Cada diagrama simplifica o sistema para responder a uma pergunta diferente. Um pode mostrar quem realiza determinada ação; outro, como os blocos da aplicação se organizam; um terceiro, quais informações se relacionam.
+UML, sigla de *Unified Modeling Language*, é uma linguagem de modelagem usada para representar partes de um sistema por meio de diagramas (OBJECT MANAGEMENT GROUP, 2017). Cada diagrama simplifica o sistema para responder a uma pergunta diferente. Um pode mostrar quem realiza determinada ação; outro, como os blocos da aplicação se organizam; um terceiro, quais informações se relacionam.
 
 Nesta fase, a UML orienta a representação das interações dos usuários e da organização lógica da aplicação. O Diagrama Entidade-Relacionamento complementa essas visões ao tratar das informações registradas. Juntos, os modelos permitem examinar a Nossa Causa sem depender de detalhes de programação ou de telas específicas.
 
@@ -12,7 +12,7 @@ Os diagramas adotam os mesmos limites do MVP. A plataforma divulga dados para tr
 
 ## 4.2 Diagrama de caso de uso
 
-Um diagrama de caso de uso apresenta os objetivos que cada papel pode atingir ao utilizar o sistema. O papel, chamado de ator, não representa uma pessoa determinada. Ele reúne pessoas que usam a plataforma com as mesmas permissões. Nesta modelagem, os atores são visitante, usuário autenticado e organizador. Cada ação aparece separadamente para deixar claro quem pode realizá-la.
+Na UML, um caso de uso especifica um conjunto de comportamentos oferecidos pelo sistema que produz resultado observável para seus atores. O ator representa o papel de uma pessoa ou de outro sistema que interage com o sujeito modelado, e não uma pessoa determinada (OBJECT MANAGEMENT GROUP, 2017, seção 18.1). Nesta modelagem, os atores são visitante, usuário autenticado e organizador. Cada ação aparece separadamente para deixar claro quem pode realizá-la.
 
 O visitante pode criar uma conta, entrar no sistema e consultar as informações públicas das campanhas. O usuário autenticado mantém esse acesso público e pode administrar a própria conta, registrar ou cancelar sua participação em campanhas físicas ativas e criar ou atualizar o perfil de organizador. Depois de manter esse perfil, ele passa a atuar também como organizador. Nessa condição, cria e administra campanhas, publica atualizações e apresenta a prestação de contas após a conclusão.
 
@@ -26,7 +26,7 @@ A Figura 1 separa as consultas públicas das operações que exigem acesso auten
 
 ## 4.3 Diagrama de implementação
 
-O diagrama de implementação mostra como as responsabilidades do sistema são distribuídas entre seus blocos principais. Ele não descreve cada tecnologia empregada. Seu propósito é tornar visível o caminho percorrido por uma ação: a pessoa usa a aplicação no navegador, a aplicação verifica o acesso e os dados informados, aplica as regras da plataforma e registra ou consulta as informações necessárias.
+Na UML, as construções de implantação descrevem a arquitetura de execução e a atribuição de artefatos de software a elementos do sistema. Elas também representam relações entre elementos lógicos ou físicos e ativos de tecnologia da informação (OBJECT MANAGEMENT GROUP, 2017, seções 19.1 e 19.2). Neste trabalho, a expressão “diagrama de implementação” designa uma visão lógica, elaborada para o TCC, das responsabilidades entre os blocos principais. Ela não pretende reproduzir integralmente a notação de implantação da UML nem descrever cada tecnologia empregada. Seu propósito é tornar visível o caminho percorrido por uma ação: a pessoa usa a aplicação no navegador, a aplicação verifica o acesso e os dados informados, aplica as regras da plataforma e registra ou consulta as informações necessárias.
 
 A interface web concentra as páginas, os formulários e as consultas. Os serviços da aplicação aplicam permissões e regras das campanhas, dos perfis e das contas. A autenticação identifica os usuários nas ações restritas. A validação confere os dados antes do uso. O banco de dados preserva as informações da plataforma, enquanto o armazenamento de arquivos guarda imagens de campanhas e evidências da prestação de contas. O serviço de e-mail apoia a verificação e a recuperação de acesso à conta.
 
@@ -40,7 +40,7 @@ O diagrama também deixa explícito o limite das integrações externas do MVP. 
 
 ## 4.4 DER
 
-O Diagrama Entidade-Relacionamento, ou DER, descreve as informações relevantes para o sistema e os vínculos entre elas. Uma entidade representa algo sobre o qual a plataforma precisa guardar dados, como uma campanha ou um perfil de organizador. Seus atributos descrevem características desse elemento. Os relacionamentos mostram como uma entidade se conecta a outra.
+O Diagrama Entidade-Relacionamento, ou DER, descreve as informações relevantes para o sistema e os vínculos entre elas. No modelo entidade-relacionamento, uma entidade é algo que pode ser distinguido, um relacionamento é uma associação entre entidades e os atributos expressam as informações registradas sobre esses elementos (CHEN, 1976, p. 10-12). Assim, uma entidade pode representar algo sobre o qual a plataforma precisa guardar dados, como uma campanha ou um perfil de organizador. Seus atributos descrevem características desse elemento. Os relacionamentos mostram como uma entidade se conecta a outra.
 
 As cardinalidades indicam quantas ocorrências podem participar de cada relação. Por exemplo, um perfil de organizador pode estar associado a várias campanhas, enquanto uma campanha pode ter apenas uma prestação de contas. Essa leitura ajuda a compreender quais registros dependem de outros e quais informações permanecem separadas.
 

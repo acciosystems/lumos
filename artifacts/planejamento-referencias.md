@@ -49,7 +49,8 @@ O levantamento realizado em 2026-09-07 identificou os seguintes grupos de fontes
 | Ghoorah, Mariyani-Squire e Amin (2025) | RESUMO, ABSTRACT e Fases 1 e 2. | DOI, página oficial, cópia local e usos identificados. |
 | Rodrigues (2022) | Fases 1 e 2. | Dissertação e páginas usadas identificadas. |
 | Varella (2019) | Fases 1 e 2. | Tese, repositório e localizador usado identificados. |
-| Especificação UML 2.5.1, da Object Management Group | Fase 6, tópico 6.2.2. | Seções, páginas e URL identificadas. |
+| Especificação UML 2.5.1, da Object Management Group | Fase 4, tópicos 4.1 a 4.3, e Fase 6, tópico 6.2.2. | Seções, páginas, URL e cópia local identificadas. |
+| Chen (1976), sobre o modelo entidade-relacionamento | Fase 4, tópico 4.4. | DOI, páginas e cópia de consulta identificados. |
 | Documentação de diagrama de classes do Mermaid | Fase 6, tópico 6.2.2. | Página e versão consultada identificadas. |
 | Documentação oficial do TSDoc | Fase 6, tópico 6.2.3. | Página introdutória, especificação e páginas das tags identificadas; diferenciação das entradas na citação final pendente. |
 
@@ -108,4 +109,3 @@ Quadros, diagramas e capturas com indicação de elaboração própria também n
 - [ ] Toda entrada destinada à bibliografia final permanece usada no texto integrado.
 - [ ] Autoria, título, publicação, DOI ou URL e data de acesso foram conferidos na fonte original.
 - [ ] `artifacts/referencias.md` foi normalizado segundo a orientação institucional e revisado contra o mapa central.
-
