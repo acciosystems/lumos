@@ -1,12 +1,12 @@
 # FASE 4 — PROJETO LÓGICO: SISTEMA PROPOSTO
 
-Esta fase apresenta o projeto lógico da Nossa Causa conforme o recorte do MVP analisado anteriormente. O objetivo é mostrar, de forma complementar, como as pessoas interagem com a plataforma, como as responsabilidades são organizadas e quais informações precisam ser relacionadas. Os diagramas concentram-se nos fluxos centrais já implementados; processamento de pagamentos, notificações automáticas, reputação, denúncias e recompensas são discutidos no tópico 4.6 como possibilidades de evolução.
+Esta fase formaliza o projeto lógico do mesmo MVP examinado na Fase 3 como sistema atual. A expressão “sistema proposto” designa, portanto, a representação lógica da solução desenvolvida, e não um segundo sistema nem uma versão futura. O objetivo é mostrar como as pessoas interagem com a plataforma, como as responsabilidades são organizadas e quais informações se relacionam. Os diagramas concentram-se nos fluxos identificados na implementação. O tópico 4.6 discute reputação, denúncias, recompensas, notificações automáticas e processamento de pagamentos como possibilidades de evolução. No caso das notificações, também registra que o recurso foi considerado tecnicamente inviável dentro do escopo do MVP.
 
 ## 4.1 UML
 
 UML, sigla de *Unified Modeling Language*, é uma linguagem de modelagem usada para representar partes de um sistema por meio de diagramas. Cada diagrama simplifica o sistema para responder a uma pergunta diferente. Um pode mostrar quem realiza determinada ação; outro, como os blocos da aplicação se organizam; um terceiro, quais informações se relacionam (OBJECT MANAGEMENT GROUP, 2017, cláusula 1, p. 1).
 
-Nesta fase, a UML orienta a representação das interações dos usuários e da organização lógica da aplicação. O Diagrama Entidade-Relacionamento complementa essas visões ao tratar das informações registradas. Juntos, os modelos permitem examinar a Nossa Causa sem depender de detalhes de programação ou de telas específicas.
+Nesta fase, a UML orienta a representação das interações dos usuários e da organização lógica da aplicação. O Diagrama Entidade-Relacionamento complementa essas visões ao tratar das informações registradas. Não há um diagrama de classes neste capítulo: blocos funcionais, contratos de tipos e entidades persistidas não são apresentados como classes da linguagem de programação. Juntos, os modelos permitem examinar a Nossa Causa sem depender de detalhes de programação ou de telas específicas.
 
 Os diagramas adotam o mesmo escopo funcional do MVP. A modalidade virtual utiliza dados de pagamento fornecidos pelo organizador e preserva a transferência direta entre as partes. A participação registrada pertence às campanhas físicas, e a prestação de contas torna públicos os resultados e as evidências declarados pelo organizador.
 
@@ -24,19 +24,19 @@ Fonte: elaboração própria (2026).
 
 A Figura 1 separa as consultas públicas das operações que exigem acesso autenticado e mostra que o organizador preserva as ações disponíveis ao usuário autenticado. O perfil de organizador é mantido pelo usuário autenticado, pois sua criação antecede a atuação como organizador. O registro de progresso de itens aparece somente entre as atividades do organizador, pois se aplica às campanhas físicas. A conclusão e o cancelamento aparecem como ações distintas, e somente a conclusão habilita a prestação de contas. A contribuição em campanha virtual não constitui um caso de uso de pagamento: o sistema apenas apresenta as informações necessárias para que a transferência seja feita diretamente ao organizador.
 
-## 4.3 Diagrama de implementação
+## 4.3 Visão lógica da arquitetura
 
-Na UML, as construções de implantação descrevem a arquitetura de execução e a atribuição de artefatos de software a elementos do sistema. Elas também representam relações entre elementos lógicos ou físicos e ativos de tecnologia da informação (OBJECT MANAGEMENT GROUP, 2017, seções 19.1 e 19.2). Neste trabalho, a expressão “diagrama de implementação” designa uma visão lógica, elaborada para o TCC, das responsabilidades entre os blocos principais. Ela não pretende reproduzir integralmente a notação de implantação da UML nem descrever cada tecnologia empregada. Seu propósito é tornar visível o caminho percorrido por uma ação: a pessoa usa a aplicação no navegador, a aplicação verifica o acesso e os dados informados, aplica as regras da plataforma e registra ou consulta as informações necessárias.
+Na UML, as construções de implantação descrevem a arquitetura de execução e a atribuição de artefatos de software a elementos do sistema. Elas também representam relações entre elementos lógicos ou físicos e ativos de tecnologia da informação (OBJECT MANAGEMENT GROUP, 2017, seções 19.1 e 19.2). A Figura 2, porém, é uma visão lógica da arquitetura elaborada para este trabalho. Ela não reproduz um diagrama de implantação UML completo nem descreve cada tecnologia empregada. Seu propósito é mostrar o caminho percorrido por uma ação: a pessoa usa a aplicação no navegador; a aplicação verifica o acesso e os dados informados, aplica as regras da plataforma e registra ou consulta as informações necessárias.
 
 A interface web concentra as páginas, os formulários e as consultas. Os serviços da aplicação aplicam permissões e regras das campanhas, dos perfis e das contas. A autenticação identifica os usuários nas ações restritas. A validação confere os dados antes do uso. O banco de dados preserva as informações da plataforma, enquanto o armazenamento de arquivos guarda imagens de campanhas e evidências da prestação de contas. O serviço de e-mail apoia a verificação e a recuperação de acesso à conta.
 
-Figura 2 — Organização lógica da implementação da Nossa Causa
+Figura 2 — Visão lógica da arquitetura da Nossa Causa
 
 Fonte: elaboração própria (2026).
 
-A Figura 2 mostra que a interface não decide sozinha as regras sensíveis do sistema. Em aplicações web, os controles de autorização não devem depender do cliente e precisam verificar as permissões em cada requisição (OWASP, s.d.b). Na Nossa Causa, a conferência técnica do MVP identificou que as regras e permissões são aplicadas antes da gravação dos dados. Essa separação concentra as condições de autenticação, o vínculo entre campanha e organizador e a distinção entre as duas modalidades de campanha em operações protegidas.
+A Figura 2 mostra que a interface não decide sozinha as regras sensíveis do sistema. Em aplicações web, os controles de autorização não devem depender do cliente e precisam verificar as permissões em cada requisição (OWASP, s.d.b). Na Nossa Causa, a conferência técnica do MVP identificou que as regras e permissões são aplicadas antes da gravação dos dados. Os blocos da figura representam responsabilidades funcionais e integrações; não são classes da linguagem de programação, contratos de tipos ou entidades persistidas. Estas últimas são apresentadas separadamente no DER e no dicionário de dados.
 
-O diagrama também apresenta as integrações escolhidas para o MVP: armazenamento de arquivos e envio de mensagens ligadas à conta. A transferência virtual ocorre diretamente entre doador e organizador. Processadores de pagamento e notificações de campanha permanecem reservados à evolução da arquitetura.
+O diagrama também apresenta as integrações escolhidas para o MVP: armazenamento de arquivos e envio de mensagens ligadas à conta. A transferência virtual ocorre diretamente entre doador e organizador. Processadores de pagamento e notificações de campanha permanecem como possibilidades de evolução da arquitetura. As notificações não integram esta versão porque sua implementação foi considerada tecnicamente inviável dentro do escopo do MVP.
 
 ## 4.4 DER
 
@@ -56,7 +56,7 @@ O DER prioriza as entidades ligadas ao domínio das campanhas. Registros técnic
 
 ## 4.5 Dicionário de dados
 
-O dicionário de dados detalha as 17 tabelas persistidas pela aplicação. Diferentemente do DER conceitual, este inventário inclui as estruturas técnicas de autenticação, controle de requisições, idempotência e gerenciamento de arquivos. As propriedades usadas pelo Prisma apenas para representar relacionamentos não aparecem como campos, pois não criam colunas próprias no banco de dados.
+O dicionário de dados detalha as 16 tabelas usadas pelos fluxos do MVP. Diferentemente do DER conceitual, este inventário inclui as estruturas técnicas de autenticação, controle de requisições, idempotência e gerenciamento de arquivos. O schema e as migrações também contêm a tabela `DONATIONS`, destinada a registros individuais de doações físicas, mas nenhum fluxo operacional da aplicação a utiliza no recorte auditado. Por essa razão, ela não é apresentada como parte funcional do MVP e foi retirada deste dicionário. As propriedades usadas pelo Prisma apenas para representar relacionamentos não aparecem como campos, pois não criam colunas próprias no banco de dados.
 
 Na coluna Campo, `@` identifica a chave primária e `#` indica uma chave estrangeira. Os campos sem esses papéis não recebem prefixo. Os nomes foram convertidos integralmente para maiúsculas, enquanto os tipos preservam a definição física encontrada no SQL do PostgreSQL. O tamanho dos campos `TEXT` é apresentado como variável quando não existe limite específico. Nos campos com restrição explícita, a coluna informa o número máximo de caracteres. Tipos enumerados mantêm o nome definido no banco, e seus valores possíveis aparecem na descrição.
 
@@ -164,7 +164,7 @@ Tabela 7 — Dicionário de dados da tabela ORGANIZER_PROFILES
 | BIO | Apresentação do organizador, quando informada. | TEXT | Até 1.000 caracteres |
 | WEBSITEURL | Endereço do site do organizador, quando informado. | TEXT | Até 2.048 caracteres |
 | CNPJ | CNPJ único do organizador institucional, quando aplicável. | TEXT | 14 caracteres |
-| CNPJVERIFIED | Indica se o CNPJ foi verificado. | BOOLEAN | 1 byte |
+| CNPJVERIFIED | Indicador interno de verificação do CNPJ; o procedimento operacional correspondente não está documentado no MVP. | BOOLEAN | 1 byte |
 | CREATEDAT | Data e hora de criação do perfil. | TIMESTAMP(3) | 8 bytes |
 | UPDATEDAT | Data e hora da última atualização do perfil. | TIMESTAMP(3) | 8 bytes |
 
@@ -292,25 +292,7 @@ Tabela 14 — Dicionário de dados da tabela CAMPAIGN_ASSETS
 
 Fonte: elaboração própria (2026).
 
-Tabela 15 — Dicionário de dados da tabela DONATIONS
-
-| Campo | Descrição | Tipo | Tamanho |
-| --- | --- | --- | --- |
-| @ID | Identificador único do registro de doação física. | TEXT | Variável |
-| #CAMPAIGNID | Identificador da campanha física beneficiada. | TEXT | Variável |
-| #DONORID | Identificador do usuário que registrou a doação. | TEXT | Variável |
-| ITEMCOUNT | Quantidade de itens informada, quando aplicável. | INTEGER | 4 bytes |
-| ITEMDESCRIPTION | Descrição dos itens doados, quando informada. | TEXT | Variável |
-| STATUS | Estado do registro de doação. Valores possíveis: `PENDING`, `COMPLETED` e `CANCELLED`. | DonationStatus | 4 bytes |
-| CONFIRMEDAT | Data e hora de confirmação da doação, quando confirmada. | TIMESTAMP(3) | 8 bytes |
-| CANCELLEDAT | Data e hora de cancelamento da doação, quando cancelada. | TIMESTAMP(3) | 8 bytes |
-| NOTES | Observações sobre a doação, quando informadas. | TEXT | Variável |
-| CREATEDAT | Data e hora de criação do registro de doação. | TIMESTAMP(3) | 8 bytes |
-| UPDATEDAT | Data e hora da última atualização do registro de doação. | TIMESTAMP(3) | 8 bytes |
-
-Fonte: elaboração própria (2026).
-
-Tabela 16 — Dicionário de dados da tabela UPLOAD_INTENTS
+Tabela 15 — Dicionário de dados da tabela UPLOAD_INTENTS
 
 | Campo | Descrição | Tipo | Tamanho |
 | --- | --- | --- | --- |
@@ -340,7 +322,7 @@ Tabela 16 — Dicionário de dados da tabela UPLOAD_INTENTS
 
 Fonte: elaboração própria (2026).
 
-Tabela 17 — Dicionário de dados da tabela AVATAR_OBJECT_CLEANUPS
+Tabela 16 — Dicionário de dados da tabela AVATAR_OBJECT_CLEANUPS
 
 | Campo | Descrição | Tipo | Tamanho |
 | --- | --- | --- | --- |
@@ -358,7 +340,7 @@ Os diagramas anteriores representam um produto minimamente viável com os fluxos
 
 Uma primeira frente reúne reputação e denúncias. O sistema de reputação foi concebido para considerar cancelamentos de última hora, cumprimento do prazo de prestação de contas e qualidade da organização da campanha. A versão analisada já registra cancelamentos e classifica a prestação como enviada dentro ou fora do prazo de sete dias corridos nas duas modalidades, mas não converte essas informações em pontuação. A definição inicial do produto também considerava um cálculo baseado na quantidade de itens doados. Essa alternativa atende diretamente às campanhas físicas, e não foi estabelecido um critério variável equivalente para as virtuais. Como o atraso seria uma infração dos termos da plataforma, a evolução desse recurso precisará definir uma política coerente entre as modalidades antes de relacioná-la à reputação. No MVP, porém, o atraso não gera penalidade automática. O canal de denúncias acrescentaria a possibilidade de reportar campanhas ou organizadores problemáticos; ele também não está representado nos casos de uso ou no modelo de dados atuais.
 
-Outra frente procura ampliar a participação. A proposta de recompensas associa um identificador de participação a cada usuário para permitir rankings e premiações definidas pelos organizadores. As notificações automáticas poderiam emitir avisos sobre as campanhas e complementar as atualizações que hoje ficam disponíveis na página pública. A viabilidade técnica ainda está em avaliação; por isso, o recurso não foi incorporado ao diagrama de implementação.
+Outra frente procura ampliar a participação. A proposta de recompensas associa um identificador de participação a cada usuário para permitir rankings e premiações definidas pelos organizadores. As notificações automáticas poderiam ampliar o alcance das atualizações publicadas na página da campanha. Sua implementação foi considerada tecnicamente inviável dentro do escopo do MVP, razão pela qual o recurso não integra a solução entregue. Essa decisão não elimina sua possível reavaliação em uma evolução posterior.
 
 A terceira frente trata das doações financeiras. Uma versão posterior poderá integrar, de forma opcional, processadores como Stripe ou Polar. A proposta oferece uma alternativa ao envio direto por PIX ou conta bancária, sem exigir a substituição desse modelo. Como o MVP não registra transações individuais, uma eventual integração demandará nova análise lógica antes de modificar os casos de uso, os componentes externos e o modelo de dados.
 

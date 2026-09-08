@@ -27,7 +27,7 @@ A redação adotará três níveis de análise:
 2. controles funcionais das campanhas físicas e virtuais, incluindo descoberta, participação e gestão;
 3. controles de transparência, ciclo de vida e prestação de contas, com seus limites atuais.
 
-A fase não produzirá diagrama de caso de uso, diagrama de implementação, DER ou diagrama de classes, pois esses elementos pertencem às Fases 4 e 6. Também não repetirá o inventário completo de telas nem usará as capturas existentes como figuras, salvo se a integração final demonstrar que uma imagem é indispensável. A evidência visual já disponível servirá, por enquanto, apenas à conferência interna.
+A fase não produzirá diagrama de caso de uso, visão lógica da arquitetura, DER ou diagrama de classes, pois esses elementos pertencem às Fases 4 e 6. Também não repetirá o inventário completo de telas nem usará as capturas existentes como figuras, salvo se a integração final demonstrar que uma imagem é indispensável. A evidência visual já disponível servirá, por enquanto, apenas à conferência interna.
 
 ## Objetivos da análise
 
@@ -43,6 +43,7 @@ O texto deverá:
 - descrever a prestação de contas após o encerramento da campanha;
 - explicitar que as transferências de campanhas virtuais ocorrem fora da plataforma;
 - separar funcionalidades implementadas, controles de apoio, limitações do MVP e capacidades futuras.
+- preparar a passagem para a Fase 4, deixando claro que ela formaliza logicamente o mesmo MVP.
 
 ## Estrutura proposta para a redação
 
@@ -54,7 +55,7 @@ O texto deverá:
 | 4 | Descoberta e participação | Explicar os controles voltados ao acesso público e ao compromisso do doador. | Listagem pública; filtros por tema e região; filtro adicional por tipo; detalhe da campanha; ingresso e cancelamento em campanhas físicas; contagem pública. | Não declarar participação em campanha virtual nem afirmar que a contagem identifica publicamente os participantes. |
 | 5 | Gestão pelo organizador | Caracterizar o painel e as ações disponíveis. | Lista de campanhas próprias; status; contagem agregada de participantes; progresso de itens; edição; atualizações; conclusão, cancelamento e visualização pública. | Não chamar indicadores agregados de análise estatística avançada nem afirmar que existe lista nominal de participantes no painel. |
 | 6 | Transparência e prestação de contas | Examinar identificação da organização e publicação dos resultados. | CNPJ público para perfis organizacionais; indicação de verificado ou não verificado; prazo e estado da prestação; total, resumo e evidências públicas. | Não apresentar o CNPJ como verificado apenas por ter formato válido; não afirmar sanção automática ou auditoria externa das informações prestadas. |
-| 7 | Possibilidades de evolução do sistema | Separar o que o MVP registra das ideias previstas para etapas posteriores. | Reputação, denúncias, recompensas, notificações, processamento opcional de pagamentos e política futura do prazo de prestação. | Não transformar propostas em entregas nem aplicar a alternativa baseada em itens às campanhas virtuais sem uma regra correspondente. |
+| 7 | Relação com o projeto lógico | Explicar a mudança metodológica entre as Fases 3 e 4 e separar o MVP das ideias posteriores. | Formalização lógica do mesmo sistema; menção sintética a reputação, denúncias, recompensas, notificações e processamento opcional de pagamentos; exclusão das notificações do MVP por inviabilidade técnica neste escopo. | Não sugerir a existência de dois sistemas, apresentar as notificações como capacidade do MVP nem repetir o detalhamento reservado ao projeto lógico. |
 
 Os títulos poderão ser ajustados na integração para manter a numeração global do TCC. A redação deverá ser predominantemente analítica, acompanhada por um quadro de síntese. Não se prevê a necessidade de pesquisa bibliográfica adicional para descrever o funcionamento do software; referências conceituais sobre UML e modelagem permanecem reservadas à Fase 4.
 
@@ -230,3 +231,7 @@ O texto final foi redigido e revisado com a skill `humanizar`, em modo de criaç
 Em 2026-09-07, o encerramento da fase foi ampliado conforme D-024. A revisão relaciona os controles existentes às propostas de reputação, denúncias, recompensas, notificações e integração opcional de pagamentos. O conteúdo recebeu uma subseção própria para não permanecer subordinado ao tópico de transparência. O texto também separa os sete dias corridos aplicados às duas modalidades no MVP da alternativa baseada em itens, aplicável diretamente às campanhas físicas, e registra a infração prevista nos termos sem inventar penalidade automática.
 
 Conforme D-025, a redação foi revista para apresentar o MVP como produto funcional e deliberadamente delimitado. As capacidades implementadas passaram a anteceder suas fronteiras, e os recursos posteriores foram descritos como ampliação de uma base existente, não como correção de um produto malsucedido.
+
+Em 2026-09-08, o pacote R-02 substituiu a expressão ampla “versão funcional” por uma delimitação baseada nas evidências técnicas examinadas. A revisão também registrou que o procedimento operacional de verificação do CNPJ não está documentado, condensou as possibilidades de evolução e explicitou que a Fase 4 formaliza o mesmo MVP analisado nesta fase. Nenhuma referência bibliográfica foi incluída, removida ou deslocada.
+
+Após esclarecimento do usuário na mesma data, as notificações automáticas deixaram de ser descritas como uma possibilidade cuja viabilidade ainda estava em avaliação para esta entrega. O texto passou a registrar que o recurso foi considerado tecnicamente inviável dentro do escopo do MVP e, por isso, não integra a versão entregue, embora permaneça como possibilidade de evolução.

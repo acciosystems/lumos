@@ -3,13 +3,13 @@
 ## Estado da atividade
 
 - Responsável: Codex.
-- Estado: concluído em 2026-09-08, após a inclusão e a revisão do dicionário de dados definido em D-026. A exportação dos diagramas pertence à etapa condicional de diagramação final e continua adiada por orientação do usuário.
+- Estado: concluído em 2026-09-08, após a revisão integrada R-02. A exportação dos diagramas pertence à etapa condicional de diagramação final e continua adiada por orientação do usuário.
 - Recorte: MVP da plataforma Nossa Causa descrito nas fases anteriores.
 - Entregas disponíveis: texto completo da Fase 4, com o dicionário de dados, e fontes editáveis dos diagramas em Mermaid. As exportações serão produzidas somente quando forem necessárias para a diagramação final.
 
 ## Objetivo
 
-A Fase 4 apresentará o projeto lógico da Nossa Causa por meio de três visões complementares e de um dicionário de dados. A primeira mostrará o que cada tipo de usuário pode fazer. A segunda explicará os blocos que executam o sistema e a comunicação entre eles. A terceira representará as principais informações armazenadas e as relações entre elas. O dicionário detalhará os campos de todos os modelos persistidos definidos no Prisma.
+A Fase 4 apresentará o projeto lógico da Nossa Causa por meio de três visões complementares e de um dicionário de dados. A primeira mostrará o que cada tipo de usuário pode fazer. A segunda explicará os blocos que executam o sistema e a comunicação entre eles. A terceira representará as principais informações armazenadas e as relações entre elas. O dicionário detalhará os campos das 16 tabelas usadas pelos fluxos do MVP e registrará separadamente a exclusão da estrutura `DONATIONS`.
 
 O texto deverá permitir que um leitor sem formação técnica compreenda a finalidade de cada representação antes de examiná-la. Os diagramas não funcionarão como inventários exaustivos do código. Eles destacarão somente os elementos necessários para explicar o funcionamento do MVP.
 
@@ -20,12 +20,13 @@ O texto deverá permitir que um leitor sem formação técnica compreenda a fina
 3. Todos os diagramas serão escritos em Mermaid.
 4. O texto destinado ao TCC não citará diretamente nenhum arquivo do repositório. A conferência do código servirá apenas como evidência interna de consistência.
 5. A Fase 4 terá uma única seção de dicionário de dados formada por uma tabela para cada modelo persistido do Prisma. As tabelas ficarão no mesmo tópico, sem subdivisões individuais e sem discussão sobre a evolução de suas estruturas. Elas usarão as colunas Campo, Descrição, Tipo e Tamanho; os campos ficarão em maiúsculas, com `@` para chave primária, `#` para chave estrangeira e nenhum prefixo para os demais. Campos enumerados terão todos os valores possíveis registrados na descrição, e os tipos preservarão as definições do SQL.
+6. Na revisão R-02, o usuário determinou que a tabela `DONATIONS` fosse retirada do texto, sem alteração do código. A estrutura continuará mencionada apenas para explicar que existe no schema e nas migrações, mas não participa dos fluxos operacionais auditados.
 
 ## Adaptações propostas
 
 ### Significado de “sistema proposto”
 
-O sistema proposto será modelado conforme o MVP implementado e analisado na Fase 3. Reputação, denúncias, recompensas, notificações automáticas e processamento de pagamentos permanecerão fora dos diagramas, mas serão discutidos em uma seção textual própria como possibilidades de evolução, conforme D-024.
+O sistema proposto será modelado conforme o MVP implementado e analisado na Fase 3. Reputação, denúncias, recompensas, notificações automáticas e processamento de pagamentos permanecerão fora dos diagramas, mas serão discutidos em uma seção textual própria como possibilidades de evolução. O texto registrará que as notificações foram consideradas tecnicamente inviáveis dentro do escopo do MVP, sem descartar sua reavaliação posterior.
 
 ### Papel do tópico 4.1
 
@@ -39,9 +40,9 @@ O Mermaid não possui uma sintaxe própria para diagramas de caso de uso UML. A 
 
 O texto esclarecerá que a figura é uma representação de casos de uso feita em Mermaid. Não será alegada conformidade integral com todos os elementos gráficos da notação UML.
 
-### Diagrama de implementação
+### Visão lógica da arquitetura
 
-A expressão “diagrama de implementação” será interpretada como uma visão lógica dos principais blocos que executam a aplicação. O desenho mostrará a interface web, os serviços responsáveis pelas regras do sistema, a autenticação, o banco de dados, o armazenamento de arquivos e o envio de mensagens necessárias à conta do usuário.
+A expressão original “diagrama de implementação” será apresentada como uma visão lógica dos principais blocos que executam a aplicação. O desenho mostrará a interface web, os serviços responsáveis pelas regras do sistema, a autenticação, o banco de dados, o armazenamento de arquivos e o envio de mensagens necessárias à conta do usuário. O texto distinguirá esses blocos funcionais de classes da linguagem, contratos de tipos e entidades persistidas.
 
 O diagrama usará um fluxograma Mermaid. Os rótulos serão compreensíveis para leitores não especializados e não dependerão de nomes de bibliotecas, pastas ou arquivos. Essa escolha mantém o foco na organização do sistema, e não nos detalhes da programação.
 
@@ -53,9 +54,9 @@ Uma estrutura de doação financeira individual também não será representada.
 
 ### Dicionário de dados
 
-O dicionário complementará o DER conceitual com um inventário completo das 17 tabelas persistidas. Por isso, também abrangerá tabelas técnicas de autenticação, limitação de requisições, idempotência e controle de arquivos que foram omitidas da figura para preservar sua legibilidade.
+O dicionário complementará o DER conceitual com o inventário das 16 tabelas usadas pelos fluxos do MVP. Por isso, também abrangerá tabelas técnicas de autenticação, limitação de requisições, idempotência e controle de arquivos que foram omitidas da figura para preservar sua legibilidade. A estrutura `DONATIONS` será mencionada apenas para registrar sua presença no banco e a ausência de uso operacional no recorte auditado.
 
-Cada modelo do Prisma corresponderá a uma tabela própria no texto. Somente campos escalares efetivamente persistidos serão listados; propriedades de relação usadas pelo cliente Prisma não serão tratadas como colunas adicionais. A legenda adotará `@` para chave primária, `#` para chave estrangeira e nenhum prefixo para campos sem essas funções. Restrições de unicidade que não sejam chaves primárias ou estrangeiras serão explicadas na descrição quando forem relevantes, mas não receberão um novo símbolo.
+Cada modelo incluído corresponderá a uma tabela própria no texto. Somente campos escalares efetivamente persistidos serão listados; propriedades de relação usadas pelo cliente Prisma não serão tratadas como colunas adicionais. A legenda adotará `@` para chave primária, `#` para chave estrangeira e nenhum prefixo para campos sem essas funções. Restrições de unicidade que não sejam chaves primárias ou estrangeiras serão explicadas na descrição quando forem relevantes, mas não receberão um novo símbolo.
 
 Os tipos serão reproduzidos conforme o SQL do PostgreSQL gerado pelas migrações, sem converter `TEXT` para `VARCHAR` nem substituir os tipos enumerados por tipos genéricos. A coluna Tamanho apresentará limites de caracteres quando houver restrição explícita e, nos tipos de tamanho fixo, o espaço correspondente. Quando o schema e as migrações não definirem limite textual, a tabela registrará tamanho variável, sem presumir o limite convencional de 255 caracteres. Todo campo enumerado terá seus valores possíveis na descrição.
 
@@ -67,7 +68,7 @@ A seção deverá:
 
 - definir UML como uma forma padronizada de representar diferentes aspectos de um sistema;
 - explicar que um diagrama simplifica a realidade e responde a uma pergunta específica;
-- apresentar as três visões utilizadas nesta fase: ações dos usuários, organização da implementação e estrutura dos dados;
+- apresentar as três visões utilizadas nesta fase: ações dos usuários, organização lógica da arquitetura e estrutura dos dados;
 - informar que as representações correspondem ao recorte do MVP;
 - preparar a leitura dos diagramas com referência à especificação UML.
 
@@ -94,9 +95,9 @@ As relações entre os papéis serão representadas sem duplicar ações. O orga
 
 Depois da figura, um parágrafo destacará os limites do fluxo: a contribuição virtual ocorre fora da plataforma, a participação registrada pertence às campanhas físicas e a prestação de contas é declarada pelo organizador.
 
-### 4.3 Diagrama de implementação
+### 4.3 Visão lógica da arquitetura
 
-A seção começará explicando que esse diagrama mostra como as responsabilidades do sistema são distribuídas entre seus blocos. O objetivo não será descrever cada tecnologia, mas indicar o caminho seguido por uma ação desde a tela até o armazenamento da informação.
+A seção começará explicando como as responsabilidades do sistema são distribuídas entre seus blocos. O objetivo não será descrever cada tecnologia nem reproduzir um diagrama de implantação UML completo, mas indicar o caminho seguido por uma ação desde a tela até o armazenamento da informação.
 
 O diagrama deverá conter:
 
@@ -111,7 +112,7 @@ O diagrama deverá conter:
 | Armazenamento de arquivos | Guardar imagens das campanhas e evidências da prestação de contas. |
 | Serviço de e-mail | Apoiar confirmações e recuperação de acesso à conta. |
 
-As setas mostrarão o fluxo principal de solicitações. Integrações externas aparecerão somente quando fizerem parte do comportamento existente. Não haverá processador de pagamento ou serviço de notificações de campanha.
+As setas mostrarão o fluxo principal de solicitações. Integrações externas aparecerão somente quando fizerem parte do comportamento existente. Não haverá processador de pagamento nem serviço de notificações de campanha. As notificações foram consideradas tecnicamente inviáveis dentro do escopo do MVP, mas permanecerão registradas como possibilidade de evolução.
 
 Depois do diagrama, o texto explicará que a separação de responsabilidades ajuda a manter regras sensíveis no lado protegido da aplicação, enquanto a interface se concentra na interação com o usuário.
 
@@ -146,11 +147,11 @@ O texto posterior ao diagrama explicará as diferenças condicionais entre campa
 
 ### 4.5 Dicionário de dados
 
-A seção começará com a legenda dos prefixos e com a explicação dos critérios de tipo e tamanho. Em seguida, apresentará no mesmo tópico uma tabela para cada modelo persistido definido no Prisma, inclusive os modelos técnicos ausentes do DER conceitual. Não haverá subdivisões próprias nem discussão sobre a evolução das tabelas. Cada tabela terá exatamente as colunas Campo, Descrição, Tipo e Tamanho.
+A seção começará com a legenda dos prefixos e com a explicação dos critérios de tipo e tamanho. Em seguida, apresentará no mesmo tópico uma tabela para cada modelo usado pelos fluxos do MVP, inclusive os modelos técnicos ausentes do DER conceitual. A tabela `DONATIONS` não será reproduzida, pois nenhum fluxo operacional utiliza essa estrutura no recorte auditado. Não haverá subdivisões próprias nem discussão sobre a evolução das tabelas. Cada tabela terá exatamente as colunas Campo, Descrição, Tipo e Tamanho.
 
 ### 4.6 Possibilidades de evolução do sistema
 
-A seção distinguirá os modelos do MVP da concepção mais ampla da Nossa Causa. Serão discutidas três frentes: confiança e governança, com reputação e denúncias; participação, com recompensas e notificações; e formas de contribuição financeira, com integração opcional de processadores de pagamento. O texto registrará os sete dias corridos aplicados às duas modalidades no MVP. A alternativa baseada em itens será delimitada às campanhas físicas, pois não há critério variável equivalente definido para as virtuais, e a infração dos termos será distinguida de uma penalidade automática inexistente. Esses recursos não serão acrescentados aos diagramas atuais.
+A seção distinguirá os modelos do MVP da concepção mais ampla da Nossa Causa. Serão discutidas três frentes: confiança e governança, com reputação e denúncias; participação, com recompensas e notificações; e formas de contribuição financeira, com integração opcional de processadores de pagamento. O texto registrará que as notificações foram consideradas tecnicamente inviáveis dentro do escopo do MVP, embora permaneçam como possibilidade de evolução. Também apresentará os sete dias corridos aplicados às duas modalidades no MVP. A alternativa baseada em itens será delimitada às campanhas físicas, pois não há critério variável equivalente definido para as virtuais, e a infração dos termos será distinguida de uma penalidade automática inexistente. Esses recursos não serão acrescentados aos diagramas atuais.
 
 ## Convenções para os diagramas
 
@@ -202,10 +203,10 @@ Esses materiais comprovam internamente o recorte modelado, mas seus caminhos e n
 2. Fixar a terminologia comum dos atores, ações, blocos da aplicação e entidades.
 3. Redigir a explicação introdutória de UML e a orientação geral de leitura.
 4. Produzir e revisar o diagrama de caso de uso em Mermaid.
-5. Produzir e revisar o diagrama de implementação em Mermaid.
+5. Produzir e revisar a visão lógica da arquitetura em Mermaid.
 6. Produzir e revisar o DER com a sintaxe própria do Mermaid.
 7. Inventariar os modelos e campos persistidos do Prisma, confrontando tipos, chaves, enumerações e limites com as migrações do banco.
-8. Redigir uma tabela de dicionário de dados para cada modelo, conforme as convenções de D-026.
+8. Redigir as tabelas do dicionário de dados conforme as convenções de D-026 e registrar a exclusão de `DONATIONS` determinada na revisão R-02.
 9. Quando solicitada para a diagramação final, renderizar os três diagramas e corrigir problemas de sintaxe, sobreposição ou legibilidade.
 10. Redigir as explicações que antecedem e interpretam cada figura, com as citações conceituais pertinentes.
 11. Atualizar o mapa central de referências e conferir os localizadores das fontes utilizadas.
@@ -223,14 +224,14 @@ Esses materiais comprovam internamente o recorte modelado, mas seus caminhos e n
 | Confundir contribuição virtual com pagamento processado | Mostrar apenas a divulgação dos dados bancários e manter o pagamento fora da plataforma. |
 | Expor detalhes internos no texto final | Revisar nomes, legendas, fontes e parágrafos em busca de caminhos e nomes de arquivo. |
 | Transformar o DER conceitual em cópia completa do banco | Manter apenas entidades e atributos relevantes para explicar o domínio. |
-| Omitir modelos técnicos do dicionário por não aparecerem no DER | Gerar o inventário a partir de todos os modelos persistidos definidos no Prisma e conferir a contagem antes da revisão. |
+| Apresentar uma estrutura sem fluxo operacional como funcionalidade do MVP | Confrontar os modelos persistidos com os fluxos da aplicação e explicar a exclusão de `DONATIONS` do dicionário. |
 | Atribuir tamanho arbitrário a campos textuais | Registrar somente limites comprovados no schema ou nas migrações; nos demais campos, indicar tamanho variável. |
 | Confundir propriedades de relação do Prisma com colunas persistidas | Listar apenas campos escalares e as chaves estrangeiras materializadas no banco. |
 | Produzir figuras ilegíveis no documento | Quando a exportação for solicitada, preferir SVG, testar orientação e reduzir cruzamentos entre linhas. |
 
 ## Dúvidas e pendências
 
-Não há dúvida que impeça a redação. A interpretação adotada para o diagrama de implementação será uma visão dos blocos da aplicação e de suas comunicações. Caso o modelo institucional use “implementação” como sinônimo de “implantação”, a figura poderá ser ajustada na integração sem alterar os demais diagramas.
+Não há dúvida que impeça a redação. A figura originalmente planejada como “diagrama de implementação” será identificada como visão lógica da arquitetura, pois representa blocos da aplicação e suas comunicações, não a implantação física prevista pela UML.
 
 A numeração definitiva das figuras dependerá da integração com as outras fases. As exportações serão geradas e testadas no editor usado para montar a versão final do TCC somente quando essa etapa for necessária. Essa atividade condicional pertence à diagramação final e não reabre a Fase 4, que permanece concluída com suas fontes Mermaid editáveis.
 
@@ -250,19 +251,23 @@ Na revisão de D-025, o texto passou a tratar os diagramas como representação 
 
 Em 2026-09-08, a Fase 4 foi reaberta por D-026 para receber um dicionário de dados completo. A nova seção passou a ocupar o tópico 4.5, e a discussão das possibilidades de evolução foi deslocada para o tópico 4.6. As 17 tabelas foram mantidas no mesmo tópico, sem subdivisões individuais, e documentam os 173 campos escalares persistidos. A conferência automatizada comparou os nomes, as funções de chave e os tipos SQL com todos os modelos do Prisma. Os limites de `TEXT` foram confrontados com as restrições das migrações, e todos os valores dos tipos enumerados foram verificados. Nenhuma referência bibliográfica foi incluída ou deslocada, pois o conteúdo decorre da modelagem interna do sistema.
 
+Na revisão integrada R-02, realizada em 2026-09-08, a passagem da análise funcional para o projeto lógico foi explicitada. A Figura 2 passou a ser denominada visão lógica da arquitetura e seus blocos foram distinguidos de classes, contratos e entidades persistidas. A revisão também esclareceu que a Fase 4 não contém um diagrama de classes. O texto delimitou o marcador de CNPJ e retirou do dicionário a tabela `DONATIONS`, que existe no schema e nas migrações, mas não possui fluxo operacional na aplicação auditada. O dicionário passou a reunir 16 tabelas. O código e as fontes Mermaid não foram alterados, e nenhuma referência bibliográfica foi incluída, removida ou deslocada.
+
+Após esclarecimento do usuário na mesma data, as notificações automáticas deixaram de ser tratadas como funcionalidade cuja viabilidade ainda seria avaliada para esta entrega. A redação passou a apresentá-las como proposta considerada tecnicamente inviável dentro do escopo do MVP e, portanto, excluída da versão entregue, mas preservada como possibilidade de evolução.
+
 ## Critérios de aceite do planejamento
 
 - [x] Os tópicos 4.1 a 4.6 possuem finalidade e conteúdo delimitados.
 - [x] Os fundamentos conceituais dos tópicos 4.1 a 4.4 usam referências primárias adequadas, sem atribuir à literatura características específicas do MVP.
 - [x] Os três diagramas previstos usam Mermaid.
 - [x] A adaptação do caso de uso às capacidades do Mermaid está registrada.
-- [x] O significado de diagrama de implementação foi definido.
+- [x] A visão lógica da arquitetura foi distinguida de um diagrama de implantação UML completo.
 - [x] Atores, ações, componentes e entidades correspondem ao MVP.
 - [x] Funcionalidades futuras e processamento de pagamentos ficaram fora do modelo.
 - [x] As possibilidades posteriores ao MVP foram discutidas em texto conforme D-024, sem alterar os diagramas da versão analisada.
 - [x] O DER foi limitado às entidades conceituais relevantes.
 - [x] O formato, o escopo e as convenções do dicionário de dados foram definidos conforme D-026.
-- [x] O dicionário contém uma tabela para cada modelo persistido do Prisma e somente os campos efetivamente armazenados.
+- [x] O dicionário contém as 16 tabelas usadas pelos fluxos do MVP e explica por que `DONATIONS` não foi apresentada como funcionalidade disponível.
 - [x] Os nomes dos campos, prefixos, valores enumerados, tipos e tamanhos foram conferidos no schema e nas migrações.
 - [x] O texto final não citará arquivos do repositório.
 - [x] Foram previstas fonte editável, exportação e validação visual dos diagramas.

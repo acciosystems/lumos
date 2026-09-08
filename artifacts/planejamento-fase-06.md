@@ -37,7 +37,7 @@ O tópico será interpretado como a organização arquitetural e o fluxo de resp
 
 A análise partirá da estrutura real do monorepo: interface web, rotas, consultas e formulários; procedimentos RPC e regras protegidas; validação compartilhada; autenticação; persistência; armazenamento de arquivos; e serviços auxiliares. O texto poderá caracterizar a solução como uma aplicação web cliente-servidor, modular e organizada em camadas ou responsabilidades somente se essas expressões continuarem compatíveis com o snapshot da execução.
 
-O diagrama de implementação da Fase 4 não será repetido. A Fase 6 explicará como o código concretiza aqueles blocos e poderá usar um quadro textual curto para relacionar responsabilidade, implementação e comunicação.
+A visão lógica da arquitetura da Fase 4 não será repetida. A Fase 6 explicará como o código concretiza aqueles blocos e poderá usar um quadro textual curto para relacionar responsabilidade, implementação e comunicação.
 
 ### 6.2. Lista de telas sem galeria visual
 
@@ -95,7 +95,7 @@ A seção deverá:
 2. explicar a separação entre interface, procedimentos protegidos, regras de negócio, validação, autenticação e persistência;
 3. descrever o fluxo de uma ação representativa, da entrada do usuário à resposta exibida;
 4. mostrar que autorização e regras sensíveis não dependem apenas da interface;
-5. relacionar a implementação ao diagrama de implementação da Fase 4 sem repetir a figura;
+5. relacionar a implementação à visão lógica da arquitetura da Fase 4 sem repetir a figura;
 6. evitar um inventário de bibliotecas sem função explicativa.
 
 Título provisório do quadro: **Responsabilidades na implementação do MVP Nossa Causa**.

@@ -7,7 +7,7 @@ time of day is part of a campaign period.
 The effective lifecycle is:
 
 - `PENDING` before `startDate`. The campaign is private to its organizer and
-  cannot receive participation, donations, progress changes, or updates.
+  cannot receive participation, progress changes, or updates.
 - `ACTIVE` from the beginning of `startDate` through the end of `endDate`.
 - `COMPLETED` at midnight on the São Paulo calendar day after `endDate`.
 - `CANCELLED` when the organizer cancels the campaign. Terminal states cannot

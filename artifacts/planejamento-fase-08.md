@@ -142,7 +142,7 @@ Registros do rastreador interno de desenvolvimento não serão citados nem usado
 
 ### 8.5. Evolução planejada além do MVP
 
-A seção aplicará o processo proposto às ideias de reputação, denúncias, recompensas, notificações e processamento opcional de pagamentos. Esses recursos serão tratados como possibilidades de evolução que ainda precisam de delimitação e análise de impacto, não como solicitações aprovadas ou funcionalidades mantidas. A discussão preservará os sete dias corridos aplicados às duas modalidades no MVP. Também registrará que o cálculo baseado na quantidade de itens atende diretamente às campanhas físicas, não possui equivalente definido para as virtuais e foi concebido junto à classificação do atraso como infração dos termos, sem penalidade automática implementada.
+A seção aplicará o processo proposto às ideias de reputação, denúncias, recompensas, notificações e processamento opcional de pagamentos. Esses recursos serão tratados como possibilidades de evolução que precisam de delimitação e análise de impacto, não como solicitações aprovadas ou funcionalidades mantidas. No caso das notificações, a análise já concluiu que a implementação era tecnicamente inviável dentro do escopo do MVP; uma retomada posterior exigirá novo recorte. A discussão preservará os sete dias corridos aplicados às duas modalidades no MVP. Também registrará que o cálculo baseado na quantidade de itens atende diretamente às campanhas físicas, não possui equivalente definido para as virtuais e foi concebido junto à classificação do atraso como infração dos termos, sem penalidade automática implementada.
 
 ## Fontes externas usadas na execução
 

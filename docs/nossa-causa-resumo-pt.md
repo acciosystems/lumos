@@ -8,7 +8,7 @@ Nossa Causa é uma plataforma web para centralizar e gerenciar campanhas de doa�
 
 ## Problema que resolve
 
-Hoje, campanhas de doação de itens físicos dependem de grupos informais em redes sociais, dificultando a organização, o acompanhamento e a prestação de contas. A plataforma centraliza esse processo, oferecendo estatísticas de engajamento, atualizações automáticas de local/horário e dados públicos de participação. Para doações em dinheiro, o organizador informa seus próprios dados de pagamento (chave PIX, número de conta), evitando as taxas de plataformas de processamento — dependendo apenas das taxas do próprio banco.
+Hoje, campanhas de doação de itens físicos dependem de grupos informais em redes sociais, dificultando a organização, o acompanhamento e a prestação de contas. A plataforma centraliza esse processo, oferecendo indicadores de participação, atualizações publicadas pelo organizador e dados públicos de participação. Para doações em dinheiro, o organizador informa seus próprios dados de pagamento (chave PIX, número de conta), evitando as taxas de plataformas de processamento — dependendo apenas das taxas do próprio banco.
 
 ## Modelo de doação
 
@@ -28,10 +28,9 @@ Hoje, campanhas de doação de itens físicos dependem de grupos informais em re
 | **P1 — Importante**       | Sistema de reputação                     | Pontua cancelamentos de última hora, cumprimento do prazo de prestação de contas e qualidade da organização da campanha |
 |                           | Sistema de denúncia                      | Permite reportar campanhas ou organizadores problemáticos                                                               |
 | **P2 — Desejável**        | Sistema de recompensas                   | ID de participação por usuário, permitindo ranking e premiação definida pelos organizadores                             |
-|                           | Sistema de notificações                  | Avisos automáticos sobre a campanha — viabilidade técnica ainda em avaliação (implementação considerada complexa)       |
+|                           | Sistema de notificações                  | Possibilidade de evolução considerada tecnicamente inviável dentro do escopo do MVP                                     |
 | **P3 — Futuro (pós-MVP)** | Integração com processador de pagamentos | Stripe, Polar, etc., como alternativa opcional ao PIX/conta direta                                                      |
 
 ## Questões em aberto
 
 - **Prazo de prestação de contas**: definir o período de respaldo (ex.: prazo fixo de uma semana vs. cálculo baseado na quantidade de itens doados). Violação do prazo configura infração dos termos da plataforma.
-- **Notificações**: avaliar complexidade de implementação antes de confirmar como funcionalidade do MVP.

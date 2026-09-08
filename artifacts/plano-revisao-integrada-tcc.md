@@ -61,17 +61,17 @@ Os pacotes R-01 a R-06 não dependem uns dos outros e podem ser distribuídos en
 
 Estados permitidos: **Não iniciado**, **Em revisão**, **Aguardando esclarecimento** e **Concluído**.
 
-| Pacote | Responsável | Estado | Arquivos principais | Dependência |
-| --- | --- | --- | --- | --- |
-| R-01 — Fundamentação do problema | Codex | Concluído | `texto-fase-01.md`, `texto-fase-02.md` | Nenhuma |
-| R-02 — Sistema atual e projeto lógico | — | Não iniciado | `texto-fase-03.md`, `texto-fase-04.md` | Nenhuma |
-| R-03 — Projeto físico e desenvolvimento | — | Não iniciado | `texto-fase-05.md`, `texto-fase-06.md` | Nenhuma |
-| R-04 — Implantação | — | Não iniciado | `texto-fase-07.md` | Nenhuma |
-| R-05 — Manutenção | — | Não iniciado | `texto-fase-08.md` | Nenhuma |
-| R-06 — Manual do Usuário | — | Não iniciado | `manual-do-usuario.md` | Nenhuma |
-| R-07 — Abertura e encerramento | — | Não iniciado | `texto-sumario.md`, `texto-introducao.md`, `texto-consideracoes-finais.md` | R-01 a R-06 |
-| R-08 — Integração textual | — | Não iniciado | Todos os textos finais e `TCC-PRINCIPAL.md` | R-07 |
-| R-09 — Referências finais | — | Não iniciado | `referencias.md`, mapa central | R-08 |
+| Pacote                                  | Responsável | Estado       | Arquivos principais                                                        | Dependência |
+| --------------------------------------- | ----------- | ------------ | -------------------------------------------------------------------------- | ----------- |
+| R-01 — Fundamentação do problema        | Codex       | Concluído    | `texto-fase-01.md`, `texto-fase-02.md`                                     | Nenhuma     |
+| R-02 — Sistema atual e projeto lógico   | Codex       | Concluído    | `texto-fase-03.md`, `texto-fase-04.md`                                     | Nenhuma     |
+| R-03 — Projeto físico e desenvolvimento | —           | Não iniciado | `texto-fase-05.md`, `texto-fase-06.md`                                     | Nenhuma     |
+| R-04 — Implantação                      | —           | Não iniciado | `texto-fase-07.md`                                                         | Nenhuma     |
+| R-05 — Manutenção                       | —           | Não iniciado | `texto-fase-08.md`                                                         | Nenhuma     |
+| R-06 — Manual do Usuário                | —           | Não iniciado | `manual-do-usuario.md`                                                     | Nenhuma     |
+| R-07 — Abertura e encerramento          | —           | Não iniciado | `texto-sumario.md`, `texto-introducao.md`, `texto-consideracoes-finais.md` | R-01 a R-06 |
+| R-08 — Integração textual               | —           | Não iniciado | Todos os textos finais e `TCC-PRINCIPAL.md`                                | R-07        |
+| R-09 — Referências finais               | —           | Não iniciado | `referencias.md`, mapa central                                             | R-08        |
 
 ## R-01 — Fundamentação do problema
 
@@ -391,4 +391,14 @@ Nenhum pacote será considerado concluído apenas porque o texto foi reescrito. 
 - Referências incluídas, removidas ou deslocadas: nenhuma obra incluída ou removida; usos existentes foram condensados e deslocados. A fonte candidata de Salido-Andres et al. (2022) foi examinada e excluída por não demonstrar o problema específico adotado pela Nossa Causa.
 - Mapa central atualizado: sim.
 - Pendências encaminhadas ao R-08: conferir a transição textual da Fase 2 para a definição de sistema atual na Fase 3 depois da execução de R-02.
+- Estado final: Concluído.
+
+### R-02 — 2026-09-08
+
+- Responsável: Codex.
+- Arquivos alterados: `artifacts/texto-fase-03.md`, `artifacts/texto-fase-04.md`, planejamentos das duas fases, mapa central de referências, documentos de escopo, textos afetados pela nomenclatura da Figura 2 e arquivo principal de coordenação.
+- Verificações realizadas: transição metodológica entre as Fases 3 e 4; conferência das capacidades do MVP no código; ausência de fluxo operacional para `DONATIONS`; sequência das 16 tabelas remanescentes e seus 162 campos; tratamento do marcador de verificação do CNPJ; limites da visão lógica da arquitetura; distinção entre blocos funcionais, classes, contratos e entidades persistidas; consistência das notificações como possibilidade de evolução considerada tecnicamente inviável dentro do escopo do MVP.
+- Referências incluídas, removidas ou deslocadas: nenhuma; o mapa central foi atualizado apenas para acompanhar a mudança do título do tópico 4.3.
+- Mapa central atualizado: sim.
+- Pendências encaminhadas ao R-08: revalidar a nomenclatura da visão lógica da arquitetura e a síntese das possibilidades de evolução durante a conferência global.
 - Estado final: Concluído.

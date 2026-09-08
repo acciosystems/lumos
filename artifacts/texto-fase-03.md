@@ -2,7 +2,7 @@
 
 ## Delimitação do sistema atual
 
-Esta fase analisa o MVP implementado da plataforma Nossa Causa. Esse recorte foi adotado como um produto minimamente viável: uma versão funcional que reúne as capacidades centrais da proposta e oferece uma base concreta para evolução. O objeto de estudo é o software existente, examinado por suas telas, regras de funcionamento e informações registradas. A análise utiliza evidências técnicas e documentais; entrevistas, observação de campanhas reais e procedimentos de uma organização específica não compõem o método adotado. Por isso, o uso informal de redes sociais, apresentado nas fases anteriores como parte do problema do projeto, não é tratado como um sistema anterior observado.
+Esta fase toma como sistema atual o MVP implementado da plataforma Nossa Causa. O objeto de estudo é o software existente, examinado por suas telas, regras de funcionamento e informações registradas. A análise utiliza evidências técnicas e documentais, mas não inclui testes com usuários, observação de campanhas reais ou procedimentos de uma organização específica. Por isso, o uso informal de redes sociais, apresentado nas fases anteriores como parte do problema do projeto, não é tratado como um sistema anterior observado. A denominação MVP delimita o conjunto de capacidades examinado; não comprova, por si só, a eficácia do sistema em condições reais de uso.
 
 O MVP reúne seis frentes principais: campanhas físicas, campanhas virtuais com transferência direta ao organizador, filtros por tema e região, recursos de gestão para organizadores, identificação pública de organizações e prestação de contas ao final das campanhas, além da divulgação da quantidade de participantes nas campanhas físicas. Em conjunto, esses recursos permitem publicar e localizar campanhas, organizar a participação, acompanhar seu andamento e divulgar os resultados declarados pelo organizador. A análise a seguir descreve como esse fluxo funciona no sistema. Seus resultados são técnicos e funcionais; efeitos sobre confiança, volume de doações, eficiência das campanhas ou adoção por usuários dependeriam de avaliação própria.
 
@@ -12,7 +12,7 @@ Qualquer pessoa pode consultar as campanhas disponíveis e acessar suas informa�
 
 As ações que alteram informações exigem autenticação. Um usuário autenticado pode participar de uma campanha física enquanto ela estiver ativa e pode cancelar essa participação no mesmo período. A plataforma mostra ao público a quantidade de participações ativas, sem divulgar nomes ou dados pessoais dos participantes. Campanhas virtuais não usam esse registro de participação, pois a contribuição financeira ocorre diretamente entre doador e organizador.
 
-Para criar campanhas, o usuário precisa manter um perfil de organizador. Esse perfil pode representar uma pessoa física ou uma organização. No caso de organizações, o sistema aceita um CNPJ formalmente válido e o apresenta de forma pública quando a campanha é consultada. A interface também distingue um CNPJ verificado de um CNPJ ainda não verificado. A validade formal do número, porém, não substitui a verificação da identidade da organização.
+Para criar campanhas, o usuário precisa manter um perfil de organizador. Esse perfil pode representar uma pessoa física ou uma organização. No caso de organizações, o sistema aceita um CNPJ formalmente válido e o apresenta de forma pública quando a campanha é consultada. A interface também distingue um CNPJ marcado como verificado de outro ainda não verificado. No recorte examinado, porém, não há um procedimento operacional documentado que estabeleça critérios, responsáveis e evidências para essa verificação. O marcador não deve ser interpretado como garantia institucional, e a validade formal do número não comprova a identidade da organização.
 
 ## Controle das campanhas
 
@@ -34,7 +34,7 @@ Quadro 2 — Controles informatizados do MVP Nossa Causa
 | Campanha física | Registra meta, local, pontos de coleta, progresso de itens e participações ativas. | Não controla estoque, triagem, transporte ou distribuição de itens. |
 | Campanha virtual | Divulga PIX ou dados bancários para transferência direta ao organizador. | Não processa, confirma ou concilia pagamentos. |
 | Gestão do organizador | Reúne estado da campanha, contagem agregada de participantes, progresso, edição, atualizações e ações de conclusão ou cancelamento. | Não apresenta lista nominal de participantes nem análises avançadas sobre doadores. |
-| Transparência | Mostra o CNPJ de organizações, seu estado de verificação e a prestação de contas publicada após o encerramento. | Não realiza auditoria externa nem aplica sanção automática sobre as informações declaradas. |
+| Transparência | Mostra o CNPJ de organizações, seu marcador de verificação e a prestação de contas publicada após o encerramento. | Não documenta o procedimento operacional de verificação do CNPJ, não realiza auditoria externa nem aplica sanção automática sobre as informações declaradas. |
 
 Fonte: elaboração própria com base na análise funcional do MVP Nossa Causa (2026).
 
@@ -42,7 +42,7 @@ Fonte: elaboração própria com base na análise funcional do MVP Nossa Causa (
 
 O organizador acompanha suas próprias campanhas em um painel de controle. Nele, pode consultar o estado atual, a quantidade de participantes em campanhas físicas e, quando aplicável, o progresso dos itens recebidos. Também pode editar os dados da campanha enquanto o estado permitir, publicar atualizações e concluir ou cancelar a campanha.
 
-As atualizações são publicadas pelo próprio organizador e ficam visíveis na página pública da campanha. Esse recurso permite comunicar alterações de local, horário ou outras informações relevantes. No MVP, a página pública concentra essa comunicação; as notificações automáticas constituem uma possibilidade de evolução para ampliar o alcance dos avisos.
+As atualizações são publicadas pelo próprio organizador e ficam visíveis na página pública da campanha. Esse recurso permite comunicar alterações de local, horário ou outras informações relevantes. No MVP, a página pública concentra essa comunicação. As notificações automáticas foram consideradas tecnicamente inviáveis dentro do escopo definido para essa versão e, por isso, não integram a solução entregue. O recurso permanece como possibilidade de evolução posterior.
 
 O painel apresenta indicadores operacionais, não um sistema de análise estatística completo. A quantidade de participantes e o total de itens são dados agregados que auxiliam o acompanhamento da campanha. Eles não permitem identificar publicamente os doadores nem demonstram, por si sós, o resultado social alcançado pela causa.
 
@@ -54,12 +54,8 @@ O sistema acompanha o prazo dessa prestação de contas até o final do sétimo 
 
 Quando a prestação é publicada, o público pode consultar o total informado, o resumo e as evidências disponibilizadas. Quando ela ainda não foi enviada, a página da campanha informa essa situação. O MVP prioriza a publicidade das informações declaradas pelo organizador. Auditoria externa, verificação da destinação dos recursos e consequências automáticas por atraso representam responsabilidades adicionais, distintas desse mecanismo de transparência.
 
-## Possibilidades de evolução do sistema
+## Relação com o projeto lógico
 
-O sistema atual centraliza dados de campanhas, participação, acompanhamento e transparência e, com isso, concretiza o recorte minimamente viável da Nossa Causa. A gestão logística continua com os responsáveis por cada campanha, enquanto os recursos reservados para etapas posteriores ampliam capacidades já estabelecidas pelo MVP.
+Esta análise trata o MVP implementado como sistema atual porque descreve o software disponível no recorte técnico adotado. A Fase 4 não introduz outro sistema: ela formaliza a mesma solução como sistema proposto, por meio de casos de uso, uma visão lógica da arquitetura, um modelo de entidades e um dicionário de dados. A mudança entre as fases é metodológica, da observação funcional para a representação lógica.
 
-Na frente de confiança e governança, a proposta de reputação considera cancelamentos de última hora, cumprimento do prazo de prestação de contas e qualidade da organização da campanha. O MVP já registra os estados de cancelamento e de prestação de contas e aplica sete dias corridos às duas modalidades, mas ainda não calcula reputação nem atribui pontuação a esses dados. A concepção inicial também previa a possibilidade de calcular o prazo pela quantidade de itens doados, alternativa diretamente aplicável às campanhas físicas, sem critério variável equivalente definido para as virtuais. Ela classificava o atraso como infração dos termos da plataforma. Uma evolução deverá decidir se conserva o prazo único ou adota regras por modalidade e como a infração participará do cálculo de reputação. O canal de denúncias, igualmente não implementado, permitiria reportar campanhas ou organizadores problemáticos.
-
-As ideias voltadas à participação incluem um identificador por usuário, destinado a permitir rankings e premiações definidas pelos organizadores. As notificações automáticas complementariam as atualizações públicas já existentes, que hoje dependem da consulta à página da campanha. A viabilidade técnica dessa funcionalidade permanece em avaliação.
-
-Para as contribuições financeiras, a continuidade prevista inclui integração opcional com processadores de pagamento, como Stripe ou Polar. O MVP adota a transferência direta por PIX ou conta bancária entre doador e organizador, escolha que viabiliza a modalidade virtual sem intermediar a transação. Reputação, denúncias, recompensas, notificações e integração de pagamentos ampliam essa base funcional e permanecem como ideias para a evolução do produto.
+Reputação, denúncias, recompensas, notificações automáticas e integração opcional com processadores de pagamento permanecem fora do MVP. Essas possibilidades são detalhadas na Fase 4 apenas para indicar impactos futuros sobre o projeto lógico, sem apresentá-las como capacidades disponíveis ou compromissos de implementação. No caso das notificações, a decisão desta entrega está encerrada: o recurso foi considerado tecnicamente inviável dentro do escopo do MVP, embora possa ser reavaliado em uma evolução posterior.
