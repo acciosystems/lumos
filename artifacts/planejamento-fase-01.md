@@ -5,7 +5,7 @@
 - Identificador: `fase-01`.
 - Responsável: Codex.
 - Data de início: 2026-09-05.
-- Etapa atual: planejamento, redação e revisão concluídos em 2026-09-05.
+- Etapa atual: planejamento, redação e revisão concluídos em 2026-09-05; revisão integrada R-01 concluída em 2026-09-08.
 - Orientação central: `artifacts/TCC-PRINCIPAL.md`, sobretudo D-001 e D-002.
 - Entrega: `artifacts/texto-fase-01.md`.
 
@@ -90,3 +90,11 @@ Liang, Wang e Wang (2022) foi excluído da lista de fontes conforme D-009 e não
 Em 2026-09-05, foram consultadas as cópias locais da Pesquisa Doação Brasil 2024, do artigo de Chapman, Hornsey e Gillespie (2021), do artigo de Ghoorah, Mariyani-Squire e Amin (2025), da dissertação de Rodrigues (2022) e da tese de Varella (2019). A redação utilizou somente os resultados e as delimitações efetivamente verificados nessas fontes, com localizadores registrados no texto para as afirmações selecionadas.
 
 O texto final foi redigido e revisado com a skill `humanizar`, em `modo_criacao` e perfil acadêmico. A revisão preservou as modalidades das evidências: os estudos associativos não foram convertidos em relações causais, a análise de Varella permaneceu no contexto de ajuda humanitária e a Nossa Causa foi apresentada como proposta de projeto, sem alegação de implantação, uso ou efeito comprovado. Liang, Wang e Wang (2022) não foi usado, conforme D-009.
+
+## Revisão integrada R-01 — 2026-09-08
+
+A Fase 1 foi reorganizada para concentrar a justificativa da necessidade, deixando amostras, percentuais e a classificação detalhada dos dados para a Fase 2. Foram preservados os métodos, resultados, localizadores e limites das cinco fontes utilizadas. A redação passou a identificar de forma direta que o problema de campanhas organizadas em Facebook e WhatsApp provém dos documentos de escopo e não foi demonstrado empiricamente pelas referências consultadas.
+
+Durante a revisão, foi examinado o artigo de Salido-Andres, Rey-Garcia, Alvarez-Gonzalez e Vazquez-Casielles (2022), *When the winner takes it all: online campaign factors influencing the success of donation-based crowdfunding for charitable causes*, DOI 10.1007/s12208-021-00320-4. A pesquisa analisa 360 campanhas monetárias de organizações sem fins lucrativos em uma plataforma espanhola com modelo de financiamento condicionado ao alcance da meta. Embora trate de campanhas digitais difundidas por redes sociais, seu recorte não demonstra a organização informal por Facebook ou WhatsApp nem abrange adequadamente as campanhas físicas da Nossa Causa. Por isso, a obra não foi incorporada ao texto nem ao mapa central.
+
+A revisão também substituiu o uso isolado de *accountability* por uma explicação em português na primeira ocorrência e concentrou as ressalvas metodológicas junto às afirmações que elas limitam. Nenhuma fonte foi incluída ou removida.

@@ -5,7 +5,7 @@
 - Identificador: `fase-02`.
 - Responsável: Codex.
 - Data de início: 2026-09-05.
-- Etapa atual: concluída; planejamento, redação e revisão finalizados.
+- Etapa atual: concluída; planejamento, redação e revisão finalizados, com revisão integrada R-01 concluída em 2026-09-08.
 - Orientação central: `artifacts/TCC-PRINCIPAL.md`, sobretudo D-001, D-002, D-008 e D-009.
 - Texto produzido: `artifacts/texto-fase-02.md`.
 
@@ -141,3 +141,11 @@ A falta de uma referência externa específica sobre o uso de Facebook e WhatsAp
 Em 2026-09-05, foram conferidas as cópias locais da Pesquisa Doação Brasil 2024, do artigo de Chapman, Hornsey e Gillespie (2021), do artigo de Ghoorah, Mariyani-Squire e Amin (2025), da dissertação de Rodrigues (2022) e da tese de Varella (2019). A redação utilizou dados e conclusões com localizadores verificados, preservando a amostra, o contexto e as limitações de interpretação de cada fonte.
 
 O texto final foi redigido e revisado com a skill `humanizar`, em `modo_criacao` e perfil acadêmico. A revisão manteve a diferença entre evidência correlacional, resultado experimental, síntese sobre logística humanitária, documento de escopo e inferência de projeto. Os documentos da Nossa Causa não foram apresentados como pesquisa empírica, e nenhuma funcionalidade foi declarada como implementada, adotada ou eficaz sem evidência correspondente.
+
+## Revisão integrada R-01 — 2026-09-08
+
+A Fase 2 passou a concentrar o método, as amostras, os números e a classificação das evidências que antes se repetiam na Fase 1. O Quadro 1 preserva os dados selecionados e explicita, na linha dedicada ao problema de Facebook e WhatsApp, que essa formulação é uma definição de escopo, não um achado das pesquisas consultadas.
+
+As aplicações de Chapman, Hornsey e Gillespie (2021), Ghoorah, Mariyani-Squire e Amin (2025), Rodrigues (2022) e Varella (2019) foram condensadas sem ampliar seu alcance. A contribuição de Varella permanece descrita como parcial e restrita ao contexto da logística humanitária. O encerramento da fase distingue a pertinência das direções de projeto da eficácia da solução, que dependeria de avaliação específica com usuários e campanhas reais.
+
+Nenhuma fonte foi acrescentada ou retirada. Os locais de uso das cinco obras foram atualizados em `artifacts/auxiliares/referencias-utilizadas.md`.
