@@ -1,6 +1,6 @@
 # Cópia parcial de consulta — Neon Point-in-Time Restore
 
-- **Fonte:** NEON. *Announcing Point-in-Time Restore*.
+- **Fonte:** SHORTISS, Evan. Announcing Point-in-Time Restore. *Neon*.
 - **Publicação:** 20 fev. 2024.
 - **Endereço:** <https://neon.com/blog/announcing-point-in-time-restore>
 - **Consulta:** 7 set. 2026.

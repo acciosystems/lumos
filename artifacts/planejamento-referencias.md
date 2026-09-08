@@ -1,153 +1,197 @@
-# Planejamento — Referências bibliográficas
+# Planejamento — Referências
 
 ## Identificação e escopo
 
 - Identificador: `referencias`.
-- Responsável pelo planejamento: Codex.
-- Data do planejamento: 2026-09-07.
-- Estado: em planejamento, com inventário inicial preenchido.
-- Orientação central: `artifacts/TCC-PRINCIPAL.md`, especialmente D-008, D-009, D-015 e D-019.
+- Responsável: Codex.
+- Planejamento inicial: 2026-09-07.
+- Revisão do planejamento: 2026-09-08.
+- Estado: concluído, com lista final, mapa central e chamadas normalizadas.
+- Orientação central: `artifacts/TCC-PRINCIPAL.md`, especialmente D-008, D-009, D-015, D-019, D-027 e D-030.
 - Entregas previstas: `artifacts/auxiliares/referencias-utilizadas.md` e `artifacts/referencias.md`.
 
-Esta etapa deverá consolidar as referências bibliográficas efetivamente usadas no TCC e preservar a rastreabilidade entre cada obra e os trechos que ela sustenta. O mapa central será mantido durante a redação das partes; a lista bibliográfica final será produzida somente na integração, depois da conferência dos metadados e da remoção de fontes que não permanecerem no texto.
+Esta etapa consolidará somente as fontes externas efetivamente usadas no TCC. A execução deverá preservar a correspondência entre cada chamada no texto, a entrada no mapa central e a referência completa. Fontes consultadas que não sustentem conteúdo mantido serão excluídas da lista final.
 
-O planejamento abrange o RESUMO e o ABSTRACT, a introdução, as oito fases, as considerações finais e outros elementos textuais que venham a empregar fontes externas. Documentos internos do projeto, evidências do repositório e figuras de elaboração própria serão identificados separadamente, pois não devem ser convertidos automaticamente em referências bibliográficas.
+O corpus abrange o RESUMO, o ABSTRACT, a introdução, as oito fases e as considerações finais. Documentos internos do projeto, código, banco de dados, capturas e materiais de elaboração própria continuarão rastreados nos planejamentos e manifestos técnicos, sem inclusão automática na lista de referências.
+
+## Base normativa adotada
+
+A normalização seguirá as edições vigentes identificadas durante esta revisão:
+
+- ABNT NBR 6023:2025, para elaboração e ordenação das referências;
+- ABNT NBR 10520:2023, para o sistema de chamadas e a correspondência entre citações e referências;
+- ABNT NBR 14724:2024, para a apresentação da seção pós-textual no documento final.
+
+O sistema autor-data já utilizado no TCC será preservado. Em consequência, a lista final será única e ordenada alfabeticamente pelo elemento de entrada. Não haverá numeração das referências nem separação por tipo de documento. Se a instituição fornecer manual próprio, suas regras de apresentação serão confrontadas com estas normas antes da diagramação final.
 
 ## Função de cada arquivo
 
 | Arquivo | Função | Regra de atualização |
 | --- | --- | --- |
-| `artifacts/auxiliares/referencias-utilizadas.md` | Inventário central e vivo das fontes, locais de uso, localizadores e pendências. | Atualizar sempre que uma citação ou um uso factual for incluído, removido ou deslocado. |
-| `artifacts/auxiliares/referencias/` | Acervo de cópias de consulta autorizadas. | Registrar procedência e integridade no `README.md`; não tratar a cópia local como substituta da fonte original. |
-| `artifacts/referencias.md` | Lista bibliográfica final destinada ao TCC. | Criar na integração com somente as fontes que permanecerem efetivamente usadas. |
-| `docs/references.md` | Lista inicial de pesquisa. | Usar como ponto de partida, sem importar automaticamente sua cadeia lógica ou fontes não citadas. |
+| `artifacts/auxiliares/referencias-utilizadas.md` | Inventário central das fontes, usos, localizadores e pendências. | Atualizar sempre que uma citação, menção bibliográfica ou uso factual for incluído, removido ou deslocado. |
+| `artifacts/auxiliares/referencias/` | Acervo de cópias autorizadas para consulta. | Registrar procedência e integridade no `README.md`; a cópia local não substitui a fonte original. |
+| `artifacts/referencias.md` | Lista final destinada ao TCC. | Criar somente após a auditoria cruzada do texto e dos metadados. |
+| `docs/references.md` | Lista inicial da pesquisa. | Usar apenas como ponto de partida; não importar fontes sem uso remanescente. |
 
-## Estrutura do mapa central
+## Diagnóstico do inventário atual
 
-Cada fonte receberá um identificador estável no formato `R-001`. O registro deverá informar:
+O mapa central contém 26 fontes externas candidatas à lista final, identificadas de R-001 a R-026. Elas se distribuem nos seguintes tipos:
 
-1. referência de trabalho, com os metadados já confirmados;
-2. forma de chamada usada no texto;
-3. arquivo e seção em que a fonte aparece;
-4. afirmação, dado, conceito ou definição sustentada;
-5. páginas, seções, DOI, URL ou outro localizador aplicável;
-6. cópia local disponível, quando houver;
-7. estado da conferência e da normalização final.
-
-O arquivo e a seção são os localizadores estáveis. Números de linha poderão ser mantidos como apoio temporário, mas deverão ser atualizados após alterações estruturais e não substituirão o nome da seção. Quando uma mesma obra for usada em mais de uma parte, todos os usos serão registrados na mesma entrada. Páginas diferentes serão discriminadas por uso.
-
-Páginas web distintas do mesmo autor institucional serão registradas separadamente quando sustentarem afirmações diferentes. Se várias páginas sem data do mesmo autor permanecerem citadas, a integração deverá diferenciar as chamadas e as referências conforme a norma adotada, inclusive com letras após a data quando necessário.
-
-## Inventário inicial
-
-O levantamento realizado em 2026-09-07 identificou os seguintes grupos de fontes externas no texto disponível:
-
-| Grupo | Partes em que aparece | Situação inicial |
+| Tipo documental | Identificadores | Tratamento previsto |
 | --- | --- | --- |
-| Pesquisa Doação Brasil 2024, do IDIS e da Ipsos | Fases 1 e 2. | Uso e páginas identificados; normalização final pendente. |
-| Chapman, Hornsey e Gillespie (2021) | Fases 1 e 2. | DOI e cópia local identificados; normalização final pendente. |
-| Ghoorah, Mariyani-Squire e Amin (2025) | RESUMO, ABSTRACT e Fases 1 e 2. | DOI, página oficial, cópia local e usos identificados. |
-| Rodrigues (2022) | Fases 1 e 2. | Dissertação e páginas usadas identificadas. |
-| Varella (2019) | Fases 1 e 2. | Tese, repositório e localizador usado identificados. |
-| Especificação UML 2.5.1, da Object Management Group | Fase 4, tópicos 4.1 a 4.3, e Fase 6, tópico 6.2.2. | Seções, páginas, URL e cópia local identificadas. |
-| Chen (1976), sobre o modelo entidade-relacionamento | Fase 4, tópico 4.4. | DOI, páginas e cópia de consulta identificados. |
-| Documentação de diagramas do Mermaid | Fase 4, tópico 4.4, e Fase 6, tópico 6.2.2. | Páginas de DER e de diagrama de classe, ambas na versão 11.17.2, identificadas. |
-| Documentação oficial do TSDoc | Fase 6, tópico 6.2.3. | Página introdutória, especificação e páginas das tags identificadas; chamadas diferenciadas no texto e no mapa. |
-| OWASP Cheat Sheet Series | Fase 4, tópico 4.3, e Fase 6, tópico 6.1. | Validação no lado protegido e autorização por requisição; cópias locais e chamadas diferenciadas identificadas. |
-| Especificação WebAuthn nível 3, do W3C | Fase 6, tópico 6.2.1. | Cerimônia de registro de chave de acesso e interação com autenticador compatível; recomendação de 25 ago. 2026 e cópia local identificadas. |
+| Relatório de pesquisa | R-001 | Conferir responsabilidade institucional, local, entidade editora, ano, URL e acesso. |
+| Artigos de periódico | R-002, R-003 e R-014 | Conferir autores, título do artigo, periódico, local quando aplicável, volume, número, paginação ou número do artigo, ano, DOI, URL e acesso. |
+| Dissertação e tese | R-004 e R-005 | Conferir autor, título, ano de depósito, tipo e grau, programa quando informado, instituição, local, repositório, URL e acesso. |
+| Especificações, normas, recomendações e guias técnicos | R-006, R-018, R-022, R-025 e R-026 | Conferir entidade responsável, título, versão ou número, local, editora ou órgão publicador, data, DOI ou URL e acesso. |
+| Documentação e páginas on-line | R-007 a R-013, R-015 a R-017, R-019 a R-021, R-023 e R-024 | Conferir autoria institucional, título da página, nome do portal quando necessário, versão, data, URL canônica e acesso. |
 
-O conteúdo detalhado, inclusive cada página da documentação do TSDoc, foi registrado em `artifacts/auxiliares/referencias-utilizadas.md`. O inventário deverá crescer apenas quando uma parte do texto usar uma nova fonte. Obras consultadas e descartadas poderão permanecer no planejamento da parte correspondente, mas não entrarão no mapa central nem na bibliografia final.
+O levantamento inicial identificou quatro pendências estruturais, resolvidas na execução:
 
-## Fluxo de atualização
+1. as quatorze entradas que usavam `s.d.` receberam datas confirmadas ou datas entre colchetes sustentadas por registros editoriais oficiais;
+2. as letras das chamadas de Mermaid, TSDoc e OWASP foram recalculadas depois da ordenação definitiva;
+3. os DOI foram registrados como URLs completas;
+4. os elementos de publicação e a consulta realizada em 8 set. 2026 foram registrados na lista final.
 
-Ao redigir ou revisar uma parte, o responsável deverá:
+Na NBR 6023:2025, a data é elemento obrigatório. Por isso, `s.d.` não permanecerá na bibliografia. Para cada página sem data aparente, a execução deverá procurar, nesta ordem, data de publicação ou atualização no documento, metadados da página, histórico oficial de versão e registro editorial confiável. Se ainda não houver ano explícito, será usada uma estimativa entre colchetes admitida pela norma e sustentada por evidência verificável. A data de acesso não será convertida automaticamente em data de publicação.
 
-1. localizar todas as chamadas autor-data, menções bibliográficas em prosa e afirmações factuais baseadas em fonte externa;
-2. associar cada uso a um identificador existente ou criar um novo identificador;
-3. registrar seção, finalidade e localizador no mapa central;
-4. conferir se a modalidade da afirmação permanece compatível com a fonte;
-5. retirar do mapa o uso eliminado, sem apagar outros usos da mesma obra;
-6. sinalizar metadados incompletos em vez de completá-los por suposição;
-7. atualizar a bibliografia final somente durante a integração.
+## Padrão de autoria e chamadas
 
-Uma varredura textual deverá complementar a revisão manual. A busca precisa considerar citações entre parênteses, autores mencionados na frase, fontes de quadros e figuras e páginas institucionais sem autor pessoal. A conferência manual continua necessária porque o RESUMO e o ABSTRACT, por exemplo, usam Ghoorah, Mariyani-Squire e Amin (2025) como apoio factual sem apresentar uma chamada autor-data.
+As referências adotarão um único padrão para nomes pessoais e institucionais:
 
-## Normalização e deduplicação
+- autores pessoais: sobrenome de entrada em maiúsculas, seguido dos prenomes por extenso quando confirmados na fonte; iniciais serão mantidas somente quando a expansão não puder ser verificada;
+- dois ou três autores: todos serão indicados e separados por ponto e vírgula;
+- quatro ou mais autores: todos serão indicados quando constarem da fonte; o uso do primeiro seguido de *et al.* ficará restrito a impedimento documental registrado no mapa;
+- autores institucionais: entrada pelo nome oficial da entidade, com sigla apenas quando fizer parte da forma adotada ou for necessária à chamada;
+- autoria desconhecida: entrada pelo título, sem uso da palavra “anônimo”.
 
-A integração deverá escolher e aplicar uma única norma bibliográfica, conforme a orientação institucional ainda pendente. Antes de formatar `artifacts/referencias.md`, será necessário conferir, para cada entrada:
+As chamadas no corpo do texto serão revistas conforme a NBR 10520:2023. Nomes por extenso dentro de parênteses não permanecerão integralmente em caixa alta; siglas consolidadas, como IDIS, NIST, OWASP e W3C, conservarão sua grafia. Assim, formas provisórias como `(NEON, ...)`, `(MERMAID, ...)`, `(TSDOC, ...)` e `(OBJECT MANAGEMENT GROUP, ...)` serão revistas para `(Neon, ...)`, `(Mermaid, ...)`, `(TSDoc, ...)` e `(Object Management Group, ...)`, se essas forem as entradas confirmadas.
 
-- autoria pessoal ou institucional;
-- título e subtítulo;
-- edição, periódico, volume, número, artigo, instituição ou tipo acadêmico;
-- ano e, quando disponível, data de publicação;
-- DOI e URL canônica;
-- data de acesso para conteúdo on-line;
-- correspondência entre a chamada no texto e a entrada final.
+Letras minúsculas após o ano serão usadas somente quando duas ou mais obras da mesma autoria tiverem a mesma data final. A atribuição seguirá a ordem das respectivas entradas na lista de referências e será reproduzida em todas as chamadas do texto e no mapa central. Nenhuma letra provisória será preservada apenas por já aparecer nos arquivos atuais.
 
-DOI e URL não deverão gerar entradas duplicadas para a mesma obra. Uma cópia local também não cria outra referência. Versões diferentes somente serão mantidas separadas quando o texto depender de conteúdo próprio de cada versão.
+## Padrão dos elementos e da apresentação
 
-## Registro temporal da pesquisa e datas de acesso
+Cada referência será montada conforme o tipo documental, com os elementos em sequência padronizada e pontuação uniforme. Serão observadas as seguintes decisões:
 
-Conforme D-019, o cronograma geral registrará três etapas distintas: a busca exploratória de referências para verificar a viabilidade do TCC, de 17/02/2026 a 16/03/2026; a pesquisa contínua de 10/03/2026 a 01/09/2026, que subsidiou documentos intermediários solicitados pelo orientador; e a filtragem final das referências, de 06/08/2026 a 01/09/2026. As obras consultadas nas duas primeiras etapas não correspondem, necessariamente, às fontes que sustentam o texto final. Essa distinção não permite inventar datas de consulta ou acesso para criar a aparência de uma pesquisa executada ao longo do ano.
+- o título da seção será `REFERÊNCIAS`, centralizado e sem numeração no documento final;
+- as referências formarão uma lista única, sem marcadores e sem subtítulos por tipo;
+- o alinhamento será à margem esquerda;
+- cada entrada usará espaçamento simples, com uma linha em branco de espaço simples entre entradas;
+- o destaque tipográfico será aplicado de modo uniforme. No Markdown, será usado itálico no título da obra completa ou da publicação que contém a parte referenciada; o subtítulo não receberá o destaque;
+- títulos de artigos serão seguidos pelo título destacado do periódico; títulos de páginas e documentos completos receberão o destaque correspondente ao documento referenciado;
+- DOI será apresentado como URL completa, no formato `DOI: https://doi.org/...`, quando existir;
+- documentos on-line terminarão com `Disponível em:` e `Acesso em:`, com URL canônica e data real de consulta;
+- informações obtidas fora do documento serão colocadas entre colchetes quando a norma assim exigir;
+- elementos complementares serão incluídos de maneira consistente entre referências do mesmo tipo;
+- títulos, nomes, datas, versões e identificadores serão transcritos sem tradução, correção editorial ou preenchimento por inferência não documentada.
 
-O controle temporal seguirá estas regras:
+O Markdown preservará conteúdo e hierarquia para transferência. Fonte, margens, paginação e demais detalhes de diagramação serão aplicados no documento final conforme a NBR 14724:2024 e o eventual manual da instituição.
 
-1. usar a data real quando houver histórico, arquivo, anotação ou outro registro de consulta;
-2. registrar como **período retrospectivo estimado** qualquer distribuição temática que não possua evidência contemporânea;
-3. nunca transformar a data de publicação da obra em data de consulta;
-4. usar na referência on-line a data real de acesso ou conferência da página;
-5. marcar `[DATA REAL DE ACESSO A REGISTRAR]` enquanto a consulta ainda não tiver ocorrido;
-6. não preencher lacunas com datas fictícias, mesmo quando elas produziriam um cronograma visualmente mais uniforme.
-7. não incluir no mapa central ou na bibliografia final fontes das etapas exploratória ou intermediária que não sustentem conteúdo mantido no texto.
+## Ordem alfabética definitiva
 
-O cronograma poderá agrupar a pesquisa contínua por tema, por exemplo, problema de doações, requisitos, modelagem, segurança e implantação. Sem evidência temporal, esses agrupamentos permanecerão identificados como reconstrução estimada e não comprovarão que cada obra foi consultada naquele intervalo.
+Considerando os elementos de entrada atualmente registrados, a sequência de trabalho será a seguinte:
 
-## Fontes internas e elaboração própria
+| Posição | Identificador | Elemento de entrada e título abreviado |
+| ---: | --- | --- |
+| 1 | R-019 | BETTER AUTH — *Security* |
+| 2 | R-002 | CHAPMAN; HORNSEY; GILLESPIE — *To What Extent Is Trust...* |
+| 3 | R-014 | CHEN — *The entity-relationship model...* |
+| 4 | R-003 | GHOORAH; MARIYANI-SQUIRE; AMIN — *Relationships between financial transparency...* |
+| 5 | R-026 | IEEE COMPUTER SOCIETY — *Guide to the Software Engineering Body of Knowledge...* |
+| 6 | R-025 | INTERNATIONAL ORGANIZATION FOR STANDARDIZATION; IEC; IEEE — *ISO/IEC/IEEE 14764:2022...* |
+| 7 | R-007 | MERMAID — *Class diagrams* |
+| 8 | R-015 | MERMAID — *Entity Relationship Diagrams* |
+| 9 | R-023 | NEON — *Connection pooling* |
+| 10 | R-006 | OBJECT MANAGEMENT GROUP — *OMG Unified Modeling Language...* |
+| 11 | R-017 | OPEN WEB APPLICATION SECURITY PROJECT — *Authorization Cheat Sheet* |
+| 12 | R-021 | OPEN WEB APPLICATION SECURITY PROJECT — *Cryptographic Storage Cheat Sheet* |
+| 13 | R-016 | OPEN WEB APPLICATION SECURITY PROJECT — *Input Validation Cheat Sheet* |
+| 14 | R-020 | OPEN WEB APPLICATION SECURITY PROJECT — *Password Storage Cheat Sheet* |
+| 15 | R-001 | PESQUISA — *Pesquisa Doação Brasil 2024* |
+| 16 | R-004 | RODRIGUES — *O efeito da adoção do accountability...* |
+| 17 | R-024 | SHORTISS — *Announcing Point-in-Time Restore* |
+| 18 | R-022 | SWANSON; BOWEN; PHILLIPS; GALLUP; LYNES — *Contingency Planning Guide...* |
+| 19 | R-008 | TSDOC — *How can I use TSDoc?* |
+| 20 | R-011 | TSDOC — *@param* |
+| 21 | R-010 | TSDOC — *@remarks* |
+| 22 | R-012 | TSDOC — *@returns* |
+| 23 | R-013 | TSDOC — *@throws* |
+| 24 | R-009 | TSDOC — *TSDoc spec* |
+| 25 | R-005 | VARELLA — *Modelagem e simulação dos processos...* |
+| 26 | R-018 | WORLD WIDE WEB CONSORTIUM — *Web Authentication...* |
 
-Os documentos `docs/nossa-causa-resumo-pt.md` e `docs/nossa-causa-summary-en.md` sustentam o escopo do produto e precisam continuar diferenciados de pesquisa empírica. O código, as validações, o banco de dados e a aplicação em execução sustentam afirmações sobre implementação. Esses materiais terão rastreabilidade nos planejamentos e manifestos técnicos, mas não serão incluídos automaticamente em `artifacts/referencias.md`.
+Essa ordem foi confirmada após a conferência da autoria oficial e do título transcrito. Dentro de uma mesma autoria, a ordenação continua pelo elemento seguinte da referência, e não pela posição em que a fonte apareceu no TCC. Na série TSDoc, o sinal `@` foi desconsiderado para a comparação alfabética dos nomes das tags. Qualquer mudança futura de entrada exigirá nova ordenação integral.
 
-Quadros, diagramas e capturas com indicação de elaboração própria também não compõem a bibliografia. Suas fontes deverão permanecer nas legendas e nos manifestos de evidência correspondentes.
+## Etapas de execução
 
-## Dependências e pendências
+### 1. Congelamento do corpus
 
-- As considerações finais ainda poderão introduzir novas fontes.
-- As fontes de segurança, contingência e Neon usadas na Fase 7 tiveram o acesso registrado em 2026-09-07.
-- A orientação institucional de normalização ainda precisa ser confirmada antes da bibliografia final.
-- As chamadas do TSDoc foram diferenciadas; a integração ainda deverá aplicar a norma institucional escolhida de modo uniforme.
-- Datas de acesso e metadados ausentes deverão ser conferidos na fonte original durante a integração.
-- Liang, Wang e Wang (2022) permanece excluído conforme D-009 e não deverá reaparecer no mapa.
+Registrar os arquivos textuais que compõem a versão auditada e evitar gerar a lista final enquanto houver revisão capaz de incluir, remover ou deslocar fontes. Alterações intermediárias continuarão sujeitas à atualização imediata do mapa central, conforme D-015 e D-027.
 
-## Novas referências incorporadas na Fase 7
+### 2. Auditoria cruzada de uso
 
-As novas fontes abaixo foram incorporadas à redação da Fase 7 e registradas no mapa central. As fontes R-016 e R-017, já empregadas em fases anteriores, também foram reutilizadas. A inclusão em `artifacts/referencias.md` ocorrerá na integração da bibliografia final.
+Executar duas conferências independentes:
 
-| Fase e tópico | Fonte utilizada | Uso na redação | Registro no mapa central |
-| --- | --- | --- | --- |
-| Fase 7, 7.6.1 Segurança — senhas | OWASP, *Password Storage Cheat Sheet*, e Better Auth, *Security*. | Distinguir hash de senha, criptografia reversível e o algoritmo padrão do serviço de autenticação. | R-019 e R-020. |
-| Fase 7, 7.6.1 Segurança — dados criptografados | OWASP, *Cryptographic Storage Cheat Sheet*. | Delimitar proteção de dados em repouso e gestão de segredos, sem alegar garantias não verificadas. | R-021. |
-| Fase 7, 7.6.2 Backup | NIST, *Contingency Planning Guide for Federal Information Systems*. | Delimitar planejamento de contingência, recuperação e prioridades de backup. | R-022; o escopo federal foi adaptado ao contexto acadêmico. |
-| Fase 7, 7.6.2 Backup na Neon | Neon, *Connection pooling* e *Announcing Point-in-Time Restore*. | Fundamentar a separação de conexões e condicionar a recuperação pontual à configuração disponível. | R-023 e R-024; nenhum recurso dependente de plano foi presumido. |
+1. partir de todas as chamadas, menções em prosa, fontes de quadros e usos factuais nos textos e confirmar uma entrada correspondente no mapa;
+2. partir de cada entrada R-001 a R-026 e confirmar ao menos um uso remanescente no corpus.
 
-## Referências incorporadas na Fase 8
+O RESUMO, o ABSTRACT e as considerações finais exigem revisão manual, pois podem usar uma fonte como base factual sem chamada autor-data explícita. Fontes internas e elaboração própria serão verificadas separadamente para impedir sua inclusão indevida.
 
-As fontes abaixo foram verificadas e incorporadas à redação da Fase 8. Seus usos, localizadores e materiais de consulta constam do mapa central; a normalização em `artifacts/referencias.md` permanece reservada à integração.
+### 3. Conferência de metadados
 
-| Fase e tópico | Fonte utilizada | Uso na redação | Registro no mapa central |
-| --- | --- | --- | --- |
-| Fase 8, Manutenção do sistema | ISO/IEC/IEEE 14764:2022. | Delimitar manutenção, operação, solicitação de modificação e categorias de manutenção. | R-025; página oficial e prévia pública conferidas em 2026-09-07. |
-| Fase 8, Manutenção do sistema | IEEE Computer Society, *SWEBOK Guide V4.0a*. | Relacionar solicitação, análise de impacto, modificação, testes, documentação e nova versão no processo de manutenção. | R-026; cópia de uso acadêmico disponível em `artifacts/auxiliares/referencias/`. |
+Para cada entrada mantida, consultar a fonte original ou a página oficial. DOI, página do periódico, repositório institucional, página da organização e cópia local serão usados em conjunto para resolver divergências. Não serão usadas informações de agregadores quando a fonte primária trouxer os dados necessários.
 
-As duas fontes foram incluídas no mapa central no momento da redação, conforme D-015.
+Cada registro deverá terminar com autoria, título, publicação ou entidade responsável, data, versão quando pertinente, DOI ou URL, data de acesso e localizadores usados no texto. Ausências serão documentadas no mapa até sua resolução; não serão preenchidas com dados plausíveis, mas não verificados.
+
+### 4. Resolução das datas e letras
+
+Resolver primeiro as 14 datas provisórias. Depois, ordenar as obras de cada autoria pelo título e atribuir letras somente aos documentos que terminarem com a mesma data. Atualizar em uma única operação lógica:
+
+- a referência de trabalho no mapa;
+- a forma de chamada registrada no mapa;
+- todas as ocorrências nos arquivos `texto-*.md`;
+- as fontes de quadros e figuras relacionadas.
+
+### 5. Normalização por tipo documental
+
+Montar cada entrada a partir do modelo aplicável da NBR 6023:2025. A revisão será feita por grupos homogêneos: artigos; trabalhos acadêmicos; relatórios; normas e guias; páginas e documentação on-line. Depois da revisão por grupo, uma segunda leitura verificará a uniformidade da lista completa.
+
+### 6. Produção da lista final
+
+Criar `artifacts/referencias.md` com o título `# REFERÊNCIAS` e as entradas em ordem alfabética. O arquivo não conterá instruções de trabalho, identificadores R-xxx, comentários editoriais, grupos por tipo ou fontes excluídas.
+
+### 7. Verificação final
+
+Comparar a lista pronta com o mapa e com o corpus. A revisão deverá detectar referências duplicadas por DOI ou URL, variações indevidas da mesma entidade, links locais, datas inventadas, chamadas sem entrada, entradas sem chamada e divergências nas letras adicionadas aos anos.
+
+A skill `humanizar` será aplicada apenas a eventual texto editorial destinado ao TCC. Autores, títulos, metadados e citações são trechos protegidos e não serão reescritos.
+
+## Fontes internas, elaboração própria e exclusões
+
+Os documentos `docs/nossa-causa-resumo-pt.md` e `docs/nossa-causa-summary-en.md` sustentam o escopo do produto, mas não constituem pesquisa empírica. Código, banco de dados e aplicação em execução sustentam afirmações técnicas; seus locais permanecem registrados nos planejamentos e manifestos. Quadros, diagramas e capturas produzidos para o TCC usarão a indicação de elaboração própria ou adaptação na legenda, sem gerar uma referência bibliográfica por si mesmos.
+
+Liang, Wang e Wang (2022) permanece excluído conforme D-009. Fontes descartadas nas etapas exploratória e intermediária descritas em D-019 também não entrarão na lista final se não sustentarem conteúdo mantido.
+
+## Dependências e riscos
+
+- O manual ou modelo da instituição ainda não foi fornecido. Sua ausência não impede a normalização bibliográfica pela ABNT, mas deixa fonte, margens e outras escolhas de diagramação sujeitas a conferência posterior.
+- As datas editoriais das 14 páginas on-line foram resolvidas por data declarada, copyright, versão publicada ou histórico editorial oficial; as estimativas documentadas permanecem entre colchetes.
+- A data de acesso corresponde à consulta real de 8 set. 2026 e não foi retroagida para coincidir com o cronograma acadêmico.
+- Alterações tardias no corpus podem mudar a composição da lista e as letras de obras da mesma autoria e data.
+- As autorias institucionais foram conferidas nas próprias publicações e páginas oficiais antes da ordenação definitiva.
 
 ## Critérios de aceite
 
-- [x] Existe um mapa central com identificadores estáveis e os usos atualmente encontrados.
-- [x] Cada fonte externa citada nos textos disponíveis possui ao menos uma localização de uso.
-- [x] Fontes internas, evidências técnicas e elaboração própria foram separadas da bibliografia.
-- [x] Localizadores já conferidos foram preservados sem criação de metadados ausentes.
-- [x] Datas reais, retrospectivamente estimadas e planejadas foram separadas; datas de acesso fictícias foram vedadas.
-- [ ] As partes futuras atualizaram o mapa ao incluir ou remover fontes.
-- [ ] Todas as chamadas do texto integrado possuem entrada correspondente no mapa.
-- [ ] Toda entrada destinada à bibliografia final permanece usada no texto integrado.
-- [ ] Autoria, título, publicação, DOI ou URL e data de acesso foram conferidos na fonte original.
-- [ ] `artifacts/referencias.md` foi normalizado segundo a orientação institucional e revisado contra o mapa central.
+- [x] O mapa central possui identificadores estáveis para as 26 fontes externas atualmente encontradas.
+- [x] Fontes internas, evidências técnicas, elaboração própria e a fonte excluída foram separadas da bibliografia.
+- [x] A NBR 6023:2025 foi definida como norma de elaboração e ordenação.
+- [x] O sistema autor-data e a ordem alfabética única foram definidos para a integração.
+- [x] A apresentação prevista registra alinhamento à esquerda, espaço simples e uma linha em branco entre entradas.
+- [x] As entradas com `s.d.` e os grupos com letras provisórias foram identificados.
+- [x] O corpus final foi auditado nos dois sentidos: texto para mapa e mapa para texto.
+- [x] Todas as 14 datas provisórias foram substituídas por datas confirmadas ou estimativas justificadas entre colchetes.
+- [x] Autoria, título, publicação, versão, DOI ou URL e data real de acesso foram conferidos na fonte original.
+- [x] As chamadas foram normalizadas conforme a NBR 10520:2023 e correspondem exatamente às entradas finais.
+- [x] As letras de obras da mesma autoria e data foram atribuídas somente após a ordenação.
+- [x] `artifacts/referencias.md` contém apenas fontes usadas, em lista única, sem numeração e na ordem alfabética definitiva.
+- [x] A lista final não contém duplicações, caminhos locais, datas inventadas, entradas sem uso ou usos sem entrada.
+- [x] A apresentação foi confrontada com o manual institucional, caso ele seja fornecido; nenhum manual foi disponibilizado nesta execução.

@@ -4,7 +4,7 @@ Esta fase formaliza o projeto lógico do mesmo MVP examinado na Fase 3 como sist
 
 ## 4.1 UML
 
-UML, sigla de *Unified Modeling Language*, é uma linguagem de modelagem usada para representar partes de um sistema por meio de diagramas. Cada diagrama simplifica o sistema para responder a uma pergunta diferente. Um pode mostrar quem realiza determinada ação; outro, como os blocos da aplicação se organizam; um terceiro, quais informações se relacionam (OBJECT MANAGEMENT GROUP, 2017, cláusula 1, p. 1).
+UML, sigla de *Unified Modeling Language*, é uma linguagem de modelagem usada para representar partes de um sistema por meio de diagramas. Cada diagrama simplifica o sistema para responder a uma pergunta diferente. Um pode mostrar quem realiza determinada ação; outro, como os blocos da aplicação se organizam; um terceiro, quais informações se relacionam (Object Management Group, 2017, cláusula 1, p. 1).
 
 Nesta fase, a UML orienta a representação das interações dos usuários e da organização lógica da aplicação. O Diagrama Entidade-Relacionamento complementa essas visões ao tratar das informações registradas. Não há um diagrama de classes neste capítulo: blocos funcionais, contratos de tipos e entidades persistidas não são apresentados como classes da linguagem de programação. Juntos, os modelos permitem examinar a Nossa Causa sem depender de detalhes de programação ou de telas específicas.
 
@@ -12,7 +12,7 @@ Os diagramas adotam o mesmo escopo funcional do MVP. A modalidade virtual utiliz
 
 ## 4.2 Diagrama de caso de uso
 
-Na UML, um caso de uso especifica um conjunto de comportamentos oferecidos pelo sistema que produz resultado observável para seus atores. O ator representa o papel de uma pessoa ou de outro sistema que interage com o sujeito modelado, e não uma pessoa determinada (OBJECT MANAGEMENT GROUP, 2017, seção 18.1). Nesta modelagem, os atores são visitante, usuário autenticado e organizador. Cada ação aparece separadamente para deixar claro quem pode realizá-la.
+Na UML, um caso de uso especifica um conjunto de comportamentos oferecidos pelo sistema que produz resultado observável para seus atores. O ator representa o papel de uma pessoa ou de outro sistema que interage com o sujeito modelado, e não uma pessoa determinada (Object Management Group, 2017, seção 18.1). Nesta modelagem, os atores são visitante, usuário autenticado e organizador. Cada ação aparece separadamente para deixar claro quem pode realizá-la.
 
 O visitante pode criar uma conta, entrar no sistema e consultar as informações públicas das campanhas. O usuário autenticado mantém esse acesso público e pode administrar a própria conta, registrar ou cancelar sua participação em campanhas físicas ativas e criar ou atualizar o perfil de organizador. Depois de manter esse perfil, ele passa a atuar também como organizador. Nessa condição, cria e administra campanhas, publica atualizações e apresenta a prestação de contas após a conclusão.
 
@@ -26,7 +26,7 @@ A Figura 1 separa as consultas públicas das operações que exigem acesso auten
 
 ## 4.3 Visão lógica da arquitetura
 
-Na UML, as construções de implantação descrevem a arquitetura de execução e a atribuição de artefatos de software a elementos do sistema. Elas também representam relações entre elementos lógicos ou físicos e ativos de tecnologia da informação (OBJECT MANAGEMENT GROUP, 2017, seções 19.1 e 19.2). A Figura 2, porém, é uma visão lógica da arquitetura elaborada para este trabalho. Ela não reproduz um diagrama de implantação UML completo nem descreve cada tecnologia empregada. Seu propósito é mostrar o caminho percorrido por uma ação: a pessoa usa a aplicação no navegador; a aplicação verifica o acesso e os dados informados, aplica as regras da plataforma e registra ou consulta as informações necessárias.
+Na UML, as construções de implantação descrevem a arquitetura de execução e a atribuição de artefatos de software a elementos do sistema. Elas também representam relações entre elementos lógicos ou físicos e ativos de tecnologia da informação (Object Management Group, 2017, seções 19.1 e 19.2). A Figura 2, porém, é uma visão lógica da arquitetura elaborada para este trabalho. Ela não reproduz um diagrama de implantação UML completo nem descreve cada tecnologia empregada. Seu propósito é mostrar o caminho percorrido por uma ação: a pessoa usa a aplicação no navegador; a aplicação verifica o acesso e os dados informados, aplica as regras da plataforma e registra ou consulta as informações necessárias.
 
 A interface web concentra as páginas, os formulários e as consultas. Os serviços da aplicação aplicam permissões e regras das campanhas, dos perfis e das contas. A autenticação identifica os usuários nas ações restritas. A validação confere os dados antes do uso. O banco de dados preserva as informações da plataforma, enquanto o armazenamento de arquivos guarda imagens de campanhas e evidências da prestação de contas. O serviço de e-mail apoia a verificação e a recuperação de acesso à conta.
 
@@ -34,15 +34,15 @@ Figura 2 — Visão lógica da arquitetura da Nossa Causa
 
 Fonte: elaboração própria (2026).
 
-A Figura 2 mostra que a interface não decide sozinha as regras sensíveis do sistema. Em aplicações web, os controles de autorização não devem depender do cliente e precisam verificar as permissões em cada requisição (OWASP, s.d.b). Na Nossa Causa, a conferência técnica do MVP identificou que as regras e permissões são aplicadas antes da gravação dos dados. Os blocos da figura representam responsabilidades funcionais e integrações; não são classes da linguagem de programação, contratos de tipos ou entidades persistidas. Estas últimas são apresentadas separadamente no DER e no dicionário de dados.
+A Figura 2 mostra que a interface não decide sozinha as regras sensíveis do sistema. Em aplicações web, os controles de autorização não devem depender do cliente e precisam verificar as permissões em cada requisição (OWASP, 2026a). Na Nossa Causa, a conferência técnica do MVP identificou que as regras e permissões são aplicadas antes da gravação dos dados. Os blocos da figura representam responsabilidades funcionais e integrações; não são classes da linguagem de programação, contratos de tipos ou entidades persistidas. Estas últimas são apresentadas separadamente no DER e no dicionário de dados.
 
 O diagrama também apresenta as integrações escolhidas para o MVP: armazenamento de arquivos e envio de mensagens ligadas à conta. A transferência virtual ocorre diretamente entre doador e organizador. Processadores de pagamento e notificações de campanha permanecem como possibilidades de evolução da arquitetura. As notificações não integram esta versão porque sua implementação foi considerada tecnicamente inviável dentro do escopo do MVP.
 
 ## 4.4 DER
 
-O Diagrama Entidade-Relacionamento, ou DER, descreve as informações relevantes para o sistema e os vínculos entre elas. No modelo entidade-relacionamento, uma entidade é algo que pode ser distinguido, um relacionamento é uma associação entre entidades e os atributos expressam as informações registradas sobre esses elementos (CHEN, 1976, p. 10-12). Assim, uma entidade pode representar algo sobre o qual a plataforma precisa guardar dados, como uma campanha ou um perfil de organizador. Seus atributos descrevem características desse elemento. Os relacionamentos mostram como uma entidade se conecta a outra.
+O Diagrama Entidade-Relacionamento, ou DER, descreve as informações relevantes para o sistema e os vínculos entre elas. No modelo entidade-relacionamento, uma entidade é algo que pode ser distinguido, um relacionamento é uma associação entre entidades e os atributos expressam as informações registradas sobre esses elementos (Chen, 1976, p. 10-12). Assim, uma entidade pode representar algo sobre o qual a plataforma precisa guardar dados, como uma campanha ou um perfil de organizador. Seus atributos descrevem características desse elemento. Os relacionamentos mostram como uma entidade se conecta a outra.
 
-Na Figura 3, as cardinalidades indicam quantas ocorrências de uma entidade podem se associar a outra. A notação de pé-de-galinha adotada pelo Mermaid representa essas quantidades nos marcadores das extremidades das relações (MERMAID, s.d.b). Assim, um perfil de organizador pode estar associado a várias campanhas, enquanto uma campanha pode ter apenas uma prestação de contas. Essa leitura ajuda a compreender quais registros dependem de outros e quais informações permanecem independentes.
+Na Figura 3, as cardinalidades indicam quantas ocorrências de uma entidade podem se associar a outra. A notação de pé-de-galinha adotada pelo Mermaid representa essas quantidades nos marcadores das extremidades das relações (Mermaid, 2026b). Assim, um perfil de organizador pode estar associado a várias campanhas, enquanto uma campanha pode ter apenas uma prestação de contas. Essa leitura ajuda a compreender quais registros dependem de outros e quais informações permanecem independentes.
 
 Figura 3 — Diagrama Entidade-Relacionamento da Nossa Causa
 

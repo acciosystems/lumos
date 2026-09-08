@@ -1,6 +1,6 @@
 # Cópia parcial de consulta — NIST SP 800-34 Rev. 1
 
-- **Fonte:** NATIONAL INSTITUTE OF STANDARDS AND TECHNOLOGY (NIST). *Contingency Planning Guide for Federal Information Systems*. NIST SP 800-34 Rev. 1.
+- **Fonte:** SWANSON, Marianne; BOWEN, Pauline; PHILLIPS, Amy Wohl; GALLUP, Dean; LYNES, David. *Contingency Planning Guide for Federal Information Systems*. NIST SP 800-34 Rev. 1.
 - **Publicação:** maio de 2010; atualização registrada em 11 nov. 2010.
 - **DOI:** <https://doi.org/10.6028/NIST.SP.800-34r1>
 - **Página oficial:** <https://csrc.nist.gov/pubs/sp/800/34/r1/upd1/final>
