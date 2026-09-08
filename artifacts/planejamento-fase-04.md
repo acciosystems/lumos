@@ -3,13 +3,13 @@
 ## Estado da atividade
 
 - Responsável: Codex.
-- Estado: concluído em 2026-09-05, após planejamento, redação, fontes Mermaid e revisão. A exportação dos diagramas pertence à etapa condicional de diagramação final e foi adiada por orientação do usuário; por isso, não impede a conclusão desta fase.
+- Estado: concluído em 2026-09-08, após a inclusão e a revisão do dicionário de dados definido em D-026. A exportação dos diagramas pertence à etapa condicional de diagramação final e continua adiada por orientação do usuário.
 - Recorte: MVP da plataforma Nossa Causa descrito nas fases anteriores.
-- Entregas disponíveis: texto da Fase 4 e fontes editáveis dos diagramas em Mermaid. As exportações serão produzidas somente quando forem necessárias para a diagramação final, sem alterar o estado concluído desta fase.
+- Entregas disponíveis: texto completo da Fase 4, com o dicionário de dados, e fontes editáveis dos diagramas em Mermaid. As exportações serão produzidas somente quando forem necessárias para a diagramação final.
 
 ## Objetivo
 
-A Fase 4 apresentará o projeto lógico da Nossa Causa por meio de três visões complementares. A primeira mostrará o que cada tipo de usuário pode fazer. A segunda explicará os blocos que executam o sistema e a comunicação entre eles. A terceira representará as principais informações armazenadas e as relações entre elas.
+A Fase 4 apresentará o projeto lógico da Nossa Causa por meio de três visões complementares e de um dicionário de dados. A primeira mostrará o que cada tipo de usuário pode fazer. A segunda explicará os blocos que executam o sistema e a comunicação entre eles. A terceira representará as principais informações armazenadas e as relações entre elas. O dicionário detalhará os campos de todos os modelos persistidos definidos no Prisma.
 
 O texto deverá permitir que um leitor sem formação técnica compreenda a finalidade de cada representação antes de examiná-la. Os diagramas não funcionarão como inventários exaustivos do código. Eles destacarão somente os elementos necessários para explicar o funcionamento do MVP.
 
@@ -19,6 +19,7 @@ O texto deverá permitir que um leitor sem formação técnica compreenda a fina
 2. Cada tópico começará com uma explicação de seu conceito, de sua finalidade e da forma de leitura adotada no trabalho. As citações sustentarão apenas esses conceitos; a descrição da Nossa Causa continuará baseada na conferência técnica interna do MVP.
 3. Todos os diagramas serão escritos em Mermaid.
 4. O texto destinado ao TCC não citará diretamente nenhum arquivo do repositório. A conferência do código servirá apenas como evidência interna de consistência.
+5. A Fase 4 terá uma única seção de dicionário de dados formada por uma tabela para cada modelo persistido do Prisma. As tabelas ficarão no mesmo tópico, sem subdivisões individuais e sem discussão sobre a evolução de suas estruturas. Elas usarão as colunas Campo, Descrição, Tipo e Tamanho; os campos ficarão em maiúsculas, com `@` para chave primária, `#` para chave estrangeira e nenhum prefixo para os demais. Campos enumerados terão todos os valores possíveis registrados na descrição, e os tipos preservarão as definições do SQL.
 
 ## Adaptações propostas
 
@@ -49,6 +50,14 @@ O diagrama usará um fluxograma Mermaid. Os rótulos serão compreensíveis para
 O Diagrama Entidade-Relacionamento será conceitual. Ele mostrará entidades do domínio, atributos que ajudam a diferenciá-las e cardinalidades relevantes. Estruturas internas de autenticação, controle temporário de arquivos, repetição segura de operações e outros registros de infraestrutura serão omitidos, pois não contribuem para a compreensão das campanhas.
 
 Uma estrutura de doação financeira individual também não será representada. No MVP, a plataforma apenas divulga PIX ou dados bancários do organizador e não registra nem processa cada transferência.
+
+### Dicionário de dados
+
+O dicionário complementará o DER conceitual com um inventário completo das 17 tabelas persistidas. Por isso, também abrangerá tabelas técnicas de autenticação, limitação de requisições, idempotência e controle de arquivos que foram omitidas da figura para preservar sua legibilidade.
+
+Cada modelo do Prisma corresponderá a uma tabela própria no texto. Somente campos escalares efetivamente persistidos serão listados; propriedades de relação usadas pelo cliente Prisma não serão tratadas como colunas adicionais. A legenda adotará `@` para chave primária, `#` para chave estrangeira e nenhum prefixo para campos sem essas funções. Restrições de unicidade que não sejam chaves primárias ou estrangeiras serão explicadas na descrição quando forem relevantes, mas não receberão um novo símbolo.
+
+Os tipos serão reproduzidos conforme o SQL do PostgreSQL gerado pelas migrações, sem converter `TEXT` para `VARCHAR` nem substituir os tipos enumerados por tipos genéricos. A coluna Tamanho apresentará limites de caracteres quando houver restrição explícita e, nos tipos de tamanho fixo, o espaço correspondente. Quando o schema e as migrações não definirem limite textual, a tabela registrará tamanho variável, sem presumir o limite convencional de 255 caracteres. Todo campo enumerado terá seus valores possíveis na descrição.
 
 ## Estrutura planejada do texto
 
@@ -135,7 +144,11 @@ As relações principais serão:
 
 O texto posterior ao diagrama explicará as diferenças condicionais entre campanhas físicas e virtuais. Campos de local, meta de itens e pontos de coleta pertencem à modalidade física. PIX e dados bancários pertencem à modalidade virtual. A prestação registra total de itens ou total monetário conforme a modalidade, sem representar transações individuais.
 
-### 4.5 Possibilidades de evolução do sistema
+### 4.5 Dicionário de dados
+
+A seção começará com a legenda dos prefixos e com a explicação dos critérios de tipo e tamanho. Em seguida, apresentará no mesmo tópico uma tabela para cada modelo persistido definido no Prisma, inclusive os modelos técnicos ausentes do DER conceitual. Não haverá subdivisões próprias nem discussão sobre a evolução das tabelas. Cada tabela terá exatamente as colunas Campo, Descrição, Tipo e Tamanho.
+
+### 4.6 Possibilidades de evolução do sistema
 
 A seção distinguirá os modelos do MVP da concepção mais ampla da Nossa Causa. Serão discutidas três frentes: confiança e governança, com reputação e denúncias; participação, com recompensas e notificações; e formas de contribuição financeira, com integração opcional de processadores de pagamento. O texto registrará os sete dias corridos aplicados às duas modalidades no MVP. A alternativa baseada em itens será delimitada às campanhas físicas, pois não há critério variável equivalente definido para as virtuais, e a infração dos termos será distinguida de uma penalidade automática inexistente. Esses recursos não serão acrescentados aos diagramas atuais.
 
@@ -191,12 +204,14 @@ Esses materiais comprovam internamente o recorte modelado, mas seus caminhos e n
 4. Produzir e revisar o diagrama de caso de uso em Mermaid.
 5. Produzir e revisar o diagrama de implementação em Mermaid.
 6. Produzir e revisar o DER com a sintaxe própria do Mermaid.
-7. Quando solicitada para a diagramação final, renderizar os três diagramas e corrigir problemas de sintaxe, sobreposição ou legibilidade.
-8. Redigir as explicações que antecedem e interpretam cada figura, com as citações conceituais pertinentes.
-9. Atualizar o mapa central de referências e conferir os localizadores das fontes utilizadas.
-10. Aplicar a skill `humanizar` ao texto final, com perfil acadêmico, preservando nomes e regras do domínio.
-11. Conferir coerência com as Fases 2, 3 e 6 e remover qualquer referência direta a arquivos internos.
-12. Atualizar o quadro de progresso somente após a revisão completa.
+7. Inventariar os modelos e campos persistidos do Prisma, confrontando tipos, chaves, enumerações e limites com as migrações do banco.
+8. Redigir uma tabela de dicionário de dados para cada modelo, conforme as convenções de D-026.
+9. Quando solicitada para a diagramação final, renderizar os três diagramas e corrigir problemas de sintaxe, sobreposição ou legibilidade.
+10. Redigir as explicações que antecedem e interpretam cada figura, com as citações conceituais pertinentes.
+11. Atualizar o mapa central de referências e conferir os localizadores das fontes utilizadas.
+12. Aplicar a skill `humanizar` ao texto final, com perfil acadêmico, preservando nomes e regras do domínio.
+13. Conferir coerência com as Fases 2, 3 e 6 e remover qualquer referência direta a arquivos internos.
+14. Atualizar o quadro de progresso somente após a revisão completa.
 
 ## Riscos e controles
 
@@ -208,6 +223,9 @@ Esses materiais comprovam internamente o recorte modelado, mas seus caminhos e n
 | Confundir contribuição virtual com pagamento processado | Mostrar apenas a divulgação dos dados bancários e manter o pagamento fora da plataforma. |
 | Expor detalhes internos no texto final | Revisar nomes, legendas, fontes e parágrafos em busca de caminhos e nomes de arquivo. |
 | Transformar o DER conceitual em cópia completa do banco | Manter apenas entidades e atributos relevantes para explicar o domínio. |
+| Omitir modelos técnicos do dicionário por não aparecerem no DER | Gerar o inventário a partir de todos os modelos persistidos definidos no Prisma e conferir a contagem antes da revisão. |
+| Atribuir tamanho arbitrário a campos textuais | Registrar somente limites comprovados no schema ou nas migrações; nos demais campos, indicar tamanho variável. |
+| Confundir propriedades de relação do Prisma com colunas persistidas | Listar apenas campos escalares e as chaves estrangeiras materializadas no banco. |
 | Produzir figuras ilegíveis no documento | Quando a exportação for solicitada, preferir SVG, testar orientação e reduzir cruzamentos entre linhas. |
 
 ## Dúvidas e pendências
@@ -226,13 +244,15 @@ Uma revisão posterior de coerência detalhou os casos de uso, incluiu criação
 
 Em 2026-09-07, a orientação que dispensava referências foi revogada. A redação passou a citar a especificação UML da OMG nos tópicos 4.1 a 4.3, Chen (1976) e a documentação de DER do Mermaid no tópico 4.4, além da OWASP no princípio geral de autorização apresentado no tópico 4.3. A descrição da organização interna da Nossa Causa permaneceu vinculada à conferência técnica do MVP. Os conceitos, os localizadores, as cópias de consulta e os locais de uso foram registrados no mapa central.
 
-Ainda em 2026-09-07, D-024 foi incorporada ao planejamento e ao texto por meio do tópico 4.5. A revisão apresenta as ideias posteriores ao MVP sem alterar os três diagramas nem atribuir estado de implementação, prazo ou compromisso de entrega. Como o novo conteúdo decorre do escopo interno do produto, nenhuma fonte bibliográfica foi acrescentada ou deslocada.
+Ainda em 2026-09-07, D-024 foi incorporada ao planejamento e ao texto por meio do tópico então numerado como 4.5. A revisão apresenta as ideias posteriores ao MVP sem alterar os três diagramas nem atribuir estado de implementação, prazo ou compromisso de entrega. Como o novo conteúdo decorre do escopo interno do produto, nenhuma fonte bibliográfica foi acrescentada ou deslocada.
 
 Na revisão de D-025, o texto passou a tratar os diagramas como representação dos fluxos centrais escolhidos para o produto minimamente viável. As integrações e funções posteriores aparecem como evolução da arquitetura, sem caracterizar sua ausência nos modelos como falha do MVP.
 
+Em 2026-09-08, a Fase 4 foi reaberta por D-026 para receber um dicionário de dados completo. A nova seção passou a ocupar o tópico 4.5, e a discussão das possibilidades de evolução foi deslocada para o tópico 4.6. As 17 tabelas foram mantidas no mesmo tópico, sem subdivisões individuais, e documentam os 173 campos escalares persistidos. A conferência automatizada comparou os nomes, as funções de chave e os tipos SQL com todos os modelos do Prisma. Os limites de `TEXT` foram confrontados com as restrições das migrações, e todos os valores dos tipos enumerados foram verificados. Nenhuma referência bibliográfica foi incluída ou deslocada, pois o conteúdo decorre da modelagem interna do sistema.
+
 ## Critérios de aceite do planejamento
 
-- [x] Os tópicos 4.1 a 4.5 possuem finalidade e conteúdo delimitados.
+- [x] Os tópicos 4.1 a 4.6 possuem finalidade e conteúdo delimitados.
 - [x] Os fundamentos conceituais dos tópicos 4.1 a 4.4 usam referências primárias adequadas, sem atribuir à literatura características específicas do MVP.
 - [x] Os três diagramas previstos usam Mermaid.
 - [x] A adaptação do caso de uso às capacidades do Mermaid está registrada.
@@ -241,6 +261,9 @@ Na revisão de D-025, o texto passou a tratar os diagramas como representação 
 - [x] Funcionalidades futuras e processamento de pagamentos ficaram fora do modelo.
 - [x] As possibilidades posteriores ao MVP foram discutidas em texto conforme D-024, sem alterar os diagramas da versão analisada.
 - [x] O DER foi limitado às entidades conceituais relevantes.
+- [x] O formato, o escopo e as convenções do dicionário de dados foram definidos conforme D-026.
+- [x] O dicionário contém uma tabela para cada modelo persistido do Prisma e somente os campos efetivamente armazenados.
+- [x] Os nomes dos campos, prefixos, valores enumerados, tipos e tamanhos foram conferidos no schema e nas migrações.
 - [x] O texto final não citará arquivos do repositório.
 - [x] Foram previstas fonte editável, exportação e validação visual dos diagramas.
 - [x] As dependências com as Fases 2, 3, 5, 6 e 7 foram registradas.
