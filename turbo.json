@@ -7,7 +7,7 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".tanstack/**"]
+      "outputs": ["dist/**", ".tanstack/**", "src/generated/**"]
     },
     "dev": {
       "cache": false,

@@ -6,7 +6,9 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
+    "build": "bun run db:generate",
     "type-check": "tsc --noEmit",
+    "db:generate": "prisma generate",
     "db:seed": "bun run src/seed.ts",
     "infra:up": "podman-compose up -d",
     "infra:down": "podman-compose down"

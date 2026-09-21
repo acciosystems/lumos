@@ -1,4 +1,3 @@
-import { CampaignStatus, CampaignType } from '@lumos/database/generated/prisma/enums';
 import * as v from 'valibot';
 
 import {
@@ -8,10 +7,26 @@ import {
 } from './string-schemas';
 
 /**
- * Canonical persisted and API values for campaign behavior.
+ * Canonical persisted and API values for campaign behavior. These values are intentionally
+ * defined here rather than imported from Prisma so client-side validation remains independent
+ * of the server-only generated Prisma client.
  * PHYSICAL campaigns collect items at collection points; VIRTUAL campaigns receive direct funds.
  */
-export { CampaignStatus, CampaignType };
+export const CampaignType = {
+  PHYSICAL: 'PHYSICAL',
+  VIRTUAL: 'VIRTUAL',
+} as const;
+
+export type CampaignType = (typeof CampaignType)[keyof typeof CampaignType];
+
+export const CampaignStatus = {
+  PENDING: 'PENDING',
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+} as const;
+
+export type CampaignStatus = (typeof CampaignStatus)[keyof typeof CampaignStatus];
 
 const requiredDate = (message: string) =>
   v.pipe(
